@@ -1,0 +1,526 @@
+%%%%%%%%%%%%%%%%%%%%%%% file template.tex %%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% This is a general template file for the LaTeX package SVJour3
+% for Springer journals.          Springer Heidelberg 2010/09/16
+%
+% Copy it to a new file with a new name and use it as the basis
+% for your article. Delete % signs as needed.
+%
+% This template includes a few options for different layouts and
+% content for various journals. Please consult a previous issue of
+% your journal as needed.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% First comes an example EPS file -- just ignore it and
+% proceed on the \documentclass line
+% your LaTeX will extract the file if required
+% \begin{filecontents*}{example.eps}
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 19 19 221 221
+%%CreationDate: Mon Sep 29 1997
+%%Creator: programmed by hand (JK)
+%%EndComments
+% gsave
+% newpath
+%   20 20 moveto
+%   20 220 lineto
+%   220 220 lineto
+%   220 20 lineto
+% closepath
+% 2 setlinewidth
+% gsave
+%   .4 setgray fill
+% grestore
+% stroke
+% grestore
+% \end{filecontents*}
+% \RequirePackage{fix-cm}
+% \documentclass[smallextended,referee,envcountsect]{svjour3}       % onecolumn (second format)
+\documentclass[smallextended,envcountsect]{svjour3}       % onecolumn (second format)
+\smartqed  % flush right qed marks, e.g. at end of proof
+\usepackage{graphicx}
+% \usepackage{textcomp}
+% \usepackage{subfigure}
+\usepackage[center]{caption}
+\usepackage{amsfonts}
+% \usepackage{pgfplots}
+\usepackage{algorithm}
+\usepackage[noend]{algorithmic}
+\usepackage{amsmath}
+
+\newtheorem{assumption}{Assumption}
+\newcommand{\len}[1]{\text{len}{(#1)}}
+
+\journalname{To be decided}
+
+\begin{document}
+
+\title{Confluent flow and other approximations to the Pooling Problem}
+\titlerunning{Confluent flow and other approximations to the Pooling Problem}
+
+\author{Dag Haugland \and Eligius M.T. Hendrix \and \'{I}sak P\'{a}ll Gestsson}
+
+\institute{Dag Haugland, Corresponding author \at 
+Department of Informatics, University of Bergen, Norway \email{dag.haugland@ii.uib.no}
+\and
+Eligius M.T. Hendrix \at
+              Department of Computer Architecture, Universidad de M\'alaga and Operations Research and Logistics Group, Wageningen University \email{eligius.hendrix@wur.nl}\and \'{I}sak P\'{a}ll Gestsson \at Gassco}
+
+\date{Received: date / Accepted: date}
+
+\maketitle
+
+\begin{abstract}
+About the computational challenge of the pooling problem and finding approximate solutions by means of confluent or influent flow
+\end{abstract}
+\keywords{Pooling problem \and complexity \and global optimization}
+\subclass{90C26 \and 90C35 \and 90C39 \and 68Q25}
+
+
+%-------------------------------------------------------------------------------
+\section{Introduction}
+\label{intro}
+
+Taken from an earlier paper, to be revised:
+Traditional network flow models, like the minimum cost network flow problem, rely on considerations of the flow as a homogeneous commodity.
+Variations in composition is however relevant in many industrial and logistics applications of the models,
+including petroleum refining and pipeline transportation of natural gas.
+Crude oils supplied to a refinery have contamination levels depending on their sources of origin.
+Major components of natural gas are methane, ethane, butane and propane, but the proportions in which they occur are not equal for all gas wells.
+For environmental or technical reasons, requirements to the final composition are often imposed at the sink nodes of the flow network.
+Whenever constraints of this kind apply, it is therefore essential for network flow models to recognize not only the total product flow,
+but also how the flow composition evolves from network sources to sinks.
+In particular, the models must reflect updates of the composition at nodes where differently composed flows are pooled.
+This provides a computationally challenging problem referred to as the \textsc{Pooling Problem}.
+
+The \textsc{Pooling Problem} exhibits strong resemblance with well-studied logistics models like the \textsc{Minimum Cost Flow Problem} and the
+\textsc{Transportation Problem}.
+Another classical related problem is Stigler's \textsc{Diet Problem} \cite{stigler45,dantzig90},
+asking for the minimum cost diet requiring a certain amount of specified nutrients.
+The problem is easy to extend to a multi-diet version where groups of people have each their own requirements.
+Nutritional contents differ between sources, that is, foods of which diets can be composed,
+and the optimal mix must be found for each sink (group of people).
+Conceptually, the multi-diet version coincides with the \textsc{Pooling Problem} in bipartite networks.
+Thanks to this simple network structure, with exclusively direct links between sources and sinks, diet problems are nothing but linear programs.
+However, when extending the problem to more general network structures, this is no longer the case.
+Absence of linear formulations has immediate computational consequences.
+While minimum cost flow instances where the network size reaches a six digit number of arcs and nodes can be solved within hours, or even minutes,
+exact solution of \textsc{Pooling Problem} instances with hundreds of nodes appears to be unrealistic.
+
+The \textsc{Pooling Problem} has been recognized for decades as a challenge where linear programming approaches fail.
+Bounds on the flow composition frequently induce bilinear constraints in otherwise linear models,
+and require corresponding solution methods.
+An approach based on iterated solution of linearized model versions has gained popularity especially in the oil refining industry,
+and has been analyzed experimentally by Haverly \cite{haverly78}.
+A major conclusion is that methods of this kind may produce suboptimal solutions.
+Such observations helped establishing a consensus, already in early days of research in the \textsc{Pooling Problem}, that global optimality is achievable only in small instances.
+
+Owing to the anticipated intractability of the problem, early research was mainly directed towards heuristic methods \cite{haverly78,baker85,dewitt89},
+where iterative linearization is the core idea.
+Floudas and Visweswaran \cite{floudas90} reported the first exact solution algorithm for the \textsc{Pooling Problem}.
+Later, algorithms based on branch-and-bound \cite{audet04,foulds92,misener11,sahinidis05,visweswaran96},
+Lagrangian relaxation \cite{adhya99,almutairi09,bental94}, and integer programming \cite{dey15} have been studied.
+The industrial relevance of the problem, notably in petroleum refining \cite{baker85,dewitt89},
+the food industry \cite{kallrath05}, and in waste water processing \cite{galan98,misener10},
+has been acknowledged by many authors.
+The \textsc{Pooling Problem} survey by Misener and Floudas \cite{misener09} has a comprehensive list of references to work in this area.
+
+The \textsc{Standard Pooling Problem} (SPP) is defined in terms of a networks with three node layers, referred to as sources, pools and sinks (sinks), respectively.
+Each arc links either a source to a pool or a pool to a sink.
+Quality constraints in terms of bounds on the composition are imposed at the sinks.
+Each bound relates to the relative content of a flow component, referred to as the component.
+After NP-hardness of the SPP was formally proved \cite{alfaki13}, Dey and Gupte \cite{dey15} showed that the problem is as hard to approximate as the maximum clique problem.
+The problem remains NP-hard for networks with only two sources and two sinks,
+and only one flow component subject to constraints \cite{haugland16}.
+
+The remainder of the text is organized as follows:
+Mathematical notation and formulation of the \textsc{Pooling Problem} are provided in Section \ref{sec:problem}.
+
+To be written.
+
+%-----------------------------------------------------------------------
+\section{Mathematical Notation and Problem Formulation}\label{sec:problem}
+
+To be revised:
+
+Let $D=(N,A)$ be a directed acyclic graph,
+where the node set $N=S\cup I\cup T$ consists of the disjoint subsets $S$ of \emph{sources}, $I$ of \emph{pools}, and $T$ of \emph{sinks}.
+Let $K$ be a finite set, and refer to its elements as \emph{flow components} or simply \emph{components}.
+In the sequel, elements of vectors and matrices defined over the sets $N$ and $K$
+are identified by a subscript if they correspond to $N$, and by a superscript if they correspond to $K$.
+Complexity analyses in later sections require that network parameters are defined as rational rather than real numbers.
+Define the vectors of unit arc costs $\boldsymbol{c}\in\mathbb{Q}^{A}$ and arc capacities $\boldsymbol{h}\in\mathbb{Q}_+^{A}$.
+For integers $j$ and $n$,
+let $\boldsymbol{j}^n$ denote the vector with all its $n$ entries equal to $j$,
+and let $\boldsymbol{I}^n$ denote the $(n\times n)$-identity matrix.
+
+At all sources $s\in S$, flow with a given concentration of each component $k\in K$ may enter $D$, and flow leaving the network at a sink $t\in T$ must satisfy upper concentration bounds.
+Define the matrices of \emph{concentration} $\boldsymbol{Q}\in\mathbb{Q}^{K\times S}$ and \emph{concentration bounds}
+$\boldsymbol{U}\in\mathbb{Q}^{K\times T}$.
+For $s\in S$ and $t\in T$, let $\boldsymbol{q}_s=\left(q_s^k\right)_{k\in K}$ and $\boldsymbol{u}_t=\left(u_t^k\right)_{k\in K}$ be the columns of $\boldsymbol{Q}$ and $\boldsymbol{U}$, respectively.
+That is, $q_s^k$ is the concentration of component $k$ of the flow entering $D$ at $s$,
+and $u_t^k$ is the upper bound on the concentration of the flow leaving $D$ at $t$.
+
+For each pool $i\in I$, the set of sources from which there exists a path to $i$ in $D$ is denoted $S_i$.
+Analogously, $T_i$ is the set of sinks to which there is a path from $i$ in $D$.
+The sets of upstream and downstream neighbors of node $j\in N$ are denoted $N_j^-$ and $N_j^-$, respectively.
+Without loss of relevant generality, it is assumed that $N_s^-=N_t^+=\emptyset$ for every $s\in S$ and $t\in T$.
+The sets of pools adjacent to source $s$ and sink $t$ are denoted
+$I_s=\left\{i\in I: (s,i)\in A\right\}$ and $I_t=\left\{i\in I: (i,t)\in A\right\}$, respectively.
+% The arc set $\mathcal{A}$ has a partition $\left(\mathcal{A}_S,\mathcal{A}_T\right)$,
+% where $\mathcal{A}_S=\mathcal{A}\cap\left(S\times I\right)$ and $\mathcal{A}_T=\mathcal{A}\cap\left(I\times T\right)$
+% denote the sets of source-incident and sink-incident arcs, respectively.
+
+A vector $\boldsymbol{f}\in\mathbb{R}_+^{A}$ is called a \emph{flow} in $D$ iff it satisfies the capacity and flow conservation constraints:
+\begin{eqnarray}
+           & f_{ij}\leq h_{ij} & (i,j)\in A, \label{eq:cap} \\
+           & \sum_{j\in N_i^-}f_{ji}-\sum_{j\in N_i^+}f_{ij} = 0~~~~ & i\in I. \label{eq:flowcons}
+\end{eqnarray}
+
+\noindent
+We refer to the set $F(D,\boldsymbol{h}) = \left\{\boldsymbol{f}\in\mathbb{R}_+^{A}: \mbox{(\ref{eq:cap})--(\ref{eq:flowcons}) are satisfied}\right\}$
+as the \emph{flow polytope} of $D$.
+For each $\boldsymbol{f}\in F(D,\boldsymbol{h})$,
+define $\boldsymbol{W}=\left(\boldsymbol{w}_j\right)_{j\in N}\in\mathbb{R}^{K\times N}$ to be a
+\emph{concentration matrix} of $\boldsymbol{f}$ iff $\boldsymbol{w}_s=\boldsymbol{q}_s$ ($s\in S$),
+\begin{eqnarray*}
+  \boldsymbol{w}_i\sum_{j\in N_i^-}f_{ji}=\sum_{j\in N_i^-}\boldsymbol{w}_jf_{ji},\ i\in I\cup T.
+\end{eqnarray*}
+That is, the concentration $\boldsymbol{w}_i=\left(w_i^k\right)_{k\in K}$ of component $k$ in the flow blended at a pool $i$,
+is a convex combination of the entering concentrations $\boldsymbol{w}_j$ ($j\in N_i^-$),
+with convexity weights $f_{ji}/\sum_{j'\in N_i^-}f_{j'i}$.
+These conditions on $\boldsymbol{w}$ are referred to as the \emph{linear blending} property, and together with \eqref{eq:flowcons}, they imply directly
+\begin{equation} \label{eq:totqual}
+  \sum_{s\in S}\boldsymbol{q}_s\sum_{j\in N_i^+}f_{sj} = \sum_{t\in T}\boldsymbol{w}_t\sum_{j\in N_t^-}f_{jt}.
+\end{equation}
+At sinks $t\in T$ where $\sum_{i\in I_t}f_{it}>0$, the upper concentration bounds $u_t^k$ apply,
+and linear blending yields $\boldsymbol{w}_t=\sum_{j\in N_t^-}\boldsymbol{w}_jf_{jt}/\sum_{j\in N_t^-}f_{jt}\leq \boldsymbol{u}_t$.
+Thus, $\boldsymbol{f}\in F\left(D,\boldsymbol{h}\right)$ is said to be a \emph{concentration-feasible} flow in
+$D$ iff $\sum_{j\in N_t^-}\boldsymbol{w}_jf_{jt}\leq \boldsymbol{u}_t\sum_{j\in N_t^-}f_{jt}$ ($t\in T$)
+for any concentration matrix $\boldsymbol{W}$ of $\boldsymbol{f}$.
+
+\begin{problem} \label{prob:pp}
+The \textsc{Pooling Problem}: Find a concentration-feasible flow $\boldsymbol{f}$ in $D$ minimizing the total costs $\boldsymbol{c}\cdot\boldsymbol{f}$.
+\qed
+\end{problem}
+
+%-----------------------------------------------------------------
+\section{Cofluent flow and extensions} \label{sec:conf}
+In the \textsc{Minimum Cost Flow Problem} (MCFP), the flow leaving a source and the flow entering a sink are subject to bounds.
+Let the bounds in question, referred to as the \emph{supply} at source $s\in S$ and the \emph{demand} at sink $t\in T$, respectively, be denoted $b_s$ and $b_t$.
+Traditionally in MCFP, the supply represents an upper bound, whereas demand is a \emph{lower} bound on the sink flow.
+This contrasts SPP, in which both bounds are upper, with the implication that zero flow is feasible in all instances.
+In the current work, we will consider both these options, and state explictly whether demand should be considered an upper or a lower bound.
+
+Let
+\[
+F^{\geq}(D,\boldsymbol{h},\boldsymbol{b}) = \left\{\boldsymbol{f}\in F(D,\boldsymbol{h}): \sum_{j\in N_s^+}f_{sj}\leq b_s (s\in S), \sum_{j\in N_t^-}f_{jt}\geq b_t (t\in T)\right\}
+\]
+and
+\[
+F^{\leq}(D,\boldsymbol{h},\boldsymbol{b}) = \left\{\boldsymbol{f}\in F(D,\boldsymbol{h}): \sum_{j\in N_s^+}f_{sj}\leq b_s (s\in S), \sum_{j\in N_t^-}f_{jt}\leq b_t (t\in T)\right\}
+\]
+be the flow polytopes corresponding to the two variants of the MCFP.
+In the current article, the notion of \emph{confluent} flow \cite{chen06} and related concepts are extensively exploited:
+\begin{definition} \label{def:conf}
+A flow $\boldsymbol{f}\in F(D,\boldsymbol{h})$ is said to be \emph{confluent} if, at all nodes $i\in S\cup I$, $f_{ij}>0$ for at most one $j\in N_i^+$.
+\qed
+\end{definition}
+
+That is, confluence means that while flow streams are allowed to merge at pools, it has to leave the pool along a unique arc.
+Also all flow leaving a source must be allocated to the same arc.
+The inflow counterpart of confluent flow, where merging is disallowed, is defined analogously:
+\begin{definition} \label{def:inf}
+A flow $\boldsymbol{f}\in F(D,\boldsymbol{h})$ is said to be \emph{influent} if, at all nodes $i\in I\cup T$, $f_{ji}>0$ for at most one $j\in N_i^-$.
+\qed
+\end{definition}
+
+The two concepts are combined disjunctively:
+\begin{definition} \label{def:confinf}
+A flow $\boldsymbol{f}\in F(D,\boldsymbol{h})$ is said to be \emph{confluent-influent} if, at all nodes $i\in I$, either $f_{ij}>0$ for at most one $j\in N_i^+$
+or $f_{ji}>0$ for at most one $j\in N_i^-$.
+\qed
+\end{definition}
+
+Observe that the condition in Definition~\ref{def:confinf} applies to pools only, since no flow enters sources or leaves sinks.
+
+\begin{problem} \label{prob:conf}
+The \textsc{Minimum Cost Confluent Flow Problem} (MCCFP):
+Find a flow $\boldsymbol{f}\in F^{\geq}(D,\boldsymbol{h},\boldsymbol{b})$ satisfying Definition~\ref{def:conf} such that the cost $\boldsymbol{c}\cdot\boldsymbol{f}$ is minimized.
+\qed
+\end{problem}
+\noindent
+Analogously, in correspondence with Definitions~\ref{def:inf} and \ref{def:confinf}, respectively, the 
+\textsc{Minimum Cost Influent Flow Problem} (MCIFP) and the \textsc{Minimum Cost Confluent-Influent Flow Problem} (MCCIFP) are defined.
+
+\subsection{Complexity of fluency-constrained extensions of MCFP} \label{sec:compl}
+A modified version of MCCFP, in which the largest arc flow is to be minimized, is known to be NP-hard \cite{chen06}, and even NP-hard to approximate within a factor
+$\tfrac{4}{3}$.
+By a simple reduction from the \textsc{Subset Sum Problem},
+it is next shown that MCCFP as introduced in Definition~\ref{prob:conf} is NP-hard, even in a much restricted instance class.
+\begin{proposition} \label{prop:conf}
+MCCFP is NP-hard in instances where $D$ is bipartite, $I=\emptyset$, and $|T|=2$.
+\end{proposition}
+\begin{proof}
+Consider an instance $(b_1,\ldots,b_n,d)$ of the \textsc{Subset Sum Problem}, where $1\leq b_1\leq\cdots\leq b_n\leq d\in\mathbb{Z}_+$.
+Let $D$ be the complete bipartite digraph with node sets $S=\{s_1,\ldots,s_n\}$ and $T=\{t_0,t_1\}$.
+Let the supply at $s_i$ be $b_i$ ($i=1,\ldots,n$), while the demand at $t_0$ and $t_1$ is, respectively, $\sum_{i=1}^nb_i-d$ and $d$.
+Both arcs leaving $s_i$ have capacity $b_i$ and arbitrary cost.
+Because total supply equals total demand, $\boldsymbol{f}\in F^{\geq}(D,\boldsymbol{h},\boldsymbol{b})$ only if $b_i$ flow units leave source $s_i$,
+$d$ units enter sink $t_1$, and $\sum_{i=1}^nb_i-d$ units enter sink $t_0$.
+Confluence implies that all the flow leaving $s_i$ enters exactly one of the sinks $t_0$ or $t_1$.
+Thus, the MCCFP instance $(D,\boldsymbol{b},boldsymbol{b},boldsymbol{c})$ is feasible if and only if there exists a set $S_1\subseteq\{1,\ldots,n\}$ such that $\sum_{i\in S_1}b_i=d$.
+\qed
+\end{proof}
+
+NP-hardness in restricted instance classes also applies to the influent and confluent-influent counterparts of MCCFP:
+\begin{proposition} \label{prop:inf}
+MCIFP is NP-hard in instances where $D$ is bipartite, $I=\emptyset$, and $|S|=2$.
+\end{proposition}
+\begin{proof}
+Consider the instance of the \textsc{Subset Sum Problem} introduced in the proof of Proposition~\ref{prop:conf}.
+Let $D$ be the complete bipartite digraph with node sets $S=\{s_0,s_1\}$ and $T=\{t_1,\ldots,t_n\}$.
+Let the demand at $t_i$ be $b_i$ ($i=1,\ldots,n$), while the supply at $s_0$ and $s_1$ is, respectively, $\sum_{i=1}^nb_i-d$ and $d$.
+Finally, $c_{st_i}$ is arbitrary and $h_{st_i}=b_i$ for $s\in\{s_0,s_1\}$.
+Following the arguments in the proof of Proposition~\ref{prop:conf}, $(D,\boldsymbol{b},boldsymbol{b},boldsymbol{c})$ is a feasible MCIFP instance
+if and only if $\sum_{i\in S_1}b_i=d$ for some $S_1\subseteq\{1,\ldots,n\}$.
+\qed
+\end{proof}
+
+Proposition~\ref{prop:conf} also applies if MCCFP is defined with the demand as upper bounds.
+That is, if $F^{\geq}$ is replaced by $F^{\leq}$ in Problem~\ref{prob:conf}.
+Consider the digraph introduced in the proof of the proposition, and let the cost $c_{st}=-2$ for all $s=s_1,\ldots,s_n$ and $t=t_1$.
+For $t=t_0$, let $c_{st}=-1$.
+Hence, the minimum cost is $-t-\sum_{i=1}^nb_i$ if and only if $\sum_{i\in S_1}b_i=d$ for some $S_1\subseteq\{1,\ldots,n\}$.
+Analogously, Proposition~\ref{prop:inf} applies even if MCIFP is defined with respect to $F^{\leq}$ rather than $F^{\geq}$.
+
+Let $\len{D}$ denote the maximum length of paths from a source to a sink in $D$.
+In bipartite digraphs consisting only of sources and sinks (i.e, $\len{D}=1$), any flow is confluent-influent.
+Introducing an intermediate set $I$ of nodes renders MCCIFP NP-hard, even if there are no arcs between any two nodes in $I$.
+\begin{proposition} \label{prop:confinf}
+MCCIFP is NP-hard in instances where $\len{D}=|T|=2$.
+\end{proposition}
+\begin{proof}
+Consider the instance of the \textsc{Subset Sum Problem} introduced in the proof of Proposition~\ref{prop:conf}.
+Let $D$ be the complete bipartite digraph with node sets $S=\{s_1,\ldots,s_n,s_1',\ldots,s_n'\}$, $I=\{p_1,\ldots,p_n\}$, and $T=\{t_0,t_1\}$.
+All arcs of $D$ are incident to $I$, where $N_{p_i}^-=\{s_i,s_i'\}$ and  $N_{p_i}^+=\{t_0,t_1\}$.
+% Node $p_i\in I$ has entering arcs $(s_i,p_i)$ and $(s_i',p_i)$, and leaving arcs $(p_i,t_0)$
+Let the supply at $s_i$ and $s_i'$ be $b_i$ ($i=1,\ldots,n$), while the demand at $t_0$ and $t_1$ is, respectively, $2\sum_{i=1}^nb_i-2d$ and $2d$.
+Both arcs entring $p_i$ have capacity $b_i$, whereas the leaving arcs have capacity $2b_i$. Arc costs are arbitrary.
+
+Consider a feasible flow $\boldsymbol{f}$ in the MCCIFP instance $(D,\boldsymbol{h},\boldsymbol{b},\boldsymbol{c})$ hence defined.
+Then, since total supply equals both the total capacity of arcs leaving $S$ and total demand, $f_{sp_i}=h_{sp_i}>0$ for all $s=s_i,s_i'$ and $i=1,\ldots,n$.
+It follows that $\boldsymbol{f}$ is confluent, as it is not influent at any $p_i$.
+Hence, all $2b_i$ units of flow leaving $p_i$ are sent to the same sink, $t_0$ or $t_1$.
+Since $t_1$ receives $2d$ units of flow, there is a set $I_1\subseteq \{1,\ldots,n\}$ such that $\sum_{i\in I_1}f_{p_it_1}=2\sum_{i\in I_1}{b_i}=2d$.
+
+Coversely, if $\sum_{i\in I_1}b_i=d$ for some $I_1\subseteq\{1,\ldots,n\}$, then the flow $\boldsymbol{f}$, where $f_{s_ip_i}=f_{s_i'p_i}=b_i$ ($i=1,\ldots,n\}$),
+$f_{p_it_0}=\left\{\begin{array}{lr}2b_i, & i\notin I_1 \\ 0, & i\in I_1,\end{array}\right.$ and
+$f_{p_it_1}=\left\{\begin{array}{lr}2b_i, & i\in I_1 \\ 0, & i\notin I_1,\end{array}\right.$ is feasible in the MCCIFP instance.
+\qed
+\end{proof}
+
+\subsection{Weak fluency conditions} \label{sec:weak}
+
+Different digraphs may be eqivalent in the perspective of the MCFP.
+Splitting any node into two new ones joined by an arc with sufficently large capacity and zero cost, renders the MCFP instance unchanged.
+In contrast, the operation largely alters the MCCIFP instance, since any flow in the modified network is confluent-influent.
+A concept that is more resilient to likely graph alterations is introduced next.
+
+For any flow $\boldsymbol{f}$ in $D$, let $D(\boldsymbol{f})=\left(N(\boldsymbol{f}), A(\boldsymbol{f})\right)$ denote the subgraph of $D$,
+where $A(\boldsymbol{f})\subseteq A$ consists of arcs $(i,j)\in A$ where $f_{ij}>0$, and
+$N(\boldsymbol{f})\subseteq N$ consists of nodes in $N$ with at least one incident arc in $A(\boldsymbol{f})$.
+
+\begin{definition} \label{def:weakconfinf}
+A flow $\boldsymbol{f}$ in $D$ is said to be \emph{weakly confluent} if, for all $i\in N(\boldsymbol{f})$,
+$D(\boldsymbol{f})$ has paths from $i$ to at most one sink $t\in T\cap N(\boldsymbol{f})$.
+If $D(\boldsymbol{f})$ has paths to $i$ from at most one source $s\in S\cap N(\boldsymbol{f})$, then $\boldsymbol{f}$ is said to be \emph{weakly influent}.
+If either of the conditions holds at all $i\in N(\boldsymbol{f})$, then $\boldsymbol{f}$ is \emph{weakly confluent-influent}.
+\qed
+\end{definition}
+
+It is readily observed that if $\boldsymbol{f}$ is confluent, then it is also weakly confluent.
+Analogous claims hold for the other two fluency conditions.
+Further, in bipartite digraphs, weak confluence (weak influence) implies confluence (influence).
+Finally, if $\len{D}=2$ (see the proof of Proposition~\ref{prop:confinf}), then a weakly confluent-influent flow in $D$ is also confluent-influent.
+For these reasons, Propositions~\ref{prop:conf}-\ref{prop:confinf} apply even if the fluency condition is to be understood in the weak sense.
+
+\subsection*{Acknowledgment}
+\small{The work of the second author has been funded by grants from the Spanish state (TIN2012-37483-C03-01 and TIN2015-66680), Junta de Andaluc\'{\i}a (P11-TIC-7176),
+in part financed by the European Regional Development Fund (ERDF).}
+
+\bibliographystyle{elsarticle-num}
+\bibliography{ref.bib}
+
+\end{document}
+
+
+\begin{thebibliography}{99}
+\bibitem{stigler45}
+Stigler, G.J.:
+\newblock The cost of subsistence.
+\newblock J. Farm Econ.
+\newblock \textbf{27}(2), 303--314 (1945)
+
+\bibitem{dantzig90}
+Dantzig, G.B.:
+\newblock The diet problem.
+\newblock Interfaces
+\newblock \textbf{20}(4), 43--47 (1990)
+
+\bibitem{haverly78}
+Haverly, C.A.:
+\newblock Studies of the behavior of recursion for the pooling problem.
+\newblock ACM SIGMAP Bulletin,
+\newblock \textbf{25}, 19--28 (1978)
+
+\bibitem{baker85}
+Baker, T.E., Lasdon, L.S.:
+\newblock Successive linear programming at Exxon.
+\newblock Manage.\ Sci.
+\newblock \textbf{31}(3), 264--274 (1985)
+
+\bibitem{dewitt89}
+DeWitt, C.W., Lasdon, L.S., Waren, A.D., Brenner, D.A., Melham, S.:
+\newblock OMEGA: An improved gasoline blending system for Texaco.
+\newblock Interfaces
+\newblock \textbf{19}(1), 85--101 (1989)
+
+\bibitem{floudas90}
+Floudas, C.A., Visweswaran, V.:
+\newblock A global optimization algorithm (GOP) for certain classes of nonconvex NLPs: I. Theory.
+\newblock Comput.\ Chem.\ Eng.
+\newblock \textbf{14}(12), 1397--1417 (1990)
+
+\bibitem{audet04}
+Audet, C., Brimberg, J., Hansen, P., Le Digabel, S., Mladenovi\'{c}, N.:
+\newblock Pooling problem: alternate formulations and solution methods.
+\newblock Manage.\ Sci.
+\newblock \textbf{50}(6), 761--776 (2004)
+
+\bibitem{foulds92}
+Foulds, L.R., Haugland, D., J\"{o}rnsten, K.:
+\newblock A bilinear approach to the pooling problem.
+\newblock Optimization,
+\newblock \textbf{24}, 165--180 (1992)
+
+\bibitem{misener11}
+Misener, R., Thompson, J.P, Floudas, C.A.:
+\newblock APOGEE: Global optimization of standard, generalized, and extended pooling
+problems via linear and logarithmic partitioning schemes.
+\newblock Comput.\ Chem.\ Eng.
+\newblock \textbf{35}, 876--892 (2011)
+
+\bibitem{sahinidis05}
+Sahinidis, N.V., Tawarmalani, M.:
+\newblock Accelerating branch-and-bound through a modeling language construct for relaxation-specific constraints.
+\newblock J.\ Global Optim.
+\newblock \textbf{32}(2), 259--280 (2005)
+
+\bibitem{visweswaran96}
+Visweswaran, V., Floudas, C.A.:
+\newblock Computational results for an efficient implementation of the GOP algorithm and its variants.
+\newblock In: Grossmann, I.E.\ (ed.): Global Optimization in Chemical Engineering, pp.\ 111--153.
+\newblock Kluwer Academic Publishers, Dordrecht, The Netherlands (1996)
+
+\bibitem{adhya99}
+Adhya, N., Tawarmalani, M., Sahinidis, N.V.:
+\newblock A Lagrangian approach to the pooling problem.
+\newblock Ind.\ Eng.\ Chem.\ Res.
+\newblock \textbf{38}(5), 1965--1972 (1999)
+
+\bibitem{almutairi09}
+Almutairi, H., Elhedhli, S.:
+\newblock A new Lagrangian approach to the pooling problem.
+\newblock J.\ Global Optim.
+\newblock \textbf{45}(2), 237--257 (2009)
+
+\bibitem{bental94}
+Ben-Tal, A., Eiger, G., Gershovitz, V.:
+\newblock Global minimization by reducing the duality gap.
+\newblock Math.\ Program.
+\newblock \textbf{63}(2), 193--212 (1994)
+
+\bibitem{dey15}
+Dey, S.S., Gupte, A.:
+\newblock Analysis of MILP techniques for the pooling problem.
+\newblock Oper.\ Res., \textbf{62}(2), 412--427 (2015)
+
+\bibitem{kallrath05}
+Kallrath, J.:
+\newblock Solving planning and design problems in the process industry using mixed integer and global optimization.
+\newblock Ann.\ Oper.\ Res.
+\newblock \textbf{140}(1), 339--373 (2005)
+
+\bibitem{galan98}
+Galan, B., Grossmann, I.E.:
+\newblock Optimal design of distributed wastewater treatment networks.
+\newblock Ind.\ Eng.\ Chem.\ Res.
+\newblock \textbf{37}(10), 4036--4048 (1998)
+
+\bibitem{misener10}
+Misener, R., Floudas, C.A.:
+\newblock Global optimization of large-scale generalized pooling problems: Quadratically constrained MINLP models.
+\newblock Ind.\ Eng.\ Chem.\ Res.
+\newblock \textbf{49}, 5424--5438 (2010)
+
+\bibitem{misener09}
+Misener, R., Floudas, C.A.:
+\newblock Advances for the pooling problem: modeling, global optimization, and computational studies.
+\newblock Appl.\ Comput.\ Math.
+\newblock \textbf{8}, 3--22 (2009)
+
+\bibitem{alfaki13}
+Alfaki, M., Haugland, D.:
+\newblock Strong formulations for the pooling problem.
+\newblock J.\ Global Optim.
+\newblock \textbf{56}(3), 897--916 (2013)
+
+\bibitem{haugland16}
+Haugland, D.:
+\newblock The computational complexity of the pooling problem.
+\newblock To appear in J.\ Global Optim.
+\newblock DOI 10.1007/s10898-015-0335-y (2015)
+
+\bibitem{aleksandrov56}
+Aleksandrov, P.S.:
+\newblock Combinatorial Topology, Vol.\ 1.
+\newblock Graylock Press, Rochester, New York (1956)
+
+\bibitem{deloera10}
+De Loera, J.A., Rambau, J., Santos, F.:
+\newblock Triangulations - Structures for Algorithms and Applications.
+\newblock Springer Verlag, Berlin, Germany (2010)
+
+\bibitem{edmonds70}
+Edmonds, A.L.:
+\newblock Simplicial decompositions of convex polytopes.
+\newblock Pi Mu Epsilon Journal,
+\newblock \textbf{5}(3), 124--128 (1970)
+
+\bibitem{murty95}
+Murty, K.G., Chung, S.-J.:
+\newblock Segments in enumerating faces.
+\newblock Math.\ Program.
+\newblock \textbf{70}(1), 27--45 (1995)
+
+\bibitem{fukuda97}
+Fukuda, K., Liebling, T.M., Margot, F.:
+\newblock Analysis of backtrack algorithms for listing all vertices and all faces of a convex polyhedron.
+\newblock Comp. Geom. Theor. Appl.
+\newblock \textbf{8}, 1--12 (1997)
+
+\bibitem{boland15}
+Boland, N., Kalinowski, T., Rigterink, F.:
+\newblock A polynomially solvable case of the pooling problem.
+\newblock arXiv:1508.03181v2 [math.OC] (2015)
+
+\bibitem{haugland15}
+Haugland, D., Hendrix, E.M.T.:
+\newblock On a pooling problem with fixed network size.
+\newblock In: Corman, F., Vo\ss, S., Negenborn,R.R.\ (eds.):
+\newblock Computational Logistics, 6th International Conference, ICCL 2015, Proceedings,
+\newblock Lect. Notes Comput. Sc. \textbf{9335}, 328--342 (2015)
+\end{thebibliography}
+

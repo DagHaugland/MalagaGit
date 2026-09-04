@@ -1,0 +1,145 @@
+\begin{thebibliography}{10}
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{\texttt{#1}}\fi
+\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
+\expandafter\ifx\csname href\endcsname\relax
+  \def\href#1#2{#2} \def\path#1{#1}\fi
+
+\bibitem{stigler45}
+G.~J. Stigler, The cost of subsistence, American Journal of Agricultural
+  Economics 27~(2) (1945) 303--314.
+
+\bibitem{dantzig90}
+G.~B. Dantzig, The diet problem, Interfaces 20~(4) (1990) 43--47.
+\newblock \href {https://doi.org/10.1287/inte.20.4.43}
+  {\path{doi:10.1287/inte.20.4.43}}.
+
+\bibitem{haverly78}
+C.~A. Haverly, Studies of the behavior of recursion for the pooling problem,
+  ACM SIGMAP Bulletin 25 (1978) 19--28.
+
+\bibitem{baker85}
+T.~E. Baker, L.~S. Lasdon, Successive linear programming at exxon, Management
+  Science 31~(3) (1985) 264--274.
+\newblock \href {https://doi.org/10.1287/mnsc.31.3.264}
+  {\path{doi:10.1287/mnsc.31.3.264}}.
+
+\bibitem{dewitt89}
+C.~W. DeWitt, L.~S. Lasdon, A.~D. Waren, D.~A. Brenner, S.~A. Melhem, Omega: An
+  improved gasoline blending system for texaco, Interfaces 19~(1) (1989)
+  85--101.
+\newblock \href {https://doi.org/10.1287/inte.19.1.85}
+  {\path{doi:10.1287/inte.19.1.85}}.
+
+\bibitem{floudas90}
+C.~A. Floudas, V.~Visweswaran, A global optimization algorithm (gop) for
+  certain classes of nonconvex nlps: I. theory, Computers \& Chemical
+  Engineering 14~(12) (1990) 1397--1417.
+\newblock \href {https://doi.org/10.1016/0098-1354(90)80020-C}
+  {\path{doi:10.1016/0098-1354(90)80020-C}}.
+
+\bibitem{audet04}
+C.~Audet, J.~Brimberg, P.~Hansen, S.~L. Digabel, N.~Mladenovi{\'c}, Pooling
+  problem: Alternate formulations and solution methods, Management Science
+  50~(6) (2004) 761--776.
+\newblock \href {https://doi.org/10.1287/mnsc.1030.0207}
+  {\path{doi:10.1287/mnsc.1030.0207}}.
+
+\bibitem{foulds92}
+L.~R. Foulds, D.~Haugland, K.~J{\"o}rnsten, A bilinear approach to the pooling
+  problem, Optimization 24~(1--2) (1992) 165--180.
+\newblock \href {https://doi.org/10.1080/02331939208843786}
+  {\path{doi:10.1080/02331939208843786}}.
+
+\bibitem{misener11}
+R.~Misener, J.~P. Thompson, C.~A. Floudas, Apogee: Global optimization of
+  standard, generalized, and extended pooling problems via linear and
+  logarithmic partitioning schemes, Computers \& Chemical Engineering 35~(5)
+  (2011) 876--892.
+\newblock \href {https://doi.org/10.1016/j.compchemeng.2011.01.026}
+  {\path{doi:10.1016/j.compchemeng.2011.01.026}}.
+
+\bibitem{sahinidis05}
+N.~V. Sahinidis, M.~Tawarmalani, Accelerating branch-and-bound through a
+  modeling language construct for relaxation-specific constraints, Journal of
+  Global Optimization 32~(2) (2005) 259--280.
+\newblock \href {https://doi.org/10.1007/s10898-004-2705-8}
+  {\path{doi:10.1007/s10898-004-2705-8}}.
+
+\bibitem{visweswaran96}
+V.~Visweswaran, C.~A. Floudas, Computational results for an efficient
+  implementation of the gop algorithm and its variants, in: I.~E. Grossmann
+  (Ed.), Global Optimization in Chemical Engineering, Kluwer Academic
+  Publishers, Dordrecht, The Netherlands, 1996, pp. 111--153.
+
+\bibitem{adhya99}
+N.~Adhya, M.~Tawarmalani, N.~V. Sahinidis, A lagrangian approach to the pooling
+  problem, Industrial \& Engineering Chemistry Research 38~(5) (1999)
+  1956--1972.
+\newblock \href {https://doi.org/10.1021/ie980666q}
+  {\path{doi:10.1021/ie980666q}}.
+
+\bibitem{almutairi09}
+H.~Almutairi, S.~Elhedhli, A new lagrangean approach to the pooling problem,
+  Journal of Global Optimization 45~(2) (2009) 237--257.
+\newblock \href {https://doi.org/10.1007/s10898-008-9371-1}
+  {\path{doi:10.1007/s10898-008-9371-1}}.
+
+\bibitem{bental94}
+A.~Ben-Tal, G.~Eiger, V.~Gershovitz, Global minimization by reducing the
+  duality gap, Mathematical Programming 63~(2) (1994) 193--212.
+\newblock \href {https://doi.org/10.1007/BF01582064}
+  {\path{doi:10.1007/BF01582064}}.
+
+\bibitem{dey15}
+S.~S. Dey, A.~Gupte, Analysis of milp techniques for the pooling problem,
+  Operations Research 63~(2) (2015) 412--427.
+\newblock \href {https://doi.org/10.1287/opre.2015.1357}
+  {\path{doi:10.1287/opre.2015.1357}}.
+
+\bibitem{kallrath05}
+J.~Kallrath, Solving planning and design problems in the process industry using
+  mixed integer and global optimization, Annals of Operations Research 140~(1)
+  (2005) 339--373.
+\newblock \href {https://doi.org/10.1007/s10479-005-3976-2}
+  {\path{doi:10.1007/s10479-005-3976-2}}.
+
+\bibitem{galan98}
+B.~Gal\'{a}n, I.~E. Grossmann, Optimal design of distributed wastewater
+  treatment networks, Industrial \& Engineering Chemistry Research 37~(10)
+  (1998) 4036--4048.
+\newblock \href {https://doi.org/10.1021/ie980133h}
+  {\path{doi:10.1021/ie980133h}}.
+
+\bibitem{misener10}
+R.~Misener, C.~A. Floudas, Global optimization of large-scale generalized
+  pooling problems: Quadratically constrained minlp models, Industrial \&
+  Engineering Chemistry Research 49~(11) (2010) 5424--5438.
+\newblock \href {https://doi.org/10.1021/ie100025e}
+  {\path{doi:10.1021/ie100025e}}.
+
+\bibitem{misener09}
+R.~Misener, C.~A. Floudas, Advances for the pooling problem: Modeling, global
+  optimization, and computational studies, Applied and Computational
+  Mathematics 8~(1) (2009) 3--22.
+
+\bibitem{alfaki13}
+M.~Alfaki, D.~Haugland, Strong formulations for the pooling problem, Journal of
+  Global Optimization 56~(3) (2013) 897--916.
+\newblock \href {https://doi.org/10.1007/s10898-012-9875-6}
+  {\path{doi:10.1007/s10898-012-9875-6}}.
+
+\bibitem{haugland16}
+D.~Haugland, The computational complexity of the pooling problem, Journal of
+  Global Optimization 64~(2) (2016) 199--215.
+\newblock \href {https://doi.org/10.1007/s10898-015-0335-y}
+  {\path{doi:10.1007/s10898-015-0335-y}}.
+
+\bibitem{chen06}
+J.~Chen, R.~Rajaraman, R.~Sundaram, Meet and merge: Approximation algorithms
+  for confluent flows, Journal of Computer and System Sciences 72~(3) (2006)
+  468--489.
+\newblock \href {https://doi.org/10.1016/j.jcss.2005.10.003}
+  {\path{doi:10.1016/j.jcss.2005.10.003}}.
+
+\end{thebibliography}

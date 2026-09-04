@@ -1,0 +1,1397 @@
+%%%%%%%%%%%%%%%%%%%%%%% file template.tex %%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% This is a general template file for the LaTeX package SVJour3
+% for Springer journals.          Springer Heidelberg 2010/09/16
+%
+% Copy it to a new file with a new name and use it as the basis
+% for your article. Delete % signs as needed.
+%
+% This template includes a few options for different layouts and
+% content for various journals. Please consult a previous issue of
+% your journal as needed.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% First comes an example EPS file -- just ignore it and
+% proceed on the \documentclass line
+% your LaTeX will extract the file if required
+% \begin{filecontents*}{example.eps}
+%!PS-Adobe-3.0 EPSF-3.0
+%%BoundingBox: 19 19 221 221
+%%CreationDate: Mon Sep 29 1997
+%%Creator: programmed by hand (JK)
+%%EndComments
+% gsave
+% newpath
+%   20 20 moveto
+%   20 220 lineto
+%   220 220 lineto
+%   220 20 lineto
+% closepath
+% 2 setlinewidth
+% gsave
+%   .4 setgray fill
+% grestore
+% stroke
+% grestore
+% \end{filecontents*}
+% \RequirePackage{fix-cm}
+\documentclass[smallextended,referee,envcountsect]{svjour3}       % onecolumn (second format)
+\smartqed  % flush right qed marks, e.g. at end of proof
+\usepackage{graphicx}
+% \usepackage{textcomp}
+% \usepackage{subfigure}
+\usepackage[center]{caption}
+\usepackage{amsfonts}
+% \usepackage{pgfplots}
+\usepackage{algorithm}
+\usepackage[noend]{algorithmic}
+\usepackage{amsmath}
+
+\newtheorem{assumption}{Assumption}
+
+\journalname{To be decided}
+
+\begin{document}
+
+\title{Confluent flow and other approximations to the Pooling Problem}
+\titlerunning{Confluent flow and other approximations to the Pooling Problem}
+
+\author{Dag Haugland \and Eligius M.T. Hendrix \and Isak P\`{a}ll Gestsson}
+
+\institute{Dag Haugland, Corresponding author \at 
+Department of Informatics, University of Bergen, Norway \email{dag.haugland@ii.uib.no}
+\and
+Eligius M.T. Hendrix \at
+              Department of Computer Architecture, Universidad de M\'alaga and Operations Research and Logistics Group, Wageningen University \email{eligius.hendrix@wur.nl\and Isak P\`{a}ll Gestsson} \at Gassco}\\
+
+\date{Received: date / Accepted: date}
+
+\maketitle
+
+\begin{abstract}
+About the computational challenge of the pooling problem and finding approximate solutions by means of confluent and influent flow
+\end{abstract}
+\keywords{Pooling problem \and complexity \and global optimization}
+\subclass{90C26 \and 90C35 \and 90C39 \and 68Q25}
+
+
+%-------------------------------------------------------------------------------
+\section{Introduction}
+\label{intro}
+
+Taken from an earlier paper, to be revised:
+Traditional network flow models, like the minimum cost network flow problem, rely on considerations of the flow as a homogeneous commodity.
+Variations in composition is however relevant in many industrial and logistics applications of the models,
+including petroleum refining and pipeline transportation of natural gas.
+Crude oils supplied to a refinery have contamination levels depending on their sources of origin.
+Major components of natural gas are methane, ethane, butane and propane, but the proportions in which they occur are not equal for all gas wells.
+For environmental or technical reasons, requirements to the final composition are often imposed at the sink nodes of the flow network.
+Whenever constraints of this kind apply, it is therefore essential for network flow models to recognize not only the total product flow,
+but also how the flow composition evolves from network sources to sinks.
+In particular, the models must reflect updates of the composition at nodes where differently composed flows are pooled.
+This provides a computationally challenging problem referred to as the \emph{pooling problem}.
+
+The pooling problem exhibits strong resemblance with well-studied logistics models like the minimum cost flow problem and the transportation problem.
+Another classical related problem is Stigler's diet problem \cite{stigler45,dantzig90},
+asking for the minimum cost diet requiring a certain amount of specified nutrients.
+The problem is easy to extend to a multi-diet version where groups of people have each their own requirements.
+Nutritional contents differ between sources, that is, foods of which diets can be composed,
+and the optimal mix must be found for each sink (group of people).
+Conceptually, the multi-diet version coincides with the pooling problem in bipartite networks.
+Thanks to this simple network structure, with exclusively direct links between sources and sinks, diet problems are nothing but linear programs.
+However, when extending the problem to more general network structures, this is no longer the case.
+Absence of linear formulations has immediate computational consequences.
+While minimum cost flow instances where the network size reaches a six digit number of arcs and nodes can be solved within hours, or even minutes,
+exact solution of pooling problem instances with hundreds of nodes appears to be unrealistic.
+
+The pooling problem has been recognized for decades as a challenge where linear programming approaches fail.
+Bounds on the flow composition frequently induce bilinear constraints in otherwise linear models,
+and require corresponding solution methods.
+An approach based on iterated solution of linearized model versions has gained popularity especially in the oil refining industry,
+and has been analyzed experimentally by Haverly \cite{haverly78}.
+A major conclusion is that methods of this kind may produce suboptimal solutions.
+Such observations helped establishing a consensus, already in early days of research in the pooling problem, that global optimality is achievable only in small instances.
+
+Owing to the anticipated intractability of the problem, early research was mainly directed towards heuristic methods \cite{haverly78,baker85,dewitt89},
+where iterative linearization is the core idea.
+Floudas and Visweswaran \cite{floudas90b} reported the first exact solution algorithm for the pooling problem.
+Later, algorithms based on branch-and-bound \cite{audet04,foulds92,misener11,sahinidis05,visweswaran96b},
+Lagrangian relaxation \cite{adhya99,almutairi09,bental94}, and integer programming \cite{dey15} have been studied.
+The industrial relevance of the problem, notably in petroleum refining \cite{baker85,dewitt89},
+the food industry \cite{kallrath05}, and in waste water processing \cite{galan98,misener10b},
+has been acknowledged by many authors.
+The pooling problem survey by Misener and Floudas \cite{misener09b} has a comprehensive list of references to work in this area.
+
+Standard pooling problems are defined as networks with three node layers, referred to as sources, pools and sinks (sinks), respectively.
+Each arc links either a source to a pool or a pool to a sink.
+Quality constraints in terms of bounds on the composition are imposed at the sinks.
+Each bound relates to the relative content of a flow component, referred to as the component.
+Rigorous studies of the computational complexity of the pooling problem have not been conducted until recently.
+After NP-hardness was formally proved \cite{alfaki13a}, Dey and Gupte \cite{dey15} showed that the problem is as hard to approximate as the maximum clique problem.
+
+The hardness theorem in \cite{alfaki13a} states that even the class of instances with a unique pool is strongly NP-hard.
+The computational complexity is however favorable if there are additional limitations on node cardinalities,
+as polynomial time algorithms have been developed for the case of a unique pool and an upper bound on either the number of sinks \cite{haugland15a}
+or the number of components \cite{alfaki13a}.
+Whether polynomial running-time algorithms for the one-pool instance class exist when the number of sources is bounded, has however been an open question \cite{haugland15a}.
+
+The pooling problem remains NP-hard for networks with only two sources and two sinks,
+and only one flow component subject to constraints \cite{haugland15a}.
+Whether such instances can be solved in polynomial time when the input data take values within given bounds, has been an open question to date.
+In the present work, we answer both of the questions above in the affirmative.
+First, we present a new algorithm for the instance class with a unique pool,
+and prove that it runs in polynomial time when the source cardinality is fixed. 
+Second, we give a dynamic programming algorithm for a rich class of instances with a unique component and only two sources and sinks.
+This algorithm is proved to have pseudo-polynomial running time, which implies that its running time is polynomial
+for any instance class in which the values of all numerical input data are bounded.
+Contributions to the pooling problem literature from the current text are thus answers to two questions left open in existing literature,
+and, by virtue of this, an enhanced understanding of the boundaries between tractable and intractable versions of the problem.
+ 
+The remainder of the text is organized as follows:
+Mathematical notation and formulation of the pooling problem are provided in Section \ref{sec:problem}.
+
+To be written.
+
+%-----------------------------------------------------------------------
+\section{Mathematical Notation and Problem Formulation}\label{sec:problem}
+
+Let $\mathcal{D}=(\mathcal{N},\mathcal{A})$ be a directed graph,
+where the node set $\mathcal{N}=S\cup I\cup T$ consists of the disjoint subsets $S$ of \emph{sources}, $I$ of \emph{pools}, and $T$ of \emph{sinks}.
+The arc set $\mathcal{A}\subseteq (S\times I)\cup(I\times T)$ links sources with pools and pools with sinks.
+Let $K$ be a finite set, and refer to its elements as \emph{flow components} or simply \emph{components}.
+In the sequel, elements of vectors and matrices defined over the sets $\mathcal{N}$ and $K$
+are identified by a subscript if they correspond to $\mathcal{N}$, and by a superscript if they correspond to $K$.
+Complexity analyses in later sections require that network parameters are defined as rational rather than real numbers.
+Define the vectors of unit arc costs $\boldsymbol{c}\in\mathbb{Q}^{|\mathcal{A}|}$ and node capacities $\boldsymbol{b}\in\mathbb{Q}_+^{|\mathcal{N}|}$.
+For integers $j$ and $n$,
+let $\boldsymbol{j}^n$ denote the vector with all its $n$ entries equal to $j$,
+and let $\boldsymbol{I}^n$ denote the $(n\times n)$-identity matrix.
+
+At all sources $s\in S$, flow with a given concentration of each component $k\in K$ may enter $\mathcal{D}$, and flow leaving the network at a sink $t\in T$ must satisfy upper concentration bounds.
+Define the matrices of \emph{concentration} $\boldsymbol{Q}\in\mathbb{Q}^{|K|\times |S|}$ and \emph{concentration bounds}
+$\boldsymbol{U}\in\mathbb{Q}^{|K|\times |T|}$.
+For $s\in S$ and $t\in T$, let $\boldsymbol{q}_s=\left(q_s^k\right)_{k\in K}$ and $\boldsymbol{u}_t=\left(u_t^k\right)_{k\in K}$ be the columns of $\boldsymbol{Q}$ and $\boldsymbol{U}$, respectively.
+That is, $q_s^k$ is the concentration of component $k$ of the flow entering $\mathcal{D}$ at $s$,
+and $u_t^k$ is the upper bound on the concentration of the flow leaving $\mathcal{D}$ at $t$.
+
+For each pool $i\in I$, the set of neighbor sources and the set of neighbor sinks are denoted by
+$S_i=\left\{s\in S: (s,i)\in \mathcal{A}\right\}$ and
+$T_i=\left\{t\in T: (i,t)\in \mathcal{A}\right\}$, respectively.
+For each source $s\in S$,
+the set of neighbor pools is denoted by
+$I_s=\left\{i\in I: (s,i)\in \mathcal{A}\right\}$, while
+$I_t=\left\{i\in I: (i,t)\in \mathcal{A}\right\}$
+denotes the set of neighbor pools of sink $t\in T$.
+% The arc set $\mathcal{A}$ has a partition $\left(\mathcal{A}_S,\mathcal{A}_T\right)$,
+% where $\mathcal{A}_S=\mathcal{A}\cap\left(S\times I\right)$ and $\mathcal{A}_T=\mathcal{A}\cap\left(I\times T\right)$
+% denote the sets of source-incident and sink-incident arcs, respectively.
+
+A vector $\boldsymbol{f}\in\mathbb{R}_+^{|\mathcal{A}|}$ is called a \emph{flow} in $\mathcal{D}$ iff it satisfies the capacity and flow conservation constraints:
+\begin{eqnarray}
+           & \sum_{i\in I_s}f_{si}\leq b_s & s\in S, \label{eq:caps} \\
+           & \sum_{s\in S_i}f_{si}\leq b_i & i\in I, \label{eq:capi} \\
+           & \sum_{i\in I_t}f_{it}\leq b_t & t\in T, \label{eq:capt} \\
+           & \sum_{s\in S_i}f_{si}-\sum_{t\in T_i}f_{it} = 0~~~~ & i\in I. \label{eq:flowcons}
+\end{eqnarray}
+
+\noindent
+We refer to the set $\mathcal{F}(\mathcal{D},\boldsymbol{b}) = \left\{\boldsymbol{f}\in\mathbb{R}_+^{|\mathcal{A}|}: \mbox{(\ref{eq:caps})--(\ref{eq:flowcons}) are satisfied}\right\}$
+as the \emph{flow polytope} of $\mathcal{D}$.
+For each $\boldsymbol{f}\in \mathcal{F}(\mathcal{D},\boldsymbol{b})$,
+define $\boldsymbol{W}=\left(\boldsymbol{w}_j\right)_{j\in \mathcal{N}}\in\mathbb{R}^{|K|\times |\mathcal{N}|}$ to be a
+\emph{concentration matrix} of $\boldsymbol{f}$ iff $\boldsymbol{w}_s=\boldsymbol{q}_s$ ($s\in S$),
+\begin{eqnarray*}
+  \boldsymbol{w}_i\sum_{t\in T_i}f_{it}=\sum_{s\in S_i}\boldsymbol{q}_sf_{si},\ i\in I,\ \mbox{and} \\
+  \boldsymbol{w}_t\sum_{i\in I_t}f_{it}=\sum_{i\in I_t}\boldsymbol{w}_if_{it},\ t\in T.
+\end{eqnarray*}
+That is, the concentration $\boldsymbol{w}_i=\left(w_i^k\right)_{k\in K}$ of the flow blended at a pool $i$ receiving positive flow,
+is a convex combination of the source concentrations $\boldsymbol{q}_s$ ($s\in S$),
+with convexity weights $f_{si}/\sum_{t\in T_i}f_{it}$ ($s\in S_i$).
+Analogously, for sinks $t\in T$ with positive inflow, the concentration $\boldsymbol{w}_t$ is a convex combination of the pool concentrations $\boldsymbol{w}_i$ ($i\in I_t$).
+These conditions on $\boldsymbol{w}$ are referred to as the \emph{linear blending} property, and imply directly
+\begin{equation} \label{eq:totqual}
+  \sum_{s\in S}\boldsymbol{q}_s\sum_{i\in I_s}f_{si} = \sum_{t\in T}\boldsymbol{w}_t\sum_{i\in I_t}f_{it}.
+\end{equation}
+At sinks $t\in T$ where $\sum_{i\in I_t}f_{it}>0$, the upper concentration bounds $u_t^k$ apply,
+and linear blending yields $\boldsymbol{w}_t=\sum_{i\in I_t}\boldsymbol{w}_if_{it}/\sum_{i\in I_t}f_{it}\leq \boldsymbol{u}_t$.
+Thus, $\boldsymbol{f}\in\mathcal{F}\left(\mathcal{D},\boldsymbol{b}\right)$ is said to be a \emph{feasible} flow in
+$\mathcal{D}$ iff $\sum_{i\in I_t}\boldsymbol{w}_if_{it}\leq \boldsymbol{u}_t\sum_{i\in I_t}f_{it}$ ($t\in T$)
+for any concentration matrix $\boldsymbol{W}$ of $\boldsymbol{f}$.
+
+\begin{problem} \label{prob:pp}
+The \textsc{Pooling Problem}: Find a feasible flow $\boldsymbol{f}$ in $\mathcal{D}$ minimizing the total costs $\boldsymbol{c}\cdot\boldsymbol{f}$.
+\qed
+\end{problem}
+Problem \ref{prob:pp}  is traditionally stated in terms of a bilinear formulation in flow and pool concentration variables \cite{haverly78},
+often referred to as the P-formulation:
+
+\begin{eqnarray}
+\min_{\boldsymbol{f},\boldsymbol{W}} & \left(\sum_{(s,i)\in \mathcal{A}_S}c_{si}f_{si}+\sum_{(i,t)\in \mathcal{A}_T}c_{it}f_{it}\right), & \label{eq:obj} \\
+           & \sum_{s\in S_i}q_s^kf_{si}-w_i^k\sum_{t\in T_i}f_{it} = 0~~~~ & i\in I, k\in K, \label{eq:qualcons} \\
+           & \sum_{i\in I_t}w_i^kf_{it}-u_t^k\sum_{i\in I_t}f_{it} \leq 0~~~~ & t\in T, k\in K, \label{eq:qualbnd} \\
+           & \boldsymbol{f}\in \mathcal{F}(\mathcal{D},\boldsymbol{b}). \label{eq:posflow}
+\end{eqnarray}
+
+
+%-----------------------------------------------------------------
+\section{Complexity of the Pooling Problem with a Single Pool} \label{sec:onepool}
+In this section, we assume that
+$\mathcal{A}=\left(S\times I\right)\cup \left(I\times T\right)$ and $|I|=1$,
+which means that all sources and all sinks are connected to a unique pool in the network.
+A pool notation thus becomes superfluous, and we let $f_s$ and $f_t$ denote,
+respectively, the flow from source $s\in S$ to the pool, and flow from the pool to sink $t\in T$.
+An analogous simplified notation is adopted for the arc costs.
+
+\subsection{Problem Formulation with a Set-Valued Variable}
+Because a sink $t$ receives flow exclusively from the unique pool, either $f_t=0$,
+or the flow entering the pool must make a blend that satisfies the bounds $u_t^k$, $k\in K$.
+Hence, we have the following disjunctive constraint for all $t\in T$:
+\begin{eqnarray}
+ & f_t=0 & ~\mbox{or} \nonumber \\
+ & \sum_{s\in S}q_s^kf_s-u_t^k\sum_{s\in S}f_s \leq 0 & ~k\in K. \label{eq:qbnd}
+\end{eqnarray}
+Considering the set $T^+\subseteq T$ of sinks receiving positive flow as a variable, the problem is formulated as:
+\begin{eqnarray}
+\min_{T^+,\boldsymbol{f}} & \left(\sum_{s\in S}c_sf_s+\sum_{t\in T}c_tf_t\right), & \label{eq:qobj} \\
+           & \boldsymbol{f}\in \mathcal{F}(\mathcal{D},\boldsymbol{b}), & \label{eq:fdom} \\
+           & \sum_{s\in S}q_s^kf_s-u_t^k\sum_{s\in S}f_s \leq 0 & k\in K, t\in T^+, \label{eq:t+} \\
+           & f_t=0 & t\in T\setminus T^+, \label{eq:t-} \\
+           & T^+\subseteq T. & \label{eq:tdom}
+\end{eqnarray}
+It has been shown \cite{alfaki13a} that the \textsc{Independent Vertex Set} problem is polynomially reducible to problem (\ref{eq:qobj})--(\ref{eq:tdom}),
+which hence is (strongly) NP-hard.
+By exploiting the same reduction, it was recently shown \cite{dey15} that the problem has no polynomial-time approximation algorithm within $|T|^{1-\epsilon}$, for any $\epsilon>0$,
+unless NP-complete problems have randomized polynomial algorithms.
+
+The computational difficulty of problem (\ref{eq:qobj})--(\ref{eq:tdom}) is represented by the set-valued variable $T^+$,
+and once $T^+\subseteq T$ is known, the remaining problem (\ref{eq:qobj})--(\ref{eq:t-}) is a linear program (LP).
+This observation inspires various solution approaches discussed in the next sections.
+
+For a given $T^+\subseteq T$, let $z(T^+)$ denote the minimum cost in the linear program (\ref{eq:qobj})--(\ref{eq:t-}).
+
+\subsection{Few Terminals} \label{sec:fewt}
+If the number $|T|$ of sinks is small, problem (\ref{eq:qobj})--(\ref{eq:tdom}) can be solved by enumerating all $2^{|T|}$ possible $T^+\subseteq T$.
+Taking the minimum of the $2^{|T|}$ LP-solutions $z\left(T^+\right)$, yields the optimal solution.
+Consequently, the \textsc{Pooling Problem} with a single pool and an upper bound on the number $|T|$ of sinks is solvable in polynomial time \cite{haugland15a}.
+
+\subsection{Few Quality Parameters} \label{sec:fewk}
+A small number $|K|$ of components suggests enumeration of all possible pool concentrations rather than enumeration of sink sets.
+Consider a component $k\in K$ and a permutation $\pi:\left\{1,\ldots,|T|\right\}\mapsto T$
+such that \\ $u_{\pi(1)}^k\leq u_{\pi(2)}^k\leq\cdots\leq u_{\pi(|T|)}^k$.
+That is, sink $\pi(1)$ imposes the strictest and sink $\pi(|T|)$ the least strict concentration bound on parameter $k$.
+If \\ $u_{\pi(j-1)}^k\sum_{s\in S}f_s < \sum_{s\in S}q_s^kf_s\leq u_{\pi(j)}^k\sum_{s\in S}f_s$,
+then the pool concentration satisfies the $k$-bound at sinks $\pi(j),\ldots,\pi(|T|)$,
+whereas sinks $\pi(1),\ldots,\pi(j-1)$ must receive zero flow.
+Letting $j$ run through all possible values $1,\ldots,|T|+1$, where $j=|T|+1$ indicates that none of the bounds are satisfied,
+yields $|T|+1$ possible pairs $\left(\sum_{s\in S}q_s^kf_s-u_{\pi(j)}^k\sum_{s\in S}f_s\leq 0, ~f_{\pi(1)}=\cdots=f_{\pi(j-1)}=0\right)$ of constraints
+for this particular $k\in K$.
+Combining all $|K|$ components, gives $\left(|T|+1\right)^{|K|}$ compact LPs to solve.
+It follows that the \textsc{Pooling Problem} with a single pool and an upper bound on the number $|K|$ of components is also solvable in polynomial time \cite{alfaki13a}.
+
+\subsection{Linearly Ordered Quality Bounds} \label{sec:linord}
+Consider instances with total domination in the concentration bounds $\boldsymbol{u}_t$.
+This means that the sinks can be ordered such that they appear successively less demanding in all components $k$,
+and implies that the permutation $\pi$ discussed in Section \ref{sec:fewk} is independent of $k$.
+% That is, for all $j=1,\ldots,|T|-1$, all concentration bounds at sink $\pi(j+1)$ are no stricter than at sink $\pi(j)$.
+For the class of such single-pool instances, there exists an algorithm with polynomial running time. This is stated more precisely as follows:
+\begin{proposition} \label{prop:linord}
+If there exists a bijection $\pi:\left\{1,\ldots,|T|\right\}\mapsto T$ such that $\boldsymbol{u}_{\pi(1)}\leq\cdots\leq\boldsymbol{u}_{\pi(|T|)}$,
+then the \textsc{Pooling Problem} with $|I|=1$ is solved in terms of $|T|$ compact linear programs.
+\end{proposition}
+\begin{proof}
+Let $T_j^+=\left\{\pi(j),\ldots,\pi(|T|)\right\}$ ($j=1,\ldots,|T|$) and $T_j^+=\emptyset$ for $j=|T|+1$.
+The proposition follows directly by observing that the optimal solution to (\ref{eq:qobj})--(\ref{eq:tdom}) is $\displaystyle{\min_{j=1,\ldots,|T|+1}z\left(T_j^+\right)}$.
+\qed
+\end{proof}
+
+\begin{remark} \label{rem:pi}
+Proposition \ref{prop:linord} also motivates heuristic approaches aimed for
+instances where there exists no bijection satisfying the given criterion.
+Let $\pi$ be defined such that some measure of the concentration demand at sink $\pi(j)$ is non-increasing with increasing value of $j$.
+Then it is reasonable to assume that for some $j=1,\ldots,|T|+1$, the set $T_j^+$ as defined in the above proof will give a small cost $z(T_j^+)$.
+The heuristic method hence amounts to solving the $|T|$ associated linear programs.
+A natural measure of concentration demand is
+$\displaystyle{\sum_{k\in K}\frac{u_t^k}{\max_{s\in S}q_s^k-\min_{s\in S}q_s^k}}$.
+It is also possible to apply the indicated heuristic for a set of different measures, e.g.\ by ordering the sinks by increasing value of $u_t^k$,
+and thus repeat the heuristic for all $k\in K$.
+\qed
+\end{remark}
+
+\subsection{Few Sources} \label{sec:fews}
+Whether or not there exists an algorithm with polynomial running time for the \textsc{Pooling Problem}
+with one pool ($|I|=1$) and an upper bound on the number of sources $|S|$,
+has been an open question to date \cite{haugland15a}.
+To prepare for an answer in the affirmative, define the map $\mathcal{T}^+:\mathcal{F}(\mathcal{D},\boldsymbol{b})\Rightarrow 2^T$ from the flow polytope to the set of sink subsets,
+such that
+\[\mathcal{T}^+(\boldsymbol{f})=\left\{\mbox{$t\in T:$ (\ref{eq:qbnd}) is satisfied}\right\}.\]
+This means that for a given flow $\boldsymbol{f}$,
+$\mathcal{T}^+(\boldsymbol{f})\subseteq T$ consists of \emph{all} sinks $t\in T$ such that $\boldsymbol{f}$ satisfies the concentration constraints of $t$.
+A set $T^+\subseteq T$ is thus in the image $\mathcal{T}(\mathcal{D},\boldsymbol{b})$ of $\mathcal{T}^+$,
+if and only if there exists an $\boldsymbol{f}\in\mathcal{F}(\mathcal{D},\boldsymbol{b})$ satisfying
+all concentration constraints of all $t\in T^+$, while violating at least one concentration constraint of each $t\in T\setminus T^+$.
+For instance, under the condition considered in Proposition \ref{prop:linord},
+$\mathcal{T}(\mathcal{D},\boldsymbol{b}) = \left\{T_j^+: j=j_0,\ldots,j_1\right\}$ for some $1\leq j_0\leq j_1\leq |T|+1$.
+
+\begin{proposition} \label{prop:z}
+$\min\left\{z\left(T^+\right):T^+\subseteq T\right\} = \min\left\{z\left(T^+\right):T^+\in\mathcal{T}\left(\mathcal{D},\boldsymbol{b}\right)\right\}$.
+\end{proposition}
+\begin{proof}
+Because $\boldsymbol{f}=\boldsymbol{0}^{\left|\mathcal{A}\right|}$ satisfies $T$, $T\in\mathcal{T}\left(\mathcal{D},\boldsymbol{b}\right)$,
+and the latter minimum exists.
+Let $T^+\in 2^T\setminus\mathcal{T}\left(\mathcal{D},\boldsymbol{b}\right)$.
+% If $T^+$ is not contained in any set in
+% $\mathcal{T}(\mathcal{D},\boldsymbol{b})$,
+% then $T^+$ is satisfied only by zero flow, %$\boldsymbol{f}=\boldsymbol{0}^{\left|\mathcal{A}\right|}$,
+% implying $z\left(T^+\right)=0$.
+Then, any optimal flow in (\ref{eq:qobj})--(\ref{eq:t-}) satisfies some $T^{\ast}\in\mathcal{T}\left(\mathcal{D},\boldsymbol{b}\right)$, where $T^{\ast}\supset T^+$.
+It follows that $z\left(T^{\ast}\right)\leq z\left(T^+\right)$.
+\qed
+\end{proof}
+
+The enumeration algorithm indicated in Section \ref{sec:fewt} computes $z(T^+)$ for \emph{every} $T^+\subseteq T$.
+According to Proposition \ref{prop:z}, however,
+it suffices to compute $z(T^+)$ for all $T^+\in\mathcal{T}(\mathcal{D},\boldsymbol{b})$.
+This is exploited in the algorithm detailed and analyzed in the next section.
+Particularly, when $|S|$ is fixed, it is proved that $\left|\mathcal{T}(\mathcal{D},\boldsymbol{b})\right|$ is polynomial in the instance size.
+In its turn, this leads to a proof of polynomial running time of the algorithm.
+
+\section{The \textsc{Pooling Problem} with One Pool and Fixed Number of Sources} \label{sec:i1sbnd}
+
+\subsection{Preliminaries} \label{sec:prelim}
+For a non-zero flow $\boldsymbol{f}$, let $x_s= \frac{f_s}{\sum_{t\in T}f_t}$ denote the proportion \cite{bental94} of the total flow originating from source $s$.
+Without loss of generality \cite[Proposition 2]{haugland15a}, 
+we assume that, for some $s_0\in S$, $\boldsymbol{q}_{s_0}=\boldsymbol{0}^{|K|}$.
+Letting $S_0=S\setminus\{s_0\}$, we thus have that the proportion vector $\boldsymbol{x}$ takes values on the unit simplex:
+\begin{eqnarray}
+         & \sum_{s\in S_0}x_s\leq 1, \label{eq:sum1} \\
+         & x_s\geq 0 & s\in S_0. \label{eq:pos}
+\end{eqnarray}
+
+\noindent
+The slack in (\ref{eq:sum1}) equals the flow proportion corresponding to source $s_0$.
+
+Dividing (\ref{eq:qbnd}) by the total flow $\displaystyle{\sum_{s\in S}f_s=\sum_{t\in T}f_t}$ shows that if $T^+\in \mathcal{T}(\mathcal{D},\boldsymbol{b})$,
+then there exists an $\boldsymbol{x}$ on the unit simplex such that for all $t\in T^+$:
+\begin{equation} \label{eq:t}
+\displaystyle{\sum_{s\in S_0}q_s^kx_s\leq u_t^k, k\in K.}
+\end{equation}
+
+The hyperplanes satisfying $\sum_{s\in S_0}q_s^kx_s = u_t^k$ for any $t\in T$ and $k\in K$, partition the unit simplex into a set of polytopes.
+Across the relative interior of any such polytope, the set $T^+$ of sinks $t$ for which (\ref{eq:t}) is satisfied is invariant.
+If all polytopes are available, problem (\ref{eq:qobj})--(\ref{eq:tdom}) is solved by the following operations on each of them:
+First, the corresponding set $T^+$ is identified.
+This is accomplished by choosing an arbitrary relative interior point $\boldsymbol{x}$, and identifying $T^+$ as $\left\{\mbox{$t\in T$: (\ref{eq:t}) is satisfied}\right\}$.
+With $T^+$ fixed, the resulting LP (\ref{eq:qobj})--(\ref{eq:t-}) is solved next.
+The best solution hence obtained is also the solution to (\ref{eq:qobj})--(\ref{eq:tdom}).
+
+The outlined approach calls for an algorithm that takes a set of linear equations as input,
+and outputs the set of polytopes in the corresponding partition of the unit simplex.
+For the case of the \textsc{Pooling Problem} with $|I|=1$,
+such an algorithm is illustrated in the next section.
+The problem of identifying the partition of the simplex induced by intersecting hyperplanes is analyzed in general in Section \ref{sec:simp}.
+The analysis leads to an algorithm presented in Section \ref{sec:alg},
+and we prove that its running time is polynomial in the number of hyperplanes when the variable dimension is fixed.
+By direct application of this result, we prove in Section \ref{sec:p1pol}
+that the \textsc{Pooling Problem} with $|I|=1$ and $|S|$ fixed is also solvable in polynomial time.
+
+\subsection{Illustration} \label{sec:ill}
+
+Consider an instance with sources $S=\left\{s_0,s_1,s_2\right\}$, sinks $T=\left\{t_1,t_2\right\}$, and $|K|=2$.
+Let the source concentration matrix be $\boldsymbol{Q} = \left(\boldsymbol{q}_{s_0},\boldsymbol{q}_{s_1},\boldsymbol{q}_{s_2}\right) = \left(
+\begin{array}{rrr}
+0 &  1 & -2\\
+0 & -2 & 1 \\
+\end{array} \right)$ and let the concentration bounds be $\boldsymbol{U} = \left(\boldsymbol{u}_{t_1},\boldsymbol{u}_{t_2}\right) = \left(
+\begin{array}{rr}
+0 & \frac{1}{2} \\
+-\frac{1}{2} & 0 \\
+\end{array} \right)$.
+Thus, $\left|S_0\right|=2$, and (\ref{eq:sum1})--(\ref{eq:pos}) define the two-dimensional unit simplex depicted in Fig.\ \ref{fig:part}.
+
+\begin{figure}[ht]
+% \vspace{-1em}
+\begin{center}
+\includegraphics[scale=0.35]{simpvoorbeeld.pdf}
+\vspace{-1em}
+\end{center}
+\caption{Partition of the unit simplex by hyperplanes}
+\label{fig:part}
+\end{figure}
+
+Letting $k$ index the first row of $\boldsymbol{Q}$ and $\boldsymbol{U}$, inequality (\ref{eq:t}) becomes (for the case of brevity, write $x_{s_j}=x_j$ ($j=1,2$))
+$x_1-2x_2\leq 0$ for $t=t_1$,
+and $x_1-2x_2\leq \frac{1}{2}$ for $t=t_2$.
+For $t=t_1$,
+the inequality is illustrated by a straight line intersecting the boundary of the simplex in Fig.\ \ref{fig:part} at points $(0,0)$ and
+$\left(\frac{2}{3},\frac{1}{3}\right)$.
+Analogously, for $t=t_2$, the intersection points are 
+$\left(\frac{1}{2},0\right)$ and
+$\left(\frac{5}{6},\frac{1}{6}\right)$.
+Inequalities
+$-2x_1+x_2\leq \frac{-1}{2}$
+and $-2x_1+x_2\leq 0$,
+corresponding to the second row of $\boldsymbol{Q}$ and $\boldsymbol{U}$,
+give the remaining two lines intersecting the simplex.
+
+The hyperplanes consisting of all $\boldsymbol{x}$-vectors satisfying one of the constraints (\ref{eq:t}) with equality,
+thus partition the unit simplex into polytopes denoted a, b, c, d, e and f.
+We observe that polytope d corresponds to $T^+=\{t_1,t_2\}$, polytopes b, c and e correspond to $T^+=\{t_2\}$, and polytopes a and f correspond to $T^+=\emptyset$.
+Thus, $\mathcal{T}(\mathcal{D},\boldsymbol{b})=\left\{T,\{t_2\},\emptyset\right\}$, which means that the LP (\ref{eq:qobj})--(\ref{eq:t-}) does not have to be solved for $T^+=\{t_1\}$.
+
+In Fig.\ \ref{fig:part}, there are 10 points appearing as a vertex in at least one of the polytopes.
+These are (1/3, 1/6) and 9 points on the boundary of the simplex.
+Each vertex point is identified by the solution to a system of linear equations.
+A pair of vertex points is further an edge of some polytope if and only if
+there exist $n-1$ distinct hyperplanes corresponding to (\ref{eq:sum1})--(\ref{eq:t}) intersecting both points,
+and no such hyperplane separating the points.
+We observe that in Fig.\ \ref{fig:part}, $[(0,0),(1/3,1/6)]$ is an edge of c and e.
+Due to the line separating $(5/6,1/6)$ and $(1/2,1/2)$, $[(5/6,1/6),(1/2,1/2)]$ is not an edge of any polytope.
+Neither is $[(1/3,1/6),(1/3,2/3)]$, since there is no line corresponding to (\ref{eq:sum1})--(\ref{eq:t}) intersecting $(1/3,1/6)$ and $(1/3,2/3)$.
+
+In addition to the polytopes in the partition, also their proper faces are of interest.
+In cases where two or more of the hyperplanes corresponding to (\ref{eq:t}) coincide,
+some $T^+\in\mathcal{T}(\mathcal{D},\boldsymbol{b})$ can map to a polytope of dimension smaller than $|S_0|$.
+The algorithm to be developed next therefore produces a list of all faces of polytopes in the partition of the simplex.
+
+
+\subsection{Polyhedral Partitions of the Unit Simplex} \label{sec:simp}
+
+\subsubsection{Definitions} \label{sec:def}
+
+Let $P\subset\mathbb{R}^n$ denote a polytope and $V(P)$ its vertex set.
+For a finite set $V\subset\mathbb{R}^n$, let $P(V)$ denote the polytope $\mbox{conv}V$.
+A polytope of dimension $n$ is referred to as an $n$-polytope, and analogous nomenclature is used for other geometrical structures in vector spaces.
+
+Define the index sets $M=\{1,\ldots,m+n+1\}$ and $N=\{1,\ldots,n\}$, and consider a matrix $\boldsymbol{A}\in\mathbb{Q}^{m\times n}$ and a vector $\boldsymbol{d}\in\mathbb{Q}^m$.
+Associate with $(\boldsymbol{A},\boldsymbol{d})$ the extension $(\bar{\boldsymbol{A}},\bar{\boldsymbol{d}})$, where
+\[
+\bar{\boldsymbol{A}} = \left(
+\begin{array}{c}
+\boldsymbol{A} \\
+\boldsymbol{I}^n \\
+% \left(\boldsymbol{1}^n\right)^T
+1\ \cdots\ 1
+\end{array} \right) = \left(a_{ij}\right)_{i\in M, j\in N},\ 
+\bar{\boldsymbol{d}} = \left(
+\begin{array}{c}
+\boldsymbol{d} \\
+\boldsymbol{0}^n \\
+1
+\end{array} \right) = \left(d_i\right)_{i\in M}.
+\]
+
+\noindent
+Observe that the last $n+1$ rows of $(\bar{\boldsymbol{A}},\bar{\boldsymbol{d}})$ contain the coefficients of the linear inequalities 
+$\sum_{j=1}^nx_j \leq 1$ and $x_j \geq 0$ ($j=1,\ldots,n$)
+defining the unit $n$-simplex $\Delta^n$.
+
+\begin{definition}\label{def:vc}
+A pair $\left(M^<,M^>\right)$ of sets $M^<\subseteq M$ and $M^>\subseteq M$ of row indices of $(\bar{\boldsymbol{A}},\bar{\boldsymbol{d}})$,
+is referred to as a \emph{valid cover} iff
+\begin{enumerate}
+  \item $M^<\cup M^>=M$ (the rows of $(\bar{\boldsymbol{A}},\bar{\boldsymbol{d}})$ are covered), \label{eq:vc1}
+  \item $m+1,\ldots,m+n\in M^>$ ($M^>$ covers the rows corresponding to \\ $x_1,\ldots,x_n\geq 0$), and \label{eq:vc2}
+  \item $m+n+1\in M^<$ ($M^<$ covers the row corresponding to $\sum_{j=1}^nx_j\leq 1$). \label{eq:vc3}
+\qed
+\end{enumerate}
+\end{definition}
+
+\noindent
+It is not required that $M^<\cap M^>$ is empty.
+Conditions \ref{eq:vc2}--\ref{eq:vc3} of Definition \ref{def:vc} imply that
+the polytope consisting of all $\boldsymbol{x}\in\mathbb{R}^n$ satisfying
+\begin{eqnarray}
+ & \sum_{j=1}^na_{ij}x_j \leq d_i & i\in M^<, \label{eq:leq} \\
+ & \sum_{j=1}^na_{ij}x_j \geq d_i & i\in M^>, \label{eq:geq}
+\end{eqnarray}
+\noindent
+is contained in $\Delta^n$.
+Let $\mathcal{P}^r(\boldsymbol{A},\boldsymbol{d})$ be the set of $r$-polytopes ($r=-1,0,1,\ldots,n$) that correspond to valid covers,
+and let $\mathcal{V}^r(\boldsymbol{A},\boldsymbol{d})$ be the set of vertex sets of these polytopes.
+Define 
+\[ \mathcal{P}(\boldsymbol{A},\boldsymbol{d}) = \mathcal{P}^{-1}(\boldsymbol{A},\boldsymbol{d})\cup\cdots\cup\mathcal{P}^n(\boldsymbol{A},\boldsymbol{d}) ~~\mbox{and} \]
+\[\mathcal{V}(\boldsymbol{A},\boldsymbol{d}) = \mathcal{V}^{-1}(\boldsymbol{A},\boldsymbol{d})\cup\cdots\cup\mathcal{V}^n(\boldsymbol{A},\boldsymbol{d}). \]
+Here, the convention $\dim\emptyset=-1$ is used,
+i.e., $\mathcal{P}^{-1}(\boldsymbol{A},\boldsymbol{d})=\emptyset$.
+All valid covers $(M^<,M^>)$ where
+$m+1,\ldots,m+n\in M^<$ and $m+n+1\in M^>$ correspond to $\emptyset$, but also others may do so.
+
+Corresponding to a polytope $P\in\mathcal{P}(\boldsymbol{A},\boldsymbol{d})$, there is at least one valid cover.
+In degenerate cases, like $P$ containing only the intersection point of three lines in the plane, there are more than one valid cover corresponding to $P$.
+A valid cover $\left(M^<,M^>\right)$ is said to be \emph{maximal} iff, for some $P\in\mathcal{P}(\boldsymbol{A},\boldsymbol{d})$,
+\[ M^<=\left\{i\in M: \sum_{j=1} ^na_{ij}x_j\leq d_i ~\forall x\in P\right\} \mbox{and} \]
+\[ M^>=\left\{i\in M: \sum_{j=1} ^na_{ij}x_j\geq d_i ~\forall x\in P\right\}.\]
+That is, $\left(M^<,M^>\right)$ is maximal if and only if $M^<$ and $M^>$ contain the indices of \emph{all} $i\in M$
+such that $\sum_{j=1}^na_{ij}x_j\leq d_i$ and $\sum_{j=1}^na_{ij}x_j\geq d_i$, respectively,
+for all $\boldsymbol{x}\in P$.
+Consequently, there is a one-to-one correspondence between polytopes in $\mathcal{P}(\boldsymbol{A},\boldsymbol{d})$ and maximal valid covers.
+In the example of a point intersected by three lines, the indices of all three lines occur in both $M^<$ and $M^>$ in the corresponding maximal valid cover.
+
+\begin{definition}[{\cite[Ch.\ IV, \S 1.2]{aleksandrov56}},{\cite[Definition 2.1.5]{deloera10}}] \label{def:polcomplex}
+A finite set $\mathcal{C}$ of polyhedra in $\mathbb{R}^n$ is a \emph{polyhedral complex} iff
+\begin{enumerate}
+  \item $F\in\mathcal{C}$ if $F$ is a face of a polyhedron $P\in\mathcal{C}$, and
+  \item $P_0\cap P_1$ is a face of both $P_0$ and $P_1$ if $P_0,P_1\in\mathcal{C}$.
+\qed
+\end{enumerate}
+\end{definition}
+
+To prove that the size of
+$\mathcal{V}(\boldsymbol{A},\boldsymbol{d})$ and
+$\mathcal{P}(\boldsymbol{A},\boldsymbol{d})$
+is polynomial in $m$,
+the concept of a polyhedral complex is instrumental.
+% This result is crucial for proving that the \textsc{Pooling Problem} with $|I|=1$ and $|S|$ fixed has a polynomial time algorithm.
+
+\subsubsection{Preliminary Results}
+
+\begin{proposition} \label{prop:polcomplex}
+$\mathcal{P}(\boldsymbol{A},\boldsymbol{d})$ is a polyhedral complex.
+\end{proposition}
+
+\begin{proof}
+To prove that $\mathcal{P}(\boldsymbol{A},\boldsymbol{d})$ satisfies the first condition of Definition \ref{def:polcomplex},
+consider any $P\in \mathcal{P}^r(\boldsymbol{A},\boldsymbol{d})$,
+and let $F$ be an $r'$-face of $P$, where $0\leq r'<r\leq n$.
+Then there exists a valid cover
+$\left(M^<,M^>\right)$ for which $P$ is the solution set of (\ref{eq:leq})--(\ref{eq:geq}).
+Because $F$ is an $r'$-face of $P$, there also exist $r-r'$ linearly independent inequalities in
+(\ref{eq:leq})--(\ref{eq:geq}),
+that are satisfied with equality for all $\boldsymbol{x}\in F$,
+and satisfied with strict inequality for all $\boldsymbol{x}\in P\setminus F\neq\emptyset$.
+Let $L^<\subseteq M^<$ and $L^>\subseteq M^>$ ($\left|L^<\right|+\left|L^>\right|=r-r'$), be the indices of the inequalities meeting these criteria.
+Since $F$ is the polytope corresponding to the valid cover $\left(M^<\cup L^>,M^>\cup L^<\right)$,
+it follows that $F\in \mathcal{P}^{r'}(\boldsymbol{A},\boldsymbol{d})\subset\mathcal{P}(\boldsymbol{A},\boldsymbol{d})$.
+
+To prove the second condition, consider any $P_0,P_1\in\mathcal{P}(\boldsymbol{A},\boldsymbol{d})$
+with corresponding maximal covers
+$\left(M_0^<,M_0^>\right)$ and
+$\left(M_1^<,M_1^>\right)$, respectively.
+Thus, $P_0\cap P_1$ consists of all $\boldsymbol{x}\in \mathbb{R}^n$ satisfying
+$\sum_{j=1}^na_{ij}x_j\leq d_i$ $\left(i\in M_0^<\cup M_1^<\right)$ and $\sum_{j=1}^na_{ij}x_j\geq d_i$ $\left(i\in M_0^>\cup M_1^>\right)$.
+Let $M^==\left(M_0^<\cap M_1^>\right)\cup\left(M_1^<\cap M_0^>\right)$ and
+$H=\left\{\boldsymbol{x}\in \mathbb{R}^n:\sum_{j=1}^na_{ij}x_j=d_i, i\in M^=\right\}$.
+For $k=0,1$, it follows that 
+\[
+  P_k\cap H=\left\{\boldsymbol{x}\in\mathbb{R}^n: \sum_{j=1}^na_{ij}x_j\leq d_i \left(i\in \widehat{M}_k^<\right),\sum_{j=1}^na_{ij}x_j\geq d_i \left(i\in \widehat{M}_k^>\right)\right\},
+\]
+\noindent
+where
+\[ \widehat{M}_k^<=M_k^<\cup M^==M_k^<\cup\left(M_k^<\cap M_{1-k}^>\right)\cup\left(M_{1-k}^<\cap M_k^>\right)= M_k^<\cup M_{1-k}^<.\]
+% $= M_k^<\cup\left(M_{1-k}^<\cap M_k^>\right)
+% = M_k^<\cup\left(M_k^<\cap M_{1-k}^<\right)\cup\left(M_{1-k}^<\cap M_k^>\right)
+
+The last equality is obtained by exploiting $M_k^<\cup M_k^>=M$,
+which is true since $\left(M_k^<,M_k^>\right)$ is a valid cover.
+Analogously, $\widehat{M}_k^>=M_k^>\cup M_{1-k}^>$,
+and hence, $P_k\cap H = P_0\cap P_1$.
+% for $k=1,2$,
+% $P_k=\left\{x\in \mathbb{R}^n: \forall\left(i\in M_k^<\right)\sum_{j=1}^na_{ij}x_j\leq d_i, \forall\left(i\in M_k^>\right)\sum_{j=1}^na_{ij}x_j\geq d_i\right\}$, and
+% $P_0\cap P_1 = H\cap
+% \left\{x\in \mathbb{R}^n: \forall\left(i\in M_0^<\cup M_1^<\right)\sum_{j=1}^na_{ij}x_j\leq d_i, \forall\left(i\in M_0^>\cup M_1^>\right)\sum_{j=1}^na_{ij}x_j\geq d_i\right\}$.
+Because % all $\boldsymbol{x}\in P_k$ ($k=1,2$) satisfy
+% $\sum_{j=1}^na_{ij}x_j\leq b_i$ for all $i\in M^=\cap M_k^<$ and
+% $\sum_{j=1}^na_{ij}x_j\geq b_i$ for all $i\in M^=\cap M_k^>$,
+$P_k$ is entirely contained in one of the two closed half-spaces bounded by $H$,
+it follows that $P_0\cap P_1$ is a face of $P_k$. % which completes the proof.
+\qed
+\end{proof}
+
+\begin{proposition} \label{prop:cover}
+For all $r=0,1,\ldots,n$, $\displaystyle{\left|\mathcal{V}^r(\boldsymbol{A},\boldsymbol{d})\right|\leq {\left|\mathcal{V}^0(\boldsymbol{A},\boldsymbol{d})\right|\choose r+1}}$.
+\end{proposition}
+\begin{proof}
+Let $p_r=\left|\mathcal{V}^r(\boldsymbol{A},\boldsymbol{d})\right|$, and $\mathcal{V}^r(\boldsymbol{A},\boldsymbol{d})=\left\{V_1,\ldots,V_{p_r}\right\}$.
+For all $k=1,\ldots,p_r$, $P\left(V_k\right)$ has a simplicial decomposition \cite{edmonds70}, i.e. there exist $t_k\geq 1$ subsets
+$U_{k1},\ldots,U_{kt_k}\subseteq V_k$ with $\left|U_{k1}\right|=\cdots=\left|U_{kt_k}\right|=r+1$ such that  
+$P\left(V_k\right)$ is 
+covered by the set of $r$-simplices $P\left(U_{k1}\right),\ldots,P\left(U_{kt_k}\right)$.
+By Proposition \ref{prop:polcomplex}, $U_{k1}\ldots,U_{kt_k}$ consist of vertices from $\mathcal{V}^0(\boldsymbol{A},\boldsymbol{d})$.
+
+Consider two polytopes $P\left(V_k\right),P\left(V_{\ell}\right)\in \mathcal{P}^r(\boldsymbol{A},\boldsymbol{d})$, where $V_k\neq V_{\ell}$.
+% and their simplicial decompositions $U_{k1},\ldots,U_{kt_k}$ and $U_{\ell1},\ldots,U_{\ell t_{\ell}}$, respectively.
+Assume there exist some $j[k]\in \{1,\ldots,t_k\}$ and $j[\ell]\in \{1,\ldots,t_{\ell}\}$ such that \\ $U_{k,j[k]}=U_{\ell,j[\ell]}=:U$.
+Because Proposition \ref{prop:polcomplex} implies that $P\left(V_k\right)\cap P\left(V_{\ell}\right)$ is a face of both
+$P\left(V_k\right)$ and $P\left(V_{\ell}\right)$, we have
+\[r=\dim{P(U)}\leq\dim{\left(P\left(V_k\right)\cap P\left(V_{\ell}\right)\right)}\leq\dim{P\left(V_k\right)}=\dim{P\left(V_{\ell}\right)}=r.\]
+Hence, $P\left(V_k\right)\cap P\left(V_{\ell}\right)$ equals $P\left(V_k\right)$ and $P\left(V_{\ell}\right)$, contradicting $V_k\neq V_{\ell}$.
+It follows that $U_{11},\ldots,U_{p_r1}$ are distinct sets consisting of $r+1$ points in $\mathcal{V}^0(\boldsymbol{A},\boldsymbol{d})$.
+% It follows that for the vertex sets $V_1,\ldots,V_{p_r}$ in $\mathcal{V}^r(\boldsymbol{A},\boldsymbol{d})$,
+% there exist distinct subsets $U_{1,j[1]},\ldots,U_{p_r,j[p_r]}$, each consisting of $r+1$ elements from $\mathcal{V}^0(\boldsymbol{A},\boldsymbol{d})$.
+As there exist exactly $\displaystyle{\left|\mathcal{V}^0(\boldsymbol{A},\boldsymbol{d})\right|\choose r+1}$ such sets, the proof is complete.
+\qed
+\end{proof}
+
+\subsection{Enumerating all Elements in the Polyhedral Complex} \label{sec:alg}
+
+Enumeration of all faces of a polyhedron is an interesting problem that has received considerable attention \cite{murty95,fukuda97} in computational geometry studies.
+In this section, an algorithm for the following more general problem is analyzed:
+\begin{problem} \label{prob:part}
+\textsc{Enumeration of a Polyhedral Complex}: \\ Given $\boldsymbol{A}\in\mathbb{Q}^{m\times n}$ and $\boldsymbol{d}\in\mathbb{Q}^m$,
+generate a list of all vertex sets of polytopes in the polyhedral complex $\mathcal{P}(\boldsymbol{A},\boldsymbol{d})$.
+\qed
+\end{problem}
+
+Below, it is formally proved that Algorithm \ref{alg:fpol} produces
+a list of all polytopes in the polyhedral complex $\mathcal{P}(\boldsymbol{A},\boldsymbol{d})$.
+Each such polytope, $P\in \mathcal{P}(\boldsymbol{A},\boldsymbol{d})$, is represented by its vertex set $V(P)$.
+First, the list $\mathcal{V}^0(\boldsymbol{A},\boldsymbol{d})$ consisting of singletons is generated by selecting sets
+$L\subseteq M$ indexing $n$ linearly independent rows of $\bar{\boldsymbol{A}}$.
+Denote the indexed rows of $\left(\bar{\boldsymbol{A}},\bar{\boldsymbol{d}}\right)$ by $\left(\bar{\boldsymbol{A}}_L,\bar{\boldsymbol{d}}_L\right)$.
+Solutions to the corresponding linear systems that are contained on the unit simplex are stored in $\mathcal{V}^0(\boldsymbol{A},\boldsymbol{d})$, whereas others are discarded.
+
+Next, for increasing values of $r$, all vertex sets in $\mathcal{V}^{r+1}(\boldsymbol{A},\boldsymbol{d})$ are found by extending vertex sets of $\mathcal{V}^r(\boldsymbol{A},\boldsymbol{d})$.
+% This is done by considering all sets $V$ constructed as follows.
+For each $U\in\mathcal{V}^r(\boldsymbol{A},\boldsymbol{d})$ and $W\in\mathcal{V}^0(\boldsymbol{A},\boldsymbol{d})$,
+let $V$ consist of the vertices in $\mathcal{V}^0(\boldsymbol{A},\boldsymbol{d})$ that satisfy all inequalities in (\ref{eq:leq})--(\ref{eq:geq}) satisfied by 
+$U\cup W$.
+Thus, $V\supseteq U\cup W$.
+% If any of the hyperplanes $\sum_{j=1}^na_{ij}x_j=d_i$ ($i\in M$) separates $V^r$ from $V^0$, then $V$ contains vertices of different $(r+1)$-polytopes in the polyhedral complex,
+% and is not considered further.
+If the inequalities satisfied by $V$ constitute a valid cover,
+and $\dim{P(V)}=r+1$,
+$V$ is added to $\mathcal{V}^r(\boldsymbol{A},\boldsymbol{d})$.
+% we search the current list $\mathcal{V}^{r+1}(\boldsymbol{A},\boldsymbol{d})$ for a set $W$ of
+% vertices that neither can be separated from $V$.
+% If one such set is found, it is extended by the vertices in $V$, reflecting the fact that the extended set consists of vertices of an $(r+1)$-polytope in the polyhedral complex.
+% Otherwise, $V$ is added to the list as a new item.
+
+\begin{algorithm} \caption{\texttt{findPolyhedralComplex}($\boldsymbol{A}$, $\boldsymbol{d}$)} \label{alg:fpol}
+\begin{algorithmic} 
+  \STATE $\mathcal{V}^0\leftarrow\emptyset$
+  \FOR{all sets $L\subset M$ indexing $n$ linearly independent rows of $\bar{\boldsymbol{A}}$}
+    \STATE $\boldsymbol{x}\leftarrow \bar{\boldsymbol{A}}_{L}^{-1}\bar{\boldsymbol{d}}_{L}$, $V\leftarrow\{\boldsymbol{x}\}$
+    \IF{$\boldsymbol{x}\in \Delta^n$ \AND $V\not\in\mathcal{V}^0$}
+      \STATE $\mathcal{V}^0\leftarrow\mathcal{V}^0\cup\{V\}$,
+      \STATE $M_V^<\leftarrow \left\{i\in M: \sum_{j=1}^na_{ij}x_j\leq d_i\right\}$,
+             $M_V^>\leftarrow \left\{i\in M: \sum_{j=1}^na_{ij}x_j\geq d_i\right\}$
+    \ENDIF
+  \ENDFOR
+  \COMMENT{Now $\mathcal{V}^0$ contains all singular point sets}
+  \FOR{$r\leftarrow 0,\ldots,n-1$}
+    \STATE $\mathcal{V}^{r+1}\leftarrow\emptyset$  \COMMENT{No $(r+1)$-polytope found yet}
+    \FOR{all $U\in\mathcal{V}^r$ and $W\in\mathcal{V}^0$ where $W\not\subseteq U$}
+      \STATE $M^<\leftarrow M_{U}^<\cap M_{W}^<$, $M^>\leftarrow M_{U}^>\cap M_{W}^>$
+      \IF[Valid cover, no $\left(\bar{\boldsymbol{A}},\bar{\boldsymbol{d}}\right)$-hyperplane separates $W$ from $U$]{$M^<\cup M^>=M$}
+        \STATE $V\leftarrow\left\{\boldsymbol{x}\in\mathcal{V}^0:
+               \sum_{j=1}^na_{ij}x_j\leq b_i (i\in M^<), \sum_{j=1}^na_{ij}x_j\geq b_i (i\in M^>)\right\}$
+        \IF[consider $V$ only if $V\in\mathcal{V}^{r+1}\left(\boldsymbol{A},\boldsymbol{d}\right)$]{$\dim{P(V)}=r+1$}
+            \STATE $\mathcal{V}^{r+1} \leftarrow \mathcal{V}^{r+1}\cup\{V\}$, $M_V^<\leftarrow M^<$, $M_V^>\leftarrow M^>$ \COMMENT{an $(r+1)$-polytope is found}
+%           \STATE \COMMENT{include the vertex set of an $(r+1)$-polytope in the polyhedral complex}
+        \ENDIF
+      \ENDIF
+    \ENDFOR
+  \ENDFOR
+  \RETURN{$\left(\mathcal{V}^0,\ldots,\mathcal{V}^n\right)$}
+\end{algorithmic} 
+\end{algorithm} 
+
+For an illustration of Algorithm \ref{alg:fpol}, assume that $\boldsymbol{A}$ and $\boldsymbol{d}$ correspond to the example depicted in Fig.\ \ref{fig:part}.
+Consider the iterations of the second and third loops of the algorithm, in which $r$ is assigned the value 0,
+while $U$ and $W$ are assigned values $\{(1/3,1/6)\}$ and $\{(1/2,1/2)\}$, respectively.
+There is no hyperplane separating the two points, and a valid cover is identified.
+Only points on the line segment $[(1/3,1/6),(1/2,1/2)]$ satisfy all inequalities satisfied by $U\cup W$, and thus 
+$V$ becomes $\{(1/3,1/6), (1/2,1/2)\}$.
+Since also $\dim{P(V)}=1$, $V$ is added to $\mathcal{V}^1$.
+When $U=\{(5/6,1/6)\}$ and $W=\{(1/2,1/2)\}$, however, the hyperplane intersecting (0,0) and (2/3,1/3) separates $U$ and $W$.
+As no valid cover is found, the condition of the first \texttt{if}-statement inside the last loop does not hold.
+When $U=\{(1/3,1/6)\}$ and $W=\{(1/3,2/3)\}$, the condition holds, and the value $\{(0,0),(1/3,1/6),(1/2,1/2),(1/3,2/3)\}$ is assigned to $V$.
+However, $\dim{P(V)}=2$, and $V$ is not added to $\mathcal{V}^1$.
+In the next iteration of the loop on $r$, $U$ will in some iteration of the innermost loop be assigned the value $\{(1/3,1/6), (1/2,1/2)\}$ while $W=\{(1/3,2/3)\}$.
+Then, $V$ again becomes $\{(0,0),(1/3,1/6),(1/2,1/2),(1/3,2/3)\}$, which finally is added to $\mathcal{V}^2$.
+
+% and the condition of the \texttt{if}-statement with label 1 holds.
+% The same is true for the \texttt{if}-statement with label 2, because 
+% Assuming that there exists no $W\in\mathcal{V}^2$ satisfying the condition of the last \texttt{if}-statement,
+% $V$ is added to $\mathcal{V}^2$.
+% In a later iteration of the third loop,
+% $V^1$ and $W$ are assigned values $[(0,0),(1/3,1/6)]$ and $(1,3,1/3)$, respectively.
+% Now, $V$ becomes $[(0,0), (1/3,1/6), (1/3,2/3)]$, and $\left(M_V^<,M_V^>\right)$ is again a valid cover.
+% However, the triangle $[(1/3,1/6), (1/2,1/2), (1/3,2/3)]$ added to $\mathcal{V}^2$ in the iteration discussed first,
+% now satisfies the condition of the last \texttt{if}-statement.
+% Consequently, $W=[(1/3,1/6), (1/2,1/2), (1/3,2/3)]$, and the quadrangle $V\cup W=[(0,0), (1/3,1/6), (1/2,1/2), (1/3,2/3)]$ replaces $W$ in $\mathcal{V}^2$.
+
+% Consider the iterations of the second and third loops of the algorithm, in which $r$ is assigned the value 1,
+% while $V^1$ and $V^0$ are assigned values $[(1/3,1/6),(1/2,1/2)]$ and $(1,3,1/3)$, respectively.
+% Subsequently, $V$ becomes the triangle $[(1/3,1/6), (1/2,1/2), (1/3,2/3)]$, $\left(M_V^<,M_V^>\right)$ is a valid cover,
+% and the condition of the \texttt{if}-statement with label 1 holds.
+% The same is true for the \texttt{if}-statement with label 2, because 
+% Assuming that there exists no $W\in\mathcal{V}^2$ satisfying the condition of the last \texttt{if}-statement,
+% $V$ is added to $\mathcal{V}^2$.
+% In a later iteration of the third loop,
+% $V^1$ and $V^0$ are assigned values $[(0,0),(1/3,1/6)]$ and $(1,3,1/3)$, respectively.
+% Now, $V$ becomes $[(0,0), (1/3,1/6), (1/3,2/3)]$, and $\left(M_V^<,M_V^>\right)$ is again a valid cover.
+% However, the triangle $[(1/3,1/6), (1/2,1/2), (1/3,2/3)]$ added to $\mathcal{V}^2$ in the iteration discussed first,
+% now satisfies the condition of the last \texttt{if}-statement.
+% Consequently, $W=[(1/3,1/6), (1/2,1/2), (1/3,2/3)]$, and the quadrangle $V\cup W=[(0,0), (1/3,1/6), (1/2,1/2), (1/3,2/3)]$ replaces $W$ in $\mathcal{V}^2$.
+
+The following result shows that Algorithm \ref{alg:fpol} generates the desired lists of vertex sets of polytopes in the polyhedral complex.
+
+\begin{lemma} \label{lem:alg}
+  Let $r\in\{0,1,\ldots,n\}$.
+  After $r$ iterations of the second \texttt{for}-loop of Algorithm \ref{alg:fpol},
+  $\mathcal{V}^\ell=\mathcal{V}^\ell(\boldsymbol{A},\boldsymbol{d})$ for all $\ell\in\{0,1,\ldots,r\}$.
+  For all $V\in \mathcal{V}^\ell$, $\left(M_V^<,M_V^>\right)$ is the maximal valid cover corresponding to $P(V)$.
+\end{lemma}
+\begin{proof}
+The proof is by induction in $r$.
+
+Vertex set $\mathcal{V}^0(\boldsymbol{A},\boldsymbol{d})$ consists of all singleton sets $\{\boldsymbol{x}\}$ such that $\boldsymbol{x}\in\Delta^n$ is the unique point satisfying $n$
+of the equations in the system $\bar{\boldsymbol{A}}\boldsymbol{x}=\bar{\boldsymbol{d}}$.
+This means that the first loop generates $\mathcal{V}^0(\boldsymbol{A},\boldsymbol{d})$, and the claims hold for $r=0$.
+
+To prove the induction step, choose $r\in\{0,1,\ldots,n-1\}$, and assume the claims hold for $r$.
+The induction hypothesis says that 
+$\left(M_{U}^<,M_{U}^>\right)$ and $\left(M_{W}^<,M_{W}^>\right)$ are the maximal valid covers corresponding to
+$P\left(U\right)\in\mathcal{P}^r\left(\boldsymbol{A},\boldsymbol{d}\right)$ and
+$P\left(W\right)\in\mathcal{P}^0\left(\boldsymbol{A},\boldsymbol{d}\right)$, respectively.
+If $\left(M^<,M^>\right)=\left(M_{U}^<\cap M_{W}^<, M_{U}^>\cap M_{W}^>\right)$ is valid,
+it is the maximal valid cover corresponding to a polytope $P\in\mathcal{P}\left(\boldsymbol{A},\boldsymbol{d}\right)$ containing $U\cup W$.
+Because the value assigned to $V$ is the set of vertices in $\mathcal{V}^0\left(\boldsymbol{A},\boldsymbol{d}\right)$ satisfying (\ref{eq:leq})--(\ref{eq:geq}),
+it follows that $V$ is the vertex set of $P$.
+If $\dim{P}=r+1$, $V$ is added to $\mathcal{V}^{r+1}$, and the corresponding maximal valid cover is assigned to $\left(M_V^<,M_V^>\right)$.
+Consequently, every iteration of the innermost \texttt{for}-loop leaves $\mathcal{V}^{r+1}$ unchanged, or extends it by the vertex set of an $(r+1)$-polytope.
+
+To complete the proof, we must show that every vertex set
+$V\in\mathcal{V}^{r+1}\left(\boldsymbol{A},\boldsymbol{d}\right)$ is added to $\mathcal{V}^{r+1}$.
+By the selection of $U$ and $W$, it follows from Proposition \ref{prop:polcomplex}
+% that $\left(P\left(V^r\right),W\right)$ enumerates all pairs $(F,\{\boldsymbol{v}\})$ consisting of a facet $F$ and a vertex $\boldsymbol{v}\not\in F$ of $P$.
+that in some iteration, $U$ is the vertex set of a facet of $P(V)$, while $W\not\subseteq U$ is a vertex of $P(V)$.
+Because $P(V)$ is the unique $(r+1)$-polytope in $\mathcal{P}^{r+1}\left(\boldsymbol{A},\boldsymbol{d}\right)$ containing $U$ and $W$,
+it follows that $V$ will be included in $\mathcal{V}^{r+1}$.
+\qed
+\end{proof}
+
+
+\begin{proposition} \label{prop:ptop}
+  Algorithm \ref{alg:fpol} solves Problem \ref{prob:part}, and its running time is polynomial in $m$.
+\end{proposition}
+\begin{proof}
+Correctness of the output  of Algorithm \ref{alg:fpol} follows directly from Lemma \ref{lem:alg}.
+The first \texttt{for}-loop amounts to solving ${m+n+1\choose n}$ systems of $n$ linear equations, and checking $2(m+1)$ linear inequalities.
+Consequently, the loop runs in time bounded by a polynomial in $m$.
+
+By Lemma \ref{lem:alg}, the number of sets $V$ considered in iteration $r$ of the second \texttt{for}-loop is no more than
+$\left|\mathcal{V}^0(\boldsymbol{A},\boldsymbol{d})\right|\cdot\left|\mathcal{V}^r(\boldsymbol{A},\boldsymbol{d})\right|$.
+Because $\left|\mathcal{V}^0(\boldsymbol{A},\boldsymbol{d})\right|\leq{m+n+1\choose n}$ and
+$\displaystyle{\left|\mathcal{V}^r(\boldsymbol{A},\boldsymbol{d})\right|\leq {\left|\mathcal{V}^0(\boldsymbol{A},\boldsymbol{d})\right|\choose r+1}}$
+according to Proposition \ref{prop:cover}, the number of executions of the third \texttt{for}-loop is polynomial in $m$.
+% Further, $\left|\mathcal{V}^{r+1}\right|$ never exceeds $\left|\mathcal{V}^{r+1}(\boldsymbol{A},\boldsymbol{d})\right|$ (Lemma \ref{lem:alg}),
+% implying that the search for $W\in\mathcal{V}^{r+1}$ also runs in polynomial time.
+Finally, the dimensionality check of $P(V)$ is accomplished by searching $V$
+for $r+2$ affinely independent vertices.
+Thus, the number of arithmetic operations inside the loops is polynomial in $m$, which completes the proof.
+\qed
+\end{proof}
+
+
+\subsection{A Polynomial Algorithm for the Pooling Problem with a Single Pool and Fixed Source Cardinality} \label{sec:p1pol}
+
+By virtue of Algorithm \ref{alg:fpol} and Proposition \ref{prop:ptop}, it is provable that problem (\ref{eq:qobj})--(\ref{eq:tdom}) is solvable in polynomial time for bounded $|S|$.
+Let $\boldsymbol{A}$ and $\boldsymbol{d}$ have one row for each $(t,k)\in T\times K$, and one column for each $s\in S_0$.
+The entry in $\boldsymbol{d}$ corresponding to $(t,k)$ is set to $u_t^k$, and $a_{ij}$ is put equal to $q_s^k$,
+where $i$ and $j$ are  the row and column corresponding to $(t,k)$ and $s$, respectively.
+When receiving $\boldsymbol{Q}$ and $\boldsymbol{U}$ as input, Algorithm \ref{alg:fter}
+outputs the set $\mathcal{T}(\mathcal{D},\boldsymbol{b})$ of sink sets that a feasible flow in $\mathcal{F}(\mathcal{D},\boldsymbol{b})$ possibly can satisfy.
+% In all instances, we have $\mathcal{T}^+(\boldsymbol{0}^{|\mathcal{A}|})=T\in\mathcal{T}(\mathcal{D},\boldsymbol{b})$.
+% However, the set $\mathcal{T}$ produced by Algorithm \ref{alg:fter} does not contain $T$ unless there exists some
+% $\boldsymbol{f}\neq\boldsymbol{0}^{|\mathcal{A}|}$ for which $\mathcal{T}^+(\boldsymbol{f})=T$.
+
+\begin{algorithm} \caption{\texttt{findTerminals}($\boldsymbol{Q}$, $\boldsymbol{U}$)} \label{alg:fter}
+\begin{algorithmic} 
+  \STATE Define the matrix $\boldsymbol{A}\in\mathbb{Q}^{(|T\times K|)\times|S_0|}$ and the vector $\boldsymbol{d}\in\mathbb{Q}^{|T\times K|}$
+         such that they correspond to inequalities (\ref{eq:t}). Let $n\leftarrow |S_0|$.
+  \STATE Find $\mathcal{V}^0,\ldots,\mathcal{V}^n$ by calling \texttt{findPolytopes}($\boldsymbol{A}$, $\boldsymbol{d}$)
+  \STATE $\mathcal{T}\leftarrow\{T\}$ \COMMENT{all sinks are satisfied by $\boldsymbol{0}^{\left|\mathcal{A}\right|}$}
+  \FOR[loop through all polytope dimensions $r$]{$r\leftarrow 0,\ldots,n$}
+    \FOR[loop through all $r$-polytopes]{all $V\in\mathcal{V}^r$}
+      \STATE $\displaystyle{\boldsymbol{x}\leftarrow\frac{1}{|V|}\sum_{\boldsymbol{y}\in V}\boldsymbol{y}}$ ~~\COMMENT{let $\boldsymbol{x}$ be any relative interior point of $P(V)$}
+      \STATE $T^+\leftarrow T$ \COMMENT{assume $\boldsymbol{x}$ satisfies all concentration bounds of all sinks}
+      \FOR[check component $k$]{all $k\in K$}
+        \STATE $\displaystyle{T^+\leftarrow \left\{t\in T^+: \sum_{s\in S_0}q_s^kx_s \leq u_t^k\right\}}$ \COMMENT{keep only sinks that $\boldsymbol{x}$ satisfies}
+      \ENDFOR
+      \STATE $\mathcal{T}\leftarrow\mathcal{T}\cup\{T^+\}$ ~~\COMMENT{include the feasible sink set}
+    \ENDFOR
+  \ENDFOR
+  \RETURN{$\mathcal{T}$}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{theorem} \label{prop:p1smax}
+  For any $s_{\max}\geq 1$, the instance class of the \textsc{Pooling Problem} with $|I|=1$ and $|S|\leq s_{\max}$ is solvable in polynomial time.
+\end{theorem}
+\begin{proof}
+According to Proposition \ref{prop:z}, the optimal cost in all instances in question is $\min\left\{z\left(T^+\right):T^+\in\mathcal{T}\right\}$,
+where $\mathcal{T}$ is the output from Algorithm \ref{alg:fter}.
+Because $z\left(T^+\right)$ is the solution to the compact LP (\ref{eq:qobj})--(\ref{eq:t-}),
+the claim then follows directly from Proposition \ref{prop:ptop} with $n=|S|-1<s_{\max}$.
+\qed
+\end{proof}
+
+\begin{corollary} \label{cor:ext}
+The extension of Problem \ref{prob:pp} where a positive lower bound is imposed on the flow entering each sink in $T'\subseteq T$,
+is solvable in polynomial time for instances where $|I|=1$ and $|S|\leq s_{\max}$.
+\end{corollary}
+
+\begin{proof}
+Follows immediately by modifying Algorithm \ref{alg:fter} such that all sink sets $T^+\in\mathcal{T}(\mathcal{D},\boldsymbol{b})$ that do not contain $T'$ are discarded.
+\qed
+\end{proof}
+
+It is also straightforward to adapt the proofs discussed in Sections \ref{sec:fewt}--\ref{sec:fewk} to the extension considered in Corollary \ref{cor:ext}.
+In conclusion, the extended problem is solvable in polynomial time for the single-pool instance classes where either $|T|$, $|K|$ or $|S|$ is bounded by a constant.
+
+Recall from Section \ref{sec:problem} that $\mathcal{D}$ is defined to have arcs only from $S$ to $I$ and from $I$ to $T$.
+Given this restriction, instances that accept direct flow from a source $s$ to a sink $t$ contain a pool $i$ where $S_i=\{s\}$ and $T_i=\{t\}$.
+Alternatively, $\mathcal{D}$ could be defined such that the direct arc from $s$ to $t$ is allowed, making the pool $i$ redundant.
+Most studies \cite{haverly78,sahinidis05,dey15,alfaki13a} follow this convention.
+It is however important to note that the results in Sections \ref{sec:onepool}--\ref{sec:i1sbnd}
+are not proved to hold if $|I|=1$ in this alternative definition of $\mathcal{D}$.
+That is, it is an open question whether the \textsc{Pooling Problem} is solvable in polynomial time when either $|T|$, $|K|$ or $|S|$ is fixed,
+and only one pool has more than one entering arc and more than one leaving arc.
+
+\begin{remark}
+After submission of the current text, Boland et al.\ \cite{boland15} submitted a manuscript with an alternative proof of Proposition \ref{prop:p1smax}.
+Their analysis has points in common with the analysis in Section \ref{sec:simp},
+as it also considers partitions of the unit simplex induced by a set of linear inequalities.
+Moreover, \cite{boland15} proves that in instances where $|I|=1$, the \textsc{Pooling Problem} is solvable in terms of at most
+$\sum_{j=0}^{|S|-1}{|K|\choose j}|T|^j$ compact linear programs. \qed
+\end{remark}
+
+%-------------------------------------------------
+\section{The Pooling Problem with a Single Quality Parameter} \label{sec:k1}
+
+In the remainder of the text, we study a rich instance class where $|I|$ is arbitrary, $|K|=1$, and $|S|=|T|=2$.
+By a reduction from \textsc{Exact Cover By 3-sets}, it is proved \cite{haugland15a} that the \textsc{Pooling Problem} remains strongly NP-hard when $|K|=1$.
+When also $|S|=|T|=2$, at least weak NP-hardness persists.
+However, the reduction \cite{haugland15a} from \textsc{Packing In Two Bins} for the $|S|=|T|=2$ case, does not prove strong NP-hardness.
+\textsc{Packing In Two Bins} asks whether a set of items of given integer weights fit into two bins with identical integer capacities.
+There exists a dynamic programming algorithm, which runs in polynomial time for instance classes where item weights and
+bin capacities are bounded by some polynomial function of the input size.
+In this section, we show how the dynamic programming algorithm for \textsc{Packing In Two Bins} can be adapted to
+the instance class of the \textsc{Pooling Problem} under study.
+
+\subsection{A Dynamic Programming Algorithm} \label{sec:dp}
+Each recursive step of the dynamic programming algorithm for \textsc{Packing In Two Bins}
+amounts to selecting the bin into which a given item should be put.
+The corresponding operation in the algorithm given below, is to select in which out of five possible subsets a given pool belongs.
+Each of four of the subsets corresponds to a particular source or sink,
+and all pools allocated to the set receive (send) zero flow from (to) the source (sink) in question.
+Pools allocated to the fifth set receive (send) positive flow from (to) both sources (sinks).
+
+It is shown below that the collection of pools in one of the former four sets can be replaced by a new pool with capacity equal to the total capacity in the set.
+Further, it is shown that under the assumptions made, it is optimal to have at most one pool in the latter set.
+Hence, the dynamic programming algorithm reduces the network to an instance with only five pools.
+Instances of this small, fixed size are shown to have closed-form solutions, and they are thereby solvable in constant time.
+Since a running time analysis of the dynamic programming algorithm proves that the reduction runs in pseudo-polynomial time,
+we thus have an algorithm with pseudo-polynomial running time for $|K|=1$ and $|S|=|T|=2$.
+
+Because $|K|=1$, indices corresponding to components are omitted in all notation used.
+Also for the purpose of simplified notation, we associate the nodes $\mathcal{N}$ with integers,
+and for reasons to become clear later, we let $S=\{0,1\}$ and $T=\{7,8\}$.
+Without loss of generality \cite[Proposition 2]{haugland15a}, we assume $q_0=0$, $q_1=1$, and $u_7\leq u_8$.
+Further, we focus on instances with pool independent costs, i.e. all arcs leaving (entering) the same source (sink) have identical costs.
+We denote by $c_s$ and $c_t$ the unit costs of arcs
+$(s,i)\in \mathcal{A}_S$ and $(i,t)\in \mathcal{A}_T$, respectively.
+For any feasible flow, we define the \emph{flow degree} of a node as the number of incident arcs carrying positive flow.
+
+\begin{proposition} \label{prop:k1}
+\textsc{Pooling Problem} instances with $|K|=1$, $|S|=|T|=2$, and pool independent costs have optimal solutions where at most one pool has flow degree 4.
+\end{proposition}
+
+\begin{proof}
+Let $\boldsymbol{f}$ be an optimal flow, and assume $f_{si},f_{sj},f_{it},f_{jt}>0$ for all $s\in S$ and $t\in T$, where $i,j\in I$ and $i\neq j$.
+Consider the cycles $C_1=(1,j,0,i,1)$ and $C_2=(j,8,i,7,j)$ consisting of forward and backward arcs in $\mathcal{D}$.
+Flow augmentations $\varepsilon$ and $\delta$ along cycles $C_1$ and $C_2$, respectively,
+yield a flow denoted $\boldsymbol{g}$, where $\boldsymbol{g}=\boldsymbol{f}$ if $\varepsilon=\delta=0$
+(the dependency of $\varepsilon$ and $\delta$ in $\boldsymbol{g}$ is suppressed for the purpose of simplified notation).
+Let $\Omega$ be the set of pairs $(\varepsilon,\delta)$ for which $\boldsymbol{g}\geq \boldsymbol{0}^{|\mathcal{A}|}$.
+That is, $\Omega$ consists of all $(\varepsilon,\delta)$ satisfying
+\begin{eqnarray*}
+  & -\min\left\{f_{0i},f_{1j}\right\}\leq\varepsilon\leq\min\left\{f_{0j},f_{1i}\right\}, & \mbox{and} \\
+  & -\min\left\{f_{i7},f_{j8}\right\}\leq\delta\leq\min\left\{f_{j7},f_{i8}\right\}.
+\end{eqnarray*}
+Because the augmentations do not affect the capacity consumption at the nodes, $\boldsymbol{g}\in\mathcal{F}(\mathcal{D},\boldsymbol{b})$ if $(\varepsilon,\delta)\in\Omega$.
+Since the costs are pool independent, also the objective function values at $\boldsymbol{f}$ and $\boldsymbol{g}$ are identical.
+It follows that $\boldsymbol{g}$ is optimal if it satisfies the concentration bounds.
+
+Let $\boldsymbol{w}\in\mathbb{R}^{|\mathcal{N}|}$ and $\boldsymbol{v}\in\mathbb{R}^{|\mathcal{N}|}$
+be the concentration vectors corresponding to $\boldsymbol{f}$ and $\boldsymbol{g}$, respectively.
+We prove the proposition by showing that there exists an augmentation $(\varepsilon,\delta)\in\Omega$ such that $\boldsymbol{g}$
+is zero on one arc of $C_1$ or $C_2$, and such that $v_{7}=w_7$ and $v_{8}=w_8$.
+
+Let $F_{\ell}=f_{\ell 7}+f_{\ell 8}=g_{\ell 7}+g_{\ell 8}$ be the total flow through pool $\ell \in I$.
+From $q_0=0$ and $q_1=1$, it follows that $w_i=f_{1i}/F_i$ and $w_j=f_{1j}/F_j$. We also have
+\[
+  \mbox{$\displaystyle{v_i = \frac{w_iF_i-\varepsilon}{F_i}=\frac{f_{1i}-\varepsilon}{F_i}}$, and
+  $\displaystyle{v_j = \frac{w_jF_j+\varepsilon}{F_j}=\frac{f_{1j}+\varepsilon}{F_j}}$, yielding}
+\]
+\[
+  \displaystyle{v_7 = \frac{w_7F_7-w_if_{i7}-w_jf_{j7}+v_ig_{i7}+v_jg_{j7}}{F_7} =}
+\]
+\[
+      \displaystyle{w_7 +\frac{-f_{1i}f_{i7}/F_i - f_{1j}f_{j7}/F_j + (f_{1i}-\varepsilon)(f_{i7}+\delta)/F_i + (f_{1j}+\varepsilon)(f_{j7}-\delta)/F_j}{F_7}}.
+\]
+
+\noindent
+It follows that $v_7=w_7$ if
+\begin{equation}
+  \varepsilon\delta\left(F_i+F_j\right) + \varepsilon\left(F_jf_{i7}-F_if_{j7}\right) + \delta\left(F_if_{1j}-F_jf_{1i}\right) = 0. \label{eq:propk1}
+\end{equation}
+
+The set of pairs $(\varepsilon,\delta)$ satisfying (\ref{eq:propk1}) is the union of two continuous curves $H_1$ and $H_2$.
+If $F_jf_{i7}-F_if_{j7}\neq 0\neq F_if_{1j}-F_jf_{1i}$, then $H_1\cup H_2$ is a hyperbola.
+Otherwise, $H_1\cup H_2$ consists of two straight lines, one of which is a coordinate axis (where either $\varepsilon=0$ or $\delta=0$).
+Because neither $H_1\setminus\Omega$ nor $H_2\setminus\Omega$ is empty, and $(0,0)\in \left(H_1\cup H_2\right)\cap\Omega$,
+continuity implies that $H_1\cup H_2$ intersects the boundary of $\Omega$.
+It follows that there exists some $(\varepsilon,\delta)$ such that $\boldsymbol{g}$ is zero on one of the arcs of $C_1$ or $C_2$,
+and such that $v_7=w_7$.
+Because
+$\sum_{\ell\in I_s}f_{s\ell}=\sum_{\ell\in I_s}g_{s\ell}$ ($s\in S$) and
+$\sum_{\ell\in I_t}f_{\ell t}=\sum_{\ell\in I_t}g_{\ell t}$ ($t\in T$), (\ref{eq:totqual}) implies that also
+$v_8=w_8$,
+which completes the proof. \qed
+\end{proof}
+
+% \begin{centering}
+\begin{figure}[ht]
+\begin{center}
+% \vspace{-3em}
+\vspace{2em}
+\includegraphics[scale=0.4]{base.pdf}
+% \vspace{-18em}
+\end{center}
+\caption{Atomic instance}
+\vspace{-2em}
+\label{fig:atom}
+\end{figure}
+% \vspace{-2em}
+% \end{centering}
+
+Motivated by Proposition \ref{prop:k1}, we search for the optimal partition of the pools $I$ into 5 subsets denoted $J_2,\ldots,J_6$.
+The subset $J_2$ ($J_6$)  consists of pools that do not receive flow from source 1 (source 0),
+and $J_3$ ($J_5$) consists of pools the do not send flow to sink 8 (sink 7).
+Subset $J_4$ is either empty, or consists of the unique pool of flow degree 4.
+Ties are broken arbitrarily.
+Associated with the partition $(J_2,\ldots,J_6)$, we define another \textsc{Pooling Problem} instance with directed graph
+$\bar{\mathcal{D}}=\left(\bar{\mathcal{N}}, \bar{\mathcal{A}}\right)$
+(see Fig.\ \ref{fig:atom}), henceforth referred to as an \emph{atomic} instance.
+The node set $\bar{\mathcal{N}}=\bar{S}\cup\bar{I}\cup\bar{T}$ consists of the sources $\bar{S}=S=\{0,1\}$,
+pools $\bar{I}=\{2,\ldots,6\}$, and sinks $\bar{T}=T=\{7,8\}$.
+
+Each pool $\ell\in\bar{I}$ corresponds to one of the sets $J_2,\ldots,J_6$.
+The arc set
+$\bar{\mathcal{A}}$ is hence defined such that the neighbors of sources 0 and 1 and sinks 7 and 8 are
+$\bar{I}_0=\bar{I}\setminus\{6\}$,
+$\bar{I}_1=\bar{I}\setminus\{2\}$,
+$\bar{I}_7=\bar{I}\setminus\{5\}$, and
+$\bar{I}_8=\bar{I}\setminus\{3\}$, respectively.
+Costs $\boldsymbol{c}$, source concentrations $\boldsymbol{q}$, and sink concentration bounds $\boldsymbol{u}$ are identical to those of the original instance.
+The same is true for source and sink capacities, whereas the capacity of pool $\ell\in\bar{I}$
+is the cumulative capacity $B_{\ell}=\sum_{i\in J_{\ell}}b_i$ of pools in $J_{\ell}$.
+Denote the node capacity vector by $\boldsymbol{B}$, where $B_s=b_s$ and $B_t=b_t$ ($s\in \bar{S}$, $t\in \bar{T}$).
+For the case of notational brevity, the dependency of $(J_2,\ldots,J_6)$ in $\boldsymbol{B}$ is suppressed.
+
+Let $\zeta\left(\mathcal{D},\boldsymbol{b}\right)$ denote the minimum cost in the given instance.
+Relevance of the atomic instances is justified as follows:
+
+\begin{proposition} \label{prop:atom}
+\textsc{Pooling Problem} instances with $|K|=1$, $|S|=|T|=2$ and pool independent costs,
+have $\zeta\left(\mathcal{D},\boldsymbol{b}\right)=\min\zeta\left(\bar{\mathcal{D}},\boldsymbol{B}\right)$,
+where the minimum is defined over all partitions $(J_2,\ldots,J_6)$ of $I$ such that $|J_4|\leq 1$.
+\end{proposition}
+
+\begin{proof}
+To prove $\zeta\left(\mathcal{D},\boldsymbol{b}\right)\geq\min\zeta\left(\bar{\mathcal{D}},\boldsymbol{B}\right)$,
+let $\boldsymbol{f}$ be an optimal flow in $\mathcal{D}$ with corresponding partition $(J_2,\ldots,J_6)$ of $I$.
+Without loss of generality (Proposition \ref{prop:k1}), assume $|J_4|\leq 1$.
+Let $g_{s\ell}=\sum_{i\in J_{\ell}}f_{si}$ ($s\in \bar{S},\ell\in\bar{I}_s$) and \\
+$g_{\ell t}=\sum_{i\in J_{\ell}}f_{it}$ ($t\in \bar{T},\ell\in\bar{I}_t$).
+Because $B_{\ell}=\sum_{i\in J_{\ell}}b_i$ and $\boldsymbol{f}\in\mathcal{F}\left(\mathcal{D},\boldsymbol{b}\right)$,
+it follows immediately that $g\in\mathcal{F}\left(\bar{\mathcal{D}},\boldsymbol{B}\right)$ and
+\[\sum_{s\in\bar{S}}c_s\sum_{\ell\in\bar{I}_s}g_{s\ell}+\sum_{t\in\bar{T}}c_t\sum_{\ell\in\bar{I}_t}g_{\ell t}
+=\sum_{(s,i)\in\mathcal{A}_S}c_sf_{si}+\sum_{(i,t)\in\mathcal{A}_T}c_tf_{it}.\]
+
+It only remains to prove that $\boldsymbol{g}$ satisfies the concentration constraints.
+Let $\boldsymbol{w}$ and $\boldsymbol{v}$ be concentration vectors corresponding to $\boldsymbol{f}$ and $\boldsymbol{g}$, respectively.
+Thus, $v_2=w_i=0$ ($i\in J_2$) and $v_6=w_i=1$ ($i\in J_6$).
+Pool concentration $v_{\ell}$ is a convex combination of $\left\{w_i\right\}_{i\in J_{\ell}}$ ($\ell=3,5$), given by
+$v_3=\sum_{i\in J_3}w_i\frac{f_{i7}}{g_{37}}$ and
+$v_5=\sum_{i\in J_5}w_i\frac{f_{i8}}{g_{58}}$.
+With respect to the concentration $v_4$, if $|J_4|=1$, we have $g_{s4}=f_{si'}$ for $i'\in J_4$ and $s\in \bar{S}$, yielding $v_4=w_{i'}$.
+Otherwise, $v_4$ is arbitrary.
+Then $\displaystyle{\sum_{\ell\in\bar{I}_7}v_{\ell}g_{\ell 7}}$ equals
+\[
+  \displaystyle{v_3g_{37}+v_4g_{47}+v_6g_{67}
+  = \sum_{i\in J_3}w_i\frac{f_{i7}}{g_{37}}g_{37} + w_{i'}f_{i'7} + \sum_{i\in J_6}w_if_{i7} = \sum_{i\in I_7}w_if_{i7}}.
+\]
+
+\noindent
+It follows that
+\[
+  \displaystyle{v_7 = \frac{\sum_{\ell\in\bar{I}_7}v_{\ell}g_{\ell 7}}{\sum_{\ell\in\bar{I}_7}g_{\ell 7}} = \frac{\sum_{i\in I_7}w_if_{i7}}{\sum_{i\in I_7}f_{i7}}=w_7\leq u_7},
+\]
+\noindent
+since $\boldsymbol{f}$ is feasible.
+Fulfillment of $v_8\leq u_8$ is proved analogously.
+
+To prove $\zeta\left(\mathcal{D},\boldsymbol{b}\right)\leq\min\zeta\left(\bar{\mathcal{D}},\boldsymbol{B}\right)$,
+let $\boldsymbol{g}$ be an optimal flow in $\bar{\mathcal{D}}$.
+For \\ $(s,\ell)\in\{(0,2),(1,6)\}$, let $f_{si}=g_{s\ell}\cdot b_i/B_{\ell}$ and $f_{it}=f_{si}\cdot g_{\ell t}/g_{s\ell}$ ($i\in J_{\ell}$, $t\in T$).
+For $(\ell,t)\in\{(3,7),(5,8)\}$, let $f_{it}=g_{\ell t}\cdot b_i/B_{\ell}$ and $f_{si}=f_{it}\cdot g_{s\ell}/g_{\ell t}$ ($i\in J_{\ell}$, $s\in S$).
+If $|J_4|=1$, let $f_{si'}=g_{s4}$ and $f_{i't}=g_{4t}$, ($s\in S$, $t\in T$, $i'\in J_4$).
+Utilizing $B_{\ell}=\sum_{i\in J_{\ell}}b_i$ and feasibility of $\boldsymbol{g}$, the proof of feasibility of $\boldsymbol{f}$ is analogous to the first part of the proof.
+Because the objective function values of $\boldsymbol{f}$ and $\boldsymbol{g}$ in their respective problems are equal, the proof is complete.
+\qed
+\end{proof}
+
+Observe that $|J_4|\leq 1$ is an essential condition in Proposition \ref{prop:atom}.
+If rather $|J_4|>1$, letting $g_{s4}=\sum_{i\in J_4}f_{si}$ and $g_{4t}=\sum_{i\in J_4}f_{it}$ ($s\in S$, $t\in T$) does not necessarily yield $v_t=w_t$.
+Aggregating pools in $J_{\ell}$ into one common pool is valid only if either their in-degree or out-degree is one.
+This is closely related to the fact that the \textsc{Pooling Problem} is an LP in case $\min\left\{|S_i|,|T_i|\right\}=1$ for all pools $i\in I$ \cite[Proposition 3]{haugland15a}.
+
+We now go on to derive a dynamic programming algorithm for reducing the original instance to an atomic instance corresponding to an optimal partition $(J_2,\ldots,J_6)$.
+For simplified exposition, we assume henceforth that all pool capacities $b_i$ are integers.
+Denote the original pools by $i_1,\ldots,i_m$, where $m=|I|$.
+At stage $n=1,\ldots,m,m+1$ of the dynamic program, each of the pools $i_{1},\ldots,i_{n-1}$ has been assigned to some set $J_{\ell}$,
+whereas pools $i_{n},\ldots,i_m$ are left to be assigned.
+The state variable is the capacity vector $\boldsymbol{B}$, where $B_{\ell}$ is the total capacity currently assigned to $J_{\ell}$.
+
+The cost function $z_n(\boldsymbol{B})$ represents the minimum obtainable cost given state $\boldsymbol{B}$ at stage $n$.
+% That is, $z_n(D)$ can be attained if $i_{1},\ldots,i_{n-1}$ are assigned to one of $I_2,\ldots,I_6$
+% such that pools of total capacity $B_{\ell}$ are assigned to $I_{\ell}$ (${\ell}=2,\ldots,6$).
+At stage $m+1$, all pools are allocated, and $z_{m+1}(\boldsymbol{B})$ is the minimum cost of an atomic instance with pool capacities $\boldsymbol{B}$.
+The assignment of $i_{n}$ made at stage $n\leq m$, is represented by a unit vector in the feasible set
+\[
+  E(\boldsymbol{B})=\left\{\boldsymbol{e}=(e_2,\ldots,e_6)\in\{0,1\}^5, \sum_{{\ell}=2}^6e_{\ell}=1, \mbox{$e_4=0$ if $B_4>0$}\right\}.
+\]
+Optimizing the assignment yields the backward recursion formula
+$$
+  z_n(\boldsymbol{B})=\min_{\boldsymbol{e}\in E(\boldsymbol{B})} z_{n+1}(\boldsymbol{B}+b_n\boldsymbol{e}),
+$$
+\noindent
+where $n=1,\ldots,m$, and $z_1(0)$ equals the optimal objective function value $\zeta(\mathcal{D},\boldsymbol{b})$.
+Correspondingly, the dynamic programming procedure depicted in Algorithm \ref{alg:dp} applies.
+
+\begin{algorithm} \caption{\texttt{DP}($S$,$I$,$T$,$\mathcal{A}$,$\boldsymbol{c}$,$\boldsymbol{b}$,$\boldsymbol{q}$,$\boldsymbol{u}$)} \label{alg:dp}
+\begin{algorithmic} 
+  \FOR{$\forall \boldsymbol{B}\in\mathbb{N}^5:\sum_{{\ell}=2}^6B_{\ell}=\sum_{i\in I}b_i$}
+    \STATE $z_{m+1}(\boldsymbol{B})\leftarrow$ minimum cost in the atomic instance with pool capacities $\boldsymbol{B}$
+  \ENDFOR
+  \FOR{$n\leftarrow m,\ldots,1$}
+    \FOR{$\forall \boldsymbol{B}\in\mathbb{N}^5:\sum_{{\ell}=2}^6B_{\ell}=\sum_{j=1}^{n-1}b_{i_j}$}
+      \STATE $z_n(\boldsymbol{B})=\min\left\{z_{n+1}(\boldsymbol{B}+b_n\boldsymbol{e}):\boldsymbol{e}\in E(\boldsymbol{B})\right\}$
+     \ENDFOR
+  \ENDFOR
+  \RETURN{$z_1(0)$}
+\end{algorithmic} 
+\end{algorithm}
+
+\subsection{Running Time Analysis} \label{sec:dptime}
+In the first loop of Algorithm \ref{alg:dp}, $N={4+\sum_{i\in I}b_i\choose 4}$ atomic instances are solved.
+The remainder of the algorithm runs in $\mathcal{O}(N|I|)$ time.
+Despite its fixed size, it is not obvious that an atomic instance is solvable by a constant number of arithmetic operations.
+Making a reasonable assumption about the arc costs is however a sufficient condition:
+
+\begin{assumption}[Quality consistent costs] The arc costs $\boldsymbol{c}$ satisfy: \label{as:cost}
+\begin{enumerate}
+  \item $c_0>c_1$, \label{as:s}
+  \item $c_8>c_7$, \label{as:t}
+  \item $c_0+c_8>0$, and \label{as:st}
+  \item $(1-u_t)c_0+u_tc_1+c_t<0$, $t=7,8$. \label{as:eq}
+\qed
+\end{enumerate}
+\end{assumption}
+
+\noindent
+Assumption \ref{as:cost} is likely to hold in many practical instances.
+The first two points state, respectively, that the source supplying the better concentration is also the more expensive,
+and that the sales prices are higher at the sink with the stricter concentration requirement.
+Further, Assumption \ref{as:cost}.\ref{as:st} states that it is not profitable to produce the poorer end product
+(at sink 8) uniquely by use of the more expensive supply (source 0).
+Finally, the last point states that at both sinks, a blend satisfying the concentration constraints by equality is profitable.
+
+For atomic instances fulfilling Assumption \ref{as:cost}, a solution algorithm with proven convergence in
+a constant number of operations on rational numbers has recently been given \cite{haugland15c}.
+Assumptions \ref{as:cost}.\ref{as:s}--\ref{as:cost}.\ref{as:st} are made merely in order to focus the study,
+and to limit the number of cases to be investigated.
+If Assumption \ref{as:cost}.\ref{as:eq} does not hold, at least one of the sinks can be removed, and the resulting \textsc{Pooling Problem} instance becomes a linear program.
+Quality consistent instances do not appear to be easier than others, and we therefore conjecture that the result in \cite{haugland15c} also applies to
+instances that do not fulfill Assumption \ref{as:cost}.
+The proof of \cite[Theorem 3]{haugland15a} shows that the \textsc{Pooling Problem} with $|K|=1$ and $|S|=|T|=2$ is NP-hard even when the costs are
+pool independent and concentration consistent.
+
+Let $\nu\left(\mathcal{D},\boldsymbol{b},\boldsymbol{c},\boldsymbol{q},\boldsymbol{u}\right)$ denote the size of a problem instance.
+It follows from the running time analysis that for any polynomial $p:\mathbb{Z}\mapsto\mathbb{Z}$,
+there exists a solution algorithm with polynomial running time for the class of \textsc{Pooling Problem} instances
+where $|K|=1$, $|S|=|T|=2$, costs are pool independent and concentration consistent, and $\sum_{i\in I}b_i\leq p\left(\nu\left(\mathcal{D},\boldsymbol{b},\boldsymbol{c},\boldsymbol{q},\boldsymbol{u}\right)\right)$.
+We have thereby proved:
+\begin{theorem} \label{prop:pseudo}
+The \textsc{Pooling Problem} with $|K|=1$, $|S|=|T|=2$, and pool independent costs satisfying Assumption \ref{as:cost} is solvable in pseudo-polynomial time.
+\end{theorem}
+
+
+%---------------------------------------------------
+\section{Conclusions}\label{sec:concl}
+This work presents polynomial running time algorithms for two instance classes of the \textsc{Pooling Problem}.
+In instances where the flow network contains only one pool, and an upper bound on the source cardinality applies,
+the problem can be solved in polynomial time by solving an associated partitioning problem:
+Hyperplanes corresponding to concentration constraints intersect the unit simplex in the space of the source proportion variables.
+A list of the polytopes into which the simplex is partitioned, yields a list of linear programs that can be solved in order to solve the original problem.
+Polynomial running time of this algorithm is formally proved by proving that the length of the list is polynomial in the number of constraints.
+
+Instances with only one component and two sources and sinks are solved by a dynamic programming algorithm.
+This algorithm is based upon a reduction of general instances to instances of fixed size.
+When conditions that are likely to apply in practice are assumed,
+it is proved that the instances of constant size are solvable by a constant number of arithmetic operations.
+From this it is directly concluded that the dynamic programming algorithm has pseudo-polynomial running time.
+
+The contribution offered by the two algorithms under study is mainly of a theoretical character.
+Questions on the computational complexity of the \textsc{Pooling Problem} that in earlier studies were left open, are now answered.
+In their present form, the algorithms appear to be computationally demanding, despite their favorable theoretical properties.
+How, and to what extent, the algorithmic ideas presented in this work can be made suitable for solving practical instances,
+is left as a challenge for future research.
+
+Applications of the algorithms can possibly be found in the design of heuristic methods for more general instance classes than those considered in the present text.
+Algorithms tailored for the one-pool case can be applied in order to construct feasible flows in networks with multiple pools.
+This follows from the obvious fact that any feasible flow using only one pool is feasible even if other pools are present in the network.
+Further, any convex combination of feasible flows using distinct pools is also feasible.
+Taking advantage of these observations, construction heuristics for multi-pool instances can be designed.
+
+Heuristics for improving a given feasible solution can also be designed by utilizing algorithmic elements presented in this paper.
+The idea of flow augmenting paths \cite{haugland15c} and cycles can be generalized to instances with more than one component.
+Improvement heuristics for general instances can thus be based upon
+identification of subnetworks in which the flow can be augmented, such that costs are reduced and feasibility is preserved.
+Exploiting these ideas in order to find computationally efficient solution methods is left as a challenge for future research.
+
+\subsection*{Acknowledgment}
+\small{The work of the second author has been funded by grants from the Spanish state (TIN2012-37483-C03-01 and TIN2015-66680), Junta de Andaluc\'{\i}a (P11-TIC-7176),
+in part financed by the European Regional Development Fund (ERDF).}
+
+
+%\bibliographystyle{abbrvnat}
+%\bibliography{duopbib}
+\begin{thebibliography}{99}
+\bibitem{stigler45}
+Stigler, G.J.:
+\newblock The cost of subsistence.
+\newblock J. Farm Econ.
+\newblock \textbf{27}(2), 303--314 (1945)
+
+\bibitem{dantzig90}
+Dantzig, G.B.:
+\newblock The diet problem.
+\newblock Interfaces
+\newblock \textbf{20}(4), 43--47 (1990)
+
+\bibitem{haverly78}
+Haverly, C.A.:
+\newblock Studies of the behavior of recursion for the pooling problem.
+\newblock ACM SIGMAP Bulletin,
+\newblock \textbf{25}, 19--28 (1978)
+
+\bibitem{baker85}
+Baker, T.E., Lasdon, L.S.:
+\newblock Successive linear programming at Exxon.
+\newblock Manage.\ Sci.
+\newblock \textbf{31}(3), 264--274 (1985)
+
+\bibitem{dewitt89}
+DeWitt, C.W., Lasdon, L.S., Waren, A.D., Brenner, D.A., Melham, S.:
+\newblock OMEGA: An improved gasoline blending system for Texaco.
+\newblock Interfaces
+\newblock \textbf{19}(1), 85--101 (1989)
+
+\bibitem{floudas90b}
+Floudas, C.A., Visweswaran, V.:
+\newblock A global optimization algorithm (GOP) for certain classes of nonconvex NLPs: I. Theory.
+\newblock Comput.\ Chem.\ Eng.
+\newblock \textbf{14}(12), 1397--1417 (1990)
+
+\bibitem{audet04}
+Audet, C., Brimberg, J., Hansen, P., Le Digabel, S., Mladenovi\'{c}, N.:
+\newblock Pooling problem: alternate formulations and solution methods.
+\newblock Manage.\ Sci.
+\newblock \textbf{50}(6), 761--776 (2004)
+
+\bibitem{foulds92}
+Foulds, L.R., Haugland, D., J\"{o}rnsten, K.:
+\newblock A bilinear approach to the pooling problem.
+\newblock Optimization,
+\newblock \textbf{24}, 165--180 (1992)
+
+\bibitem{misener11}
+Misener, R., Thompson, J.P, Floudas, C.A.:
+\newblock APOGEE: Global optimization of standard, generalized, and extended pooling
+problems via linear and logarithmic partitioning schemes.
+\newblock Comput.\ Chem.\ Eng.
+\newblock \textbf{35}, 876--892 (2011)
+
+\bibitem{sahinidis05}
+Sahinidis, N.V., Tawarmalani, M.:
+\newblock Accelerating branch-and-bound through a modeling language construct for relaxation-specific constraints.
+\newblock J.\ Global Optim.
+\newblock \textbf{32}(2), 259--280 (2005)
+
+\bibitem{visweswaran96b}
+Visweswaran, V., Floudas, C.A.:
+\newblock Computational results for an efficient implementation of the GOP algorithm and its variants.
+\newblock In: Grossmann, I.E.\ (ed.): Global Optimization in Chemical Engineering, pp.\ 111--153.
+\newblock Kluwer Academic Publishers, Dordrecht, The Netherlands (1996)
+
+\bibitem{adhya99}
+Adhya, N., Tawarmalani, M., Sahinidis, N.V.:
+\newblock A Lagrangian approach to the pooling problem.
+\newblock Ind.\ Eng.\ Chem.\ Res.
+\newblock \textbf{38}(5), 1965--1972 (1999)
+
+\bibitem{almutairi09}
+Almutairi, H., Elhedhli, S.:
+\newblock A new Lagrangian approach to the pooling problem.
+\newblock J.\ Global Optim.
+\newblock \textbf{45}(2), 237--257 (2009)
+
+\bibitem{bental94}
+Ben-Tal, A., Eiger, G., Gershovitz, V.:
+\newblock Global minimization by reducing the duality gap.
+\newblock Math.\ Program.
+\newblock \textbf{63}(2), 193--212 (1994)
+
+\bibitem{dey15}
+Dey, S.S., Gupte, A.:
+\newblock Analysis of MILP techniques for the pooling problem.
+\newblock Oper.\ Res., \textbf{62}(2), 412--427 (2015)
+
+\bibitem{kallrath05}
+Kallrath, J.:
+\newblock Solving planning and design problems in the process industry using mixed integer and global optimization.
+\newblock Ann.\ Oper.\ Res.
+\newblock \textbf{140}(1), 339--373 (2005)
+
+\bibitem{galan98}
+Galan, B., Grossmann, I.E.:
+\newblock Optimal design of distributed wastewater treatment networks.
+\newblock Ind.\ Eng.\ Chem.\ Res.
+\newblock \textbf{37}(10), 4036--4048 (1998)
+
+\bibitem{misener10b}
+Misener, R., Floudas, C.A.:
+\newblock Global optimization of large-scale generalized pooling problems: Quadratically constrained MINLP models.
+\newblock Ind.\ Eng.\ Chem.\ Res.
+\newblock \textbf{49}, 5424--5438 (2010)
+
+\bibitem{misener09b}
+Misener, R., Floudas, C.A.:
+\newblock Advances for the pooling problem: modeling, global optimization, and computational studies.
+\newblock Appl.\ Comput.\ Math.
+\newblock \textbf{8}, 3--22 (2009)
+
+\bibitem{alfaki13a}
+Alfaki, M., Haugland, D.:
+\newblock Strong formulations for the pooling problem.
+\newblock J.\ Global Optim.
+\newblock \textbf{56}(3), 897--916 (2013)
+
+\bibitem{haugland15a}
+Haugland, D.:
+\newblock The computational complexity of the pooling problem.
+\newblock To appear in J.\ Global Optim.
+\newblock DOI 10.1007/s10898-015-0335-y (2015)
+
+\bibitem{aleksandrov56}
+Aleksandrov, P.S.:
+\newblock Combinatorial Topology, Vol.\ 1.
+\newblock Graylock Press, Rochester, New York (1956)
+
+\bibitem{deloera10}
+De Loera, J.A., Rambau, J., Santos, F.:
+\newblock Triangulations - Structures for Algorithms and Applications.
+\newblock Springer Verlag, Berlin, Germany (2010)
+
+\bibitem{edmonds70}
+Edmonds, A.L.:
+\newblock Simplicial decompositions of convex polytopes.
+\newblock Pi Mu Epsilon Journal,
+\newblock \textbf{5}(3), 124--128 (1970)
+
+\bibitem{murty95}
+Murty, K.G., Chung, S.-J.:
+\newblock Segments in enumerating faces.
+\newblock Math.\ Program.
+\newblock \textbf{70}(1), 27--45 (1995)
+
+\bibitem{fukuda97}
+Fukuda, K., Liebling, T.M., Margot, F.:
+\newblock Analysis of backtrack algorithms for listing all vertices and all faces of a convex polyhedron.
+\newblock Comp. Geom. Theor. Appl.
+\newblock \textbf{8}, 1--12 (1997)
+
+\bibitem{boland15}
+Boland, N., Kalinowski, T., Rigterink, F.:
+\newblock A polynomially solvable case of the pooling problem.
+\newblock arXiv:1508.03181v2 [math.OC] (2015)
+
+\bibitem{haugland15c}
+Haugland, D., Hendrix, E.M.T.:
+\newblock On a pooling problem with fixed network size.
+\newblock In: Corman, F., Vo\ss, S., Negenborn,R.R.\ (eds.):
+\newblock Computational Logistics, 6th International Conference, ICCL 2015, Proceedings,
+\newblock Lect. Notes Comput. Sc. \textbf{9335}, 328--342 (2015)
+\end{thebibliography}
+
+\newpage
+\section*{Appendix: Table of Notation}
+\begin{description}
+\item $\mathbb{R}^n$ = the $n$-dimensional space of real vectors
+\item $\mathbb{Q}^n$ = the $n$-dimensional space of rational vectors
+\item $\mathcal{D}=\left(\mathcal{N},\mathcal{A}\right)$ = directed graph with node set $\mathcal{N}$ and arc set $\mathcal{A}$
+\item $S$ = set of source nodes
+\item $I$ = set of pool nodes
+\item $T$ = set of sink nodes
+\item $K$ = set of components
+\item $S_i$ = set of neighbor sources of pool $i$
+\item $T_i$ = set of neighbor sinks of pool $i$
+\item $I_j$ = set of neighbor pools of node $j$
+\item $\mathcal{A}_S$ = set of source incident arcs
+\item $\mathcal{A}_T$ = set of sink incident arcs
+\item $\boldsymbol{Q}=\left(q_s^k\right)_{s\in S, k\in K}$ = matrix of source concentrations
+\item $\boldsymbol{U}=\left(u_t^k\right)_{t\in T, k\in K}$ = matrix of sink concentration bounds
+\item $\boldsymbol{b}$ = vector of node capacities
+\item $\boldsymbol{c}$ = vector of arc costs
+\item $s_0$ = a source for which $q_{s_0}^k=0$ for all $k\in K$
+\item $S_0=S\setminus\{s_0\}$
+\item $\boldsymbol{f}$ = flow vector
+\item $\boldsymbol{W}=\left(w_j^k\right)_{j\in \mathcal{N}, k\in K}$ = matrix of flow concentrations
+\item $\mathcal{F}\left(\mathcal{D},\boldsymbol{b}\right)$ = set of all flow vectors satisfying conservation of flow and node capacities
+\item $\mathcal{T}^+:\mathcal{F}\left(\mathcal{D},\boldsymbol{b}\right)\Rightarrow 2^T$
+      maps flow vector $\boldsymbol{f}$ to the set of sinks with all concentration constraints satisfied by $\boldsymbol{f}$
+\item $\mathcal{T}\left(\mathcal{D},\boldsymbol{b}\right)$ = image of $\mathcal{T}^+$
+\item $x_s$ = proportion of the flow through a pool originating from source $s$
+\item $z\left(T^+\right)$ = minimum cost when only sinks in $T^+$ can receive positive flow
+\item $P$ = polytope in $\mathbb{R}^n$
+\item $V$ = finite set in $\mathbb{R}^n$
+\item $V(P)$ = vertex set of polytope $P$
+\item $P(V)$ = convex hull of $V$
+\item $\boldsymbol{A}=\left(a_{ij}\right)_{i\in M, j \in N}$ = rational matrix
+\item $\boldsymbol{d}=\left(d_i\right)_{i\in M}$ = rational vector
+\item $\left(\bar{\boldsymbol{A}},\bar{\boldsymbol{d}}\right) = \left(\boldsymbol{A},\boldsymbol{d}\right)$ extended by rows with coefficients of the inequalities defining the unit simplex
+\item $\left(M^<,M^>\right)$ = valid cover
+\item $\Delta^n$ = unit $n$-simplex
+\item $\mathcal{P}\left(\boldsymbol{A},\boldsymbol{d}\right)$ = polyhedral complex induced by $\left(\boldsymbol{A},\boldsymbol{d}\right)$
+\item $\mathcal{P}^r\left(\boldsymbol{A},\boldsymbol{d}\right)$ = set of $r$-dimensional polyhedra in $\mathcal{P}\left(\boldsymbol{A},\boldsymbol{d}\right)$
+\item $\mathcal{V}\left(\boldsymbol{A},\boldsymbol{d}\right)$ = vertex sets of polyhedra in $\mathcal{P}\left(\boldsymbol{A},\boldsymbol{d}\right)$
+\item $\mathcal{V}^r\left(\boldsymbol{A},\boldsymbol{d}\right)$ = vertex sets of polyhedra in $\mathcal{P}^r\left(\boldsymbol{A},\boldsymbol{d}\right)$
+\item $\bar{\mathcal{D}}=\left(\bar{\mathcal{N}},\bar{\mathcal{A}}\right)$ = directed graph in an atomic instance
+\item $\left(\bar{S},\bar{I},\bar{T}\right)$ = (sources, pools, sinks) in an atomic instance
+\item $\left(J_2,\ldots,J_6\right)$ = partition of $I$
+\item $\boldsymbol{B}=\left(B_2,\ldots,B_6\right)$ = total capacities of pools in $J_2,\ldots,J_6$
+\item $\zeta\left(\mathcal{D},\boldsymbol{b}\right)$ = minimum cost of flow in network $\mathcal{D}$ with node capacities $\boldsymbol{b}$ (dependency on other parameters suppressed)
+\item $\left(e_2,\ldots,e_6\right)$ = unit vector representing the choice of one of the pool sets $J_2,\ldots,J_6$
+\item $E\left(\boldsymbol{B}\right)$ = set of feasible values of $\left(e_2,\ldots,e_6\right)$ when $J_2,\ldots,J_6$ have capacities $B_2,\ldots,B_6$
+\item $z_n\left(\boldsymbol{B}\right)$ = minimum cost when $J_2,\ldots,J_6$ have capacities $B_2,\ldots,B_6$ and $n-1$ pools are assigned to a set in $\left(J_2,\ldots,J_6\right)$
+\item $\nu\left(\mathcal{D},\boldsymbol{b},\boldsymbol{c},\boldsymbol{q},\boldsymbol{u}\right)$ = size of a problem instance
+\item $p$ = polynomial function of the instance size 
+\end{description}
+\end{document}
+
