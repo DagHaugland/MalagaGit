@@ -263,14 +263,14 @@ it is next shown that MCCFP as introduced in Definition~\ref{prob:conf} is NP-ha
 MCCFP is NP-hard in instances where $D$ is bipartite, $I=\emptyset$, and $|T|=2$.
 \end{proposition}
 \begin{proof}
-Consider an instance $(b_1,\ldots,b_n,d)$ of the \textsc{Subset Sum Problem}, where $1\leq b_1\leq\cdots\leq b_n\leq d\in\mathbb{Z}_+$.
+Consider an instance $(b_1,\ldots,b_n,d)$ of the \textsc{Subset Sum Problem}, with positive integers $1\leq b_1\leq\cdots\leq b_n\leq d$.
 Let $D$ be the complete bipartite digraph with node sets $S=\{s_1,\ldots,s_n\}$ and $T=\{t_0,t_1\}$.
 Let the supply at $s_i$ be $b_i$ ($i=1,\ldots,n$), while the demand at $t_0$ and $t_1$ is, respectively, $\sum_{i=1}^nb_i-d$ and $d$.
 Both arcs leaving $s_i$ have capacity $b_i$ and arbitrary cost.
 Because total supply equals total demand, $\boldsymbol{f}\in F^{\geq}(D,\boldsymbol{h},\boldsymbol{b})$ only if $b_i$ flow units leave source $s_i$,
 $d$ units enter sink $t_1$, and $\sum_{i=1}^nb_i-d$ units enter sink $t_0$.
 Confluence implies that all the flow leaving $s_i$ enters exactly one of the sinks $t_0$ or $t_1$.
-Thus, the MCCFP instance $(D,\boldsymbol{b},boldsymbol{b},boldsymbol{c})$ is feasible if and only if there exists a set $S_1\subseteq\{1,\ldots,n\}$ such that $\sum_{i\in S_1}b_i=d$.
+Thus, the MCCFP instance $(D,\boldsymbol{b},\boldsymbol{b},\boldsymbol{c})$ is feasible if and only if there exists a set $S_1\subseteq\{1,\ldots,n\}$ such that $\sum_{i\in S_1}b_i=d$.
 \qed
 \end{proof}
 
@@ -283,7 +283,7 @@ Consider the instance of the \textsc{Subset Sum Problem} introduced in the proof
 Let $D$ be the complete bipartite digraph with node sets $S=\{s_0,s_1\}$ and $T=\{t_1,\ldots,t_n\}$.
 Let the demand at $t_i$ be $b_i$ ($i=1,\ldots,n$), while the supply at $s_0$ and $s_1$ is, respectively, $\sum_{i=1}^nb_i-d$ and $d$.
 Finally, $c_{st_i}$ is arbitrary and $h_{st_i}=b_i$ for $s\in\{s_0,s_1\}$.
-Following the arguments in the proof of Proposition~\ref{prop:conf}, $(D,\boldsymbol{b},boldsymbol{b},boldsymbol{c})$ is a feasible MCIFP instance
+Following the arguments in the proof of Proposition~\ref{prop:conf}, $(D,\boldsymbol{b},\boldsymbol{b},\boldsymbol{c})$ is a feasible MCIFP instance
 if and only if $\sum_{i\in S_1}b_i=d$ for some $S_1\subseteq\{1,\ldots,n\}$.
 \qed
 \end{proof}
@@ -315,7 +315,7 @@ It follows that $\boldsymbol{f}$ is confluent, as it is not influent at any $p_i
 Hence, all $2b_i$ units of flow leaving $p_i$ are sent to the same sink, $t_0$ or $t_1$.
 Since $t_1$ receives $2d$ units of flow, there is a set $I_1\subseteq \{1,\ldots,n\}$ such that $\sum_{i\in I_1}f_{p_it_1}=2\sum_{i\in I_1}{b_i}=2d$.
 
-Coversely, if $\sum_{i\in I_1}b_i=d$ for some $I_1\subseteq\{1,\ldots,n\}$, then the flow $\boldsymbol{f}$, where $f_{s_ip_i}=f_{s_i'p_i}=b_i$ ($i=1,\ldots,n\}$),
+Conversely, if $\sum_{i\in I_1}b_i=d$ for some $I_1\subseteq\{1,\ldots,n\}$, then the flow $\boldsymbol{f}$, where $f_{s_ip_i}=f_{s_i'p_i}=b_i$ ($i=1,\ldots,n\}$),
 $f_{p_it_0}=\left\{\begin{array}{lr}2b_i, & i\notin I_1 \\ 0, & i\in I_1,\end{array}\right.$ and
 $f_{p_it_1}=\left\{\begin{array}{lr}2b_i, & i\in I_1 \\ 0, & i\notin I_1,\end{array}\right.$ is feasible in the MCCIFP instance.
 \qed
@@ -354,173 +354,3 @@ in part financed by the European Regional Development Fund (ERDF).}
 \bibliography{ref.bib}
 
 \end{document}
-
-
-\begin{thebibliography}{99}
-\bibitem{stigler45}
-Stigler, G.J.:
-\newblock The cost of subsistence.
-\newblock J. Farm Econ.
-\newblock \textbf{27}(2), 303--314 (1945)
-
-\bibitem{dantzig90}
-Dantzig, G.B.:
-\newblock The diet problem.
-\newblock Interfaces
-\newblock \textbf{20}(4), 43--47 (1990)
-
-\bibitem{haverly78}
-Haverly, C.A.:
-\newblock Studies of the behavior of recursion for the pooling problem.
-\newblock ACM SIGMAP Bulletin,
-\newblock \textbf{25}, 19--28 (1978)
-
-\bibitem{baker85}
-Baker, T.E., Lasdon, L.S.:
-\newblock Successive linear programming at Exxon.
-\newblock Manage.\ Sci.
-\newblock \textbf{31}(3), 264--274 (1985)
-
-\bibitem{dewitt89}
-DeWitt, C.W., Lasdon, L.S., Waren, A.D., Brenner, D.A., Melham, S.:
-\newblock OMEGA: An improved gasoline blending system for Texaco.
-\newblock Interfaces
-\newblock \textbf{19}(1), 85--101 (1989)
-
-\bibitem{floudas90}
-Floudas, C.A., Visweswaran, V.:
-\newblock A global optimization algorithm (GOP) for certain classes of nonconvex NLPs: I. Theory.
-\newblock Comput.\ Chem.\ Eng.
-\newblock \textbf{14}(12), 1397--1417 (1990)
-
-\bibitem{audet04}
-Audet, C., Brimberg, J., Hansen, P., Le Digabel, S., Mladenovi\'{c}, N.:
-\newblock Pooling problem: alternate formulations and solution methods.
-\newblock Manage.\ Sci.
-\newblock \textbf{50}(6), 761--776 (2004)
-
-\bibitem{foulds92}
-Foulds, L.R., Haugland, D., J\"{o}rnsten, K.:
-\newblock A bilinear approach to the pooling problem.
-\newblock Optimization,
-\newblock \textbf{24}, 165--180 (1992)
-
-\bibitem{misener11}
-Misener, R., Thompson, J.P, Floudas, C.A.:
-\newblock APOGEE: Global optimization of standard, generalized, and extended pooling
-problems via linear and logarithmic partitioning schemes.
-\newblock Comput.\ Chem.\ Eng.
-\newblock \textbf{35}, 876--892 (2011)
-
-\bibitem{sahinidis05}
-Sahinidis, N.V., Tawarmalani, M.:
-\newblock Accelerating branch-and-bound through a modeling language construct for relaxation-specific constraints.
-\newblock J.\ Global Optim.
-\newblock \textbf{32}(2), 259--280 (2005)
-
-\bibitem{visweswaran96}
-Visweswaran, V., Floudas, C.A.:
-\newblock Computational results for an efficient implementation of the GOP algorithm and its variants.
-\newblock In: Grossmann, I.E.\ (ed.): Global Optimization in Chemical Engineering, pp.\ 111--153.
-\newblock Kluwer Academic Publishers, Dordrecht, The Netherlands (1996)
-
-\bibitem{adhya99}
-Adhya, N., Tawarmalani, M., Sahinidis, N.V.:
-\newblock A Lagrangian approach to the pooling problem.
-\newblock Ind.\ Eng.\ Chem.\ Res.
-\newblock \textbf{38}(5), 1965--1972 (1999)
-
-\bibitem{almutairi09}
-Almutairi, H., Elhedhli, S.:
-\newblock A new Lagrangian approach to the pooling problem.
-\newblock J.\ Global Optim.
-\newblock \textbf{45}(2), 237--257 (2009)
-
-\bibitem{bental94}
-Ben-Tal, A., Eiger, G., Gershovitz, V.:
-\newblock Global minimization by reducing the duality gap.
-\newblock Math.\ Program.
-\newblock \textbf{63}(2), 193--212 (1994)
-
-\bibitem{dey15}
-Dey, S.S., Gupte, A.:
-\newblock Analysis of MILP techniques for the pooling problem.
-\newblock Oper.\ Res., \textbf{62}(2), 412--427 (2015)
-
-\bibitem{kallrath05}
-Kallrath, J.:
-\newblock Solving planning and design problems in the process industry using mixed integer and global optimization.
-\newblock Ann.\ Oper.\ Res.
-\newblock \textbf{140}(1), 339--373 (2005)
-
-\bibitem{galan98}
-Galan, B., Grossmann, I.E.:
-\newblock Optimal design of distributed wastewater treatment networks.
-\newblock Ind.\ Eng.\ Chem.\ Res.
-\newblock \textbf{37}(10), 4036--4048 (1998)
-
-\bibitem{misener10}
-Misener, R., Floudas, C.A.:
-\newblock Global optimization of large-scale generalized pooling problems: Quadratically constrained MINLP models.
-\newblock Ind.\ Eng.\ Chem.\ Res.
-\newblock \textbf{49}, 5424--5438 (2010)
-
-\bibitem{misener09}
-Misener, R., Floudas, C.A.:
-\newblock Advances for the pooling problem: modeling, global optimization, and computational studies.
-\newblock Appl.\ Comput.\ Math.
-\newblock \textbf{8}, 3--22 (2009)
-
-\bibitem{alfaki13}
-Alfaki, M., Haugland, D.:
-\newblock Strong formulations for the pooling problem.
-\newblock J.\ Global Optim.
-\newblock \textbf{56}(3), 897--916 (2013)
-
-\bibitem{haugland16}
-Haugland, D.:
-\newblock The computational complexity of the pooling problem.
-\newblock To appear in J.\ Global Optim.
-\newblock DOI 10.1007/s10898-015-0335-y (2015)
-
-\bibitem{aleksandrov56}
-Aleksandrov, P.S.:
-\newblock Combinatorial Topology, Vol.\ 1.
-\newblock Graylock Press, Rochester, New York (1956)
-
-\bibitem{deloera10}
-De Loera, J.A., Rambau, J., Santos, F.:
-\newblock Triangulations - Structures for Algorithms and Applications.
-\newblock Springer Verlag, Berlin, Germany (2010)
-
-\bibitem{edmonds70}
-Edmonds, A.L.:
-\newblock Simplicial decompositions of convex polytopes.
-\newblock Pi Mu Epsilon Journal,
-\newblock \textbf{5}(3), 124--128 (1970)
-
-\bibitem{murty95}
-Murty, K.G., Chung, S.-J.:
-\newblock Segments in enumerating faces.
-\newblock Math.\ Program.
-\newblock \textbf{70}(1), 27--45 (1995)
-
-\bibitem{fukuda97}
-Fukuda, K., Liebling, T.M., Margot, F.:
-\newblock Analysis of backtrack algorithms for listing all vertices and all faces of a convex polyhedron.
-\newblock Comp. Geom. Theor. Appl.
-\newblock \textbf{8}, 1--12 (1997)
-
-\bibitem{boland15}
-Boland, N., Kalinowski, T., Rigterink, F.:
-\newblock A polynomially solvable case of the pooling problem.
-\newblock arXiv:1508.03181v2 [math.OC] (2015)
-
-\bibitem{haugland15}
-Haugland, D., Hendrix, E.M.T.:
-\newblock On a pooling problem with fixed network size.
-\newblock In: Corman, F., Vo\ss, S., Negenborn,R.R.\ (eds.):
-\newblock Computational Logistics, 6th International Conference, ICCL 2015, Proceedings,
-\newblock Lect. Notes Comput. Sc. \textbf{9335}, 328--342 (2015)
-\end{thebibliography}
-
