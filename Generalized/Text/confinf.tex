@@ -145,7 +145,7 @@ To be written.
 To be revised:
 
 Let $D=(N,A)$ be a directed acyclic graph,
-where the node set $N=S\cup I\cup T$ consists of the disjoint subsets $S$ of \emph{sources}, $I$ of \emph{pools}, and $T$ of \emph{sinks}.
+where the node set $N=S\cup P\cup T$ consists of the disjoint subsets $S$ of \emph{sources}, $P$ of \emph{pools}, and $T$ of \emph{sinks}.
 Let $K$ be a finite set, and refer to its elements as \emph{flow components} or simply \emph{components}.
 In the sequel, elements of vectors and matrices defined over the sets $N$ and $K$
 are identified by a subscript if they correspond to $N$, and by a superscript if they correspond to $K$.
@@ -162,20 +162,20 @@ For $s\in S$ and $t\in T$, let $\boldsymbol{q}_s=\left(q_s^k\right)_{k\in K}$ an
 That is, $q_s^k$ is the concentration of component $k$ of the flow entering $D$ at $s$,
 and $u_t^k$ is the upper bound on the concentration of the flow leaving $D$ at $t$.
 
-For each pool $i\in I$, the set of sources from which there exists a path to $i$ in $D$ is denoted $S_i$.
-Analogously, $T_i$ is the set of sinks to which there is a path from $i$ in $D$.
+For each pool $p\in P$, the set of sources from which there exists a path to $p$ in $D$ is denoted $S_p$.
+Analogously, $T_p$ is the set of sinks to which there is a path from $p$ in $D$.
 The sets of upstream and downstream neighbors of node $j\in N$ are denoted $N_j^-$ and $N_j^-$, respectively.
 Without loss of relevant generality, it is assumed that $N_s^-=N_t^+=\emptyset$ for every $s\in S$ and $t\in T$.
 The sets of pools adjacent to source $s$ and sink $t$ are denoted
-$I_s=\left\{i\in I: (s,i)\in A\right\}$ and $I_t=\left\{i\in I: (i,t)\in A\right\}$, respectively.
+$P_s=P\cap N_s^+$ and $P_t=P\cap N_t^-$, respectively.
 % The arc set $\mathcal{A}$ has a partition $\left(\mathcal{A}_S,\mathcal{A}_T\right)$,
-% where $\mathcal{A}_S=\mathcal{A}\cap\left(S\times I\right)$ and $\mathcal{A}_T=\mathcal{A}\cap\left(I\times T\right)$
+% where $\mathcal{A}_S=\mathcal{A}\cap\left(S\times P\right)$ and $\mathcal{A}_T=\mathcal{A}\cap\left(P\times T\right)$
 % denote the sets of source-incident and sink-incident arcs, respectively.
 
 A vector $\boldsymbol{f}\in\mathbb{R}_+^{A}$ is called a \emph{flow} in $D$ iff it satisfies the capacity and flow conservation constraints:
 \begin{eqnarray}
            & f_{ij}\leq h_{ij} & (i,j)\in A, \label{eq:cap} \\
-           & \sum_{j\in N_i^-}f_{ji}-\sum_{j\in N_i^+}f_{ij} = 0~~~~ & i\in I. \label{eq:flowcons}
+           & \sum_{j\in N_p^-}f_{jp}-\sum_{j\in N_p^+}f_{pj} = 0~~~~ & p\in P. \label{eq:flowcons}
 \end{eqnarray}
 
 \noindent
@@ -183,18 +183,15 @@ We refer to the set $F(D,\boldsymbol{h}) = \left\{\boldsymbol{f}\in\mathbb{R}_+^
 as the \emph{flow polytope} of $D$.
 For each $\boldsymbol{f}\in F(D,\boldsymbol{h})$,
 define $\boldsymbol{W}=\left(\boldsymbol{w}_j\right)_{j\in N}\in\mathbb{R}^{K\times N}$ to be a
-\emph{concentration matrix} of $\boldsymbol{f}$ iff $\boldsymbol{w}_s=\boldsymbol{q}_s$ ($s\in S$),
-\begin{eqnarray*}
-  \boldsymbol{w}_i\sum_{j\in N_i^-}f_{ji}=\sum_{j\in N_i^-}\boldsymbol{w}_jf_{ji},\ i\in I\cup T.
-\end{eqnarray*}
-That is, the concentration $\boldsymbol{w}_i=\left(w_i^k\right)_{k\in K}$ of component $k$ in the flow blended at a pool $i$,
-is a convex combination of the entering concentrations $\boldsymbol{w}_j$ ($j\in N_i^-$),
-with convexity weights $f_{ji}/\sum_{j'\in N_i^-}f_{j'i}$.
-These conditions on $\boldsymbol{w}$ are referred to as the \emph{linear blending} property, and together with \eqref{eq:flowcons}, they imply directly
+\emph{concentration matrix} of $\boldsymbol{f}$ iff $\boldsymbol{w}_s=\boldsymbol{q}_s$ ($s\in S$) and
 \begin{equation} \label{eq:totqual}
-  \sum_{s\in S}\boldsymbol{q}_s\sum_{j\in N_i^+}f_{sj} = \sum_{t\in T}\boldsymbol{w}_t\sum_{j\in N_t^-}f_{jt}.
+  \boldsymbol{w}_p\sum_{j\in N_p^-}f_{jp}=\sum_{j\in N_p^-}\boldsymbol{w}_jf_{jp},\ p\in P\cup T.
 \end{equation}
-At sinks $t\in T$ where $\sum_{i\in I_t}f_{it}>0$, the upper concentration bounds $u_t^k$ apply,
+That is, the concentration $\boldsymbol{w}_p=\left(w_p^k\right)_{k\in K}$ of component $k$ in the flow blended at a pool/sink $i$,
+is a convex combination of the entering concentrations $\boldsymbol{w}_j$ ($j\in N_i^-$),
+with convexity weights $f_{ji}/\sum_{j'\in N_i^-}f_{j'p}$.
+Condition \eqref{eq:totqual} on $\boldsymbol{w}$ is referred to as the \emph{linear blending} property.
+At sinks $t\in T$ where $\sum_{i\in N_t^-}f_{it}>0$, the upper concentration bounds $u_t^k$ apply,
 and linear blending yields $\boldsymbol{w}_t=\sum_{j\in N_t^-}\boldsymbol{w}_jf_{jt}/\sum_{j\in N_t^-}f_{jt}\leq \boldsymbol{u}_t$.
 Thus, $\boldsymbol{f}\in F\left(D,\boldsymbol{h}\right)$ is said to be a \emph{concentration-feasible} flow in
 $D$ iff $\sum_{j\in N_t^-}\boldsymbol{w}_jf_{jt}\leq \boldsymbol{u}_t\sum_{j\in N_t^-}f_{jt}$ ($t\in T$)
@@ -224,7 +221,7 @@ F^{\leq}(D,\boldsymbol{h},\boldsymbol{b}) = \left\{\boldsymbol{f}\in F(D,\boldsy
 be the flow polytopes corresponding to the two variants of the MCFP.
 In the current article, the notion of \emph{confluent} flow \cite{chen06} and related concepts are extensively exploited:
 \begin{definition} \label{def:conf}
-A flow $\boldsymbol{f}\in F(D,\boldsymbol{h})$ is said to be \emph{confluent} if, at all nodes $i\in S\cup I$, $f_{ij}>0$ for at most one $j\in N_i^+$.
+A flow $\boldsymbol{f}\in F(D,\boldsymbol{h})$ is said to be \emph{confluent} if, at all nodes $i\in S\cup P$, $f_{ij}>0$ for at most one $j\in N_i^+$.
 \qed
 \end{definition}
 
@@ -232,14 +229,14 @@ That is, confluence means that while flow streams are allowed to merge at pools,
 Also all flow leaving a source must be allocated to the same arc.
 The inflow counterpart of confluent flow, where merging is disallowed, is defined analogously:
 \begin{definition} \label{def:inf}
-A flow $\boldsymbol{f}\in F(D,\boldsymbol{h})$ is said to be \emph{influent} if, at all nodes $i\in I\cup T$, $f_{ji}>0$ for at most one $j\in N_i^-$.
+A flow $\boldsymbol{f}\in F(D,\boldsymbol{h})$ is said to be \emph{influent} if, at all nodes $i\in P\cup T$, $f_{ji}>0$ for at most one $j\in N_i^-$.
 \qed
 \end{definition}
 
 The two concepts are combined disjunctively:
 \begin{definition} \label{def:confinf}
-A flow $\boldsymbol{f}\in F(D,\boldsymbol{h})$ is said to be \emph{confluent-influent} if, at all nodes $i\in I$, either $f_{ij}>0$ for at most one $j\in N_i^+$
-or $f_{ji}>0$ for at most one $j\in N_i^-$.
+A flow $\boldsymbol{f}\in F(D,\boldsymbol{h})$ is said to be \emph{confluent-influent} if, at all nodes $p\in P$, either $f_{pj}>0$ for at most one $j\in N_p^+$
+or $f_{jp}>0$ for at most one $j\in N_p^-$.
 \qed
 \end{definition}
 
@@ -260,7 +257,7 @@ $\tfrac{4}{3}$.
 By a simple reduction from the \textsc{Subset Sum Problem},
 it is next shown that MCCFP as introduced in Definition~\ref{prob:conf} is NP-hard, even in a much restricted instance class.
 \begin{proposition} \label{prop:conf}
-MCCFP is NP-hard in instances where $D$ is bipartite, $I=\emptyset$, and $|T|=2$.
+MCCFP is NP-hard in instances where $D$ is bipartite, $P=\emptyset$, and $|T|=2$.
 \end{proposition}
 \begin{proof}
 Consider an instance $(b_1,\ldots,b_n,d)$ of the \textsc{Subset Sum Problem}, with positive integers $1\leq b_1\leq\cdots\leq b_n\leq d$.
@@ -270,20 +267,20 @@ Both arcs leaving $s_i$ have capacity $b_i$ and arbitrary cost.
 Because total supply equals total demand, $\boldsymbol{f}\in F^{\geq}(D,\boldsymbol{h},\boldsymbol{b})$ only if $b_i$ flow units leave source $s_i$,
 $d$ units enter sink $t_1$, and $\sum_{i=1}^nb_i-d$ units enter sink $t_0$.
 Confluence implies that all the flow leaving $s_i$ enters exactly one of the sinks $t_0$ or $t_1$.
-Thus, the MCCFP instance $(D,\boldsymbol{b},\boldsymbol{b},\boldsymbol{c})$ is feasible if and only if there exists a set $S_1\subseteq\{1,\ldots,n\}$ such that $\sum_{i\in S_1}b_i=d$.
+Thus, the MCCFP instance $(D,\boldsymbol{h},\boldsymbol{b},\boldsymbol{c})$ is feasible if and only if there exists a set $S_1\subseteq\{1,\ldots,n\}$ such that $\sum_{i\in S_1}b_i=d$.
 \qed
 \end{proof}
 
 NP-hardness in restricted instance classes also applies to the influent and confluent-influent counterparts of MCCFP:
 \begin{proposition} \label{prop:inf}
-MCIFP is NP-hard in instances where $D$ is bipartite, $I=\emptyset$, and $|S|=2$.
+MCIFP is NP-hard in instances where $D$ is bipartite, $P=\emptyset$, and $|S|=2$.
 \end{proposition}
 \begin{proof}
 Consider the instance of the \textsc{Subset Sum Problem} introduced in the proof of Proposition~\ref{prop:conf}.
 Let $D$ be the complete bipartite digraph with node sets $S=\{s_0,s_1\}$ and $T=\{t_1,\ldots,t_n\}$.
 Let the demand at $t_i$ be $b_i$ ($i=1,\ldots,n$), while the supply at $s_0$ and $s_1$ is, respectively, $\sum_{i=1}^nb_i-d$ and $d$.
 Finally, $c_{st_i}$ is arbitrary and $h_{st_i}=b_i$ for $s\in\{s_0,s_1\}$.
-Following the arguments in the proof of Proposition~\ref{prop:conf}, $(D,\boldsymbol{b},\boldsymbol{b},\boldsymbol{c})$ is a feasible MCIFP instance
+Following the arguments in the proof of Proposition~\ref{prop:conf}, $(D,\boldsymbol{h},\boldsymbol{b},\boldsymbol{c})$ is a feasible MCIFP instance
 if and only if $\sum_{i\in S_1}b_i=d$ for some $S_1\subseteq\{1,\ldots,n\}$.
 \qed
 \end{proof}
@@ -297,15 +294,15 @@ Analogously, Proposition~\ref{prop:inf} applies even if MCIFP is defined with re
 
 Let $\len{D}$ denote the maximum length of paths from a source to a sink in $D$.
 In bipartite digraphs consisting only of sources and sinks (i.e, $\len{D}=1$), any flow is confluent-influent.
-Introducing an intermediate set $I$ of nodes renders MCCIFP NP-hard, even if there are no arcs between any two nodes in $I$.
+Introducing an intermediate set $P$ of nodes renders MCCIFP NP-hard, even if there are no arcs between any two nodes in $P$.
 \begin{proposition} \label{prop:confinf}
 MCCIFP is NP-hard in instances where $\len{D}=|T|=2$.
 \end{proposition}
 \begin{proof}
 Consider the instance of the \textsc{Subset Sum Problem} introduced in the proof of Proposition~\ref{prop:conf}.
-Let $D$ be the complete bipartite digraph with node sets $S=\{s_1,\ldots,s_n,s_1',\ldots,s_n'\}$, $I=\{p_1,\ldots,p_n\}$, and $T=\{t_0,t_1\}$.
-All arcs of $D$ are incident to $I$, where $N_{p_i}^-=\{s_i,s_i'\}$ and  $N_{p_i}^+=\{t_0,t_1\}$.
-% Node $p_i\in I$ has entering arcs $(s_i,p_i)$ and $(s_i',p_i)$, and leaving arcs $(p_i,t_0)$
+Let $D$ be the complete bipartite digraph with node sets $S=\{s_1,\ldots,s_n,s_1',\ldots,s_n'\}$, $P=\{p_1,\ldots,p_n\}$, and $T=\{t_0,t_1\}$.
+All arcs of $D$ are incident to $P$, where $N_{p_i}^-=\{s_i,s_i'\}$ and  $N_{p_i}^+=\{t_0,t_1\}$.
+% Node $p_i\in P$ has entering arcs $(s_i,p_i)$ and $(s_i',p_i)$, and leaving arcs $(p_i,t_0)$
 Let the supply at $s_i$ and $s_i'$ be $b_i$ ($i=1,\ldots,n$), while the demand at $t_0$ and $t_1$ is, respectively, $2\sum_{i=1}^nb_i-2d$ and $2d$.
 Both arcs entring $p_i$ have capacity $b_i$, whereas the leaving arcs have capacity $2b_i$. Arc costs are arbitrary.
 
@@ -345,6 +342,44 @@ Analogous claims hold for the other two fluency conditions.
 Further, in bipartite digraphs, weak confluence (weak influence) implies confluence (influence).
 Finally, if $\len{D}=2$ (see the proof of Proposition~\ref{prop:confinf}), then a weakly confluent-influent flow in $D$ is also confluent-influent.
 For these reasons, Propositions~\ref{prop:conf}-\ref{prop:confinf} apply even if the fluency condition is to be understood in the weak sense.
+
+\subsection{MILP formulations and valid inequalities for weakly confluent-influent flow} \label{sec:ciMILP}
+Combining the flow variables $\boldsymbol{f}$ with binary variables gives a natural formulation of the weak MCCIFP.
+For all $p\in P$, $s\in S_p$, and $t\in T_p$, let $x_p^s=1$ signify that all paths from $S$ to $p$ in $D(\boldsymbol{f})$ start at $s$.
+Analogously, $x_p^t=1$ means that all paths from $p$ to $T$ terminate at $t$.
+For notational convenience, define the constants $x_u^v=\left\{\begin{array}{lr}1, & u=v \\ 0, & u\neq v,\end{array}\right.$r
+for all $u,v\in S\cup T$, and $x_p^u=0$ for all $p\in P$ and $u\in (S\setminus S_p)\cup(T\setminus T_p)$.
+
+Weakly confluent-influent flow dictates $\sum_{s\in S_p}x_p^s+\sum_{t\in T_p}x_p^t=1$ at all $p\in P$.
+Consistency between $\boldsymbol{f}$ and $\boldsymbol{x}=\left(x_p^u\right)_{p\in P, u\in S_p\cup T_p}$ implies that for all arcs $(i,j)$
+in $D(\boldsymbol{f})$ and all $s\in S_i$, it holds that $x_i^s=1$ (node $i$ receives flow only from source $s$) if $x_j^s=1$
+(node $j$ receives flow only from source $s$).
+Hence, $f_{ij}=0$ if $x_i^s=0$ and $x_j^s=1$, which is imposed by $f_{ij}\leq h_{ij}\left(1-x_j^s+x_i^s\right)$.
+A symmetric argument suggests the constraint $f_{ij}\leq h_{ij}\left(1-x_i^t+x_j^t\right)$ for each $t\in T_j$.
+A basic MILP model thus reads:
+\begin{eqnarray}
+\min & \sum_{(i,j)\in A}c_{ij}f_{ij} \label{eq:objMCCIFP} \\
+     & \sum_{s\in S_p}x_p^s+\sum_{t\in T_p}x_p^t = 1 & p\in P \label{eq:convMCCIFP} \\
+     & f_{ij}\leq h_{ij}\left(1-x_j^s+x_i^s\right) & (i,j)\in A, s\in S_j \label{eq:sMCCIFP} \\
+     & f_{ij}\leq h_{ij}\left(1-x_i^t+x_j^t\right) & (i,j)\in A, t\in T_i \label{eq:tMCCIFP} \\
+     & \boldsymbol{f}\in F^{\geq}(D,\boldsymbol{h},\boldsymbol{b}) \label{eq:fMCCIFP} \\
+     & x_p^u\in\{0,1\} & p\in P, u\in S_p\cup T_p \label{eq:x}
+\end{eqnarray}
+
+For arcs $(i,j)\in A$, where $i\in S$, \eqref{eq:sMCCIFP} is simplified to $f_{ij}\leq h_{ij}(1-x_j^s)$ for all $s\neq i$, since $x_i^s=0$.
+Hence, $(i,j)$ does not carry flow if $j$ receives all its flow from some source $s\neq i$.
+Likewise, \eqref{eq:tMCCIFP} implies no flow along arc $(i,j)$ if $j\in T$ and $x_i^t=1$ for some sink $t\in T_i\setminus\{j\}$.
+
+Redundant valid inequalities are derived by applying the idea behind constraints \eqref{eq:sMCCIFP}--\eqref{eq:tMCCIFP}
+to sets of sources or sinks.
+Consider an arc $(i,j) \in A$. If $j$ receives all its flow from some source $s\in S'\subseteq S$, i.e., if $\sum_{s\in S'}x_j^s=1$,
+then there is no flow along $(i,j)$ unless also $\sum_{s\in S'}x_i^s=1$.
+Therefore, the inequalities
+\begin{eqnarray}
+ & f_{ij}\leq h_{ij}\left(1+\sum_{s\in S'}(x_i^s-x_j^s)\right) & (i,j)\in A, S'\subseteq S \label{eq:visMCCIFP} \\
+ & f_{ij}\leq h_{ij}\left(1+\sum_{t\in T'}(x_j^t-x_i^t)\right) & (i,j)\in A, T'\subseteq T \label{eq:vitMCCIFP}
+\end{eqnarray}
+are valid
 
 \subsection*{Acknowledgment}
 \small{The work of the second author has been funded by grants from the Spanish state (TIN2012-37483-C03-01 and TIN2015-66680), Junta de Andaluc\'{\i}a (P11-TIC-7176),
