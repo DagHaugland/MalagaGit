@@ -205,7 +205,8 @@ The \textsc{Pooling Problem}: Find a concentration-feasible flow $\boldsymbol{f}
 %-----------------------------------------------------------------
 \section{Cofluent flow and extensions} \label{sec:conf}
 In the \textsc{Minimum Cost Flow Problem} (MCFP), the flow leaving a source and the flow entering a sink are subject to bounds.
-Let the bounds in question, referred to as the \emph{supply} at source $s\in S$ and the \emph{demand} at sink $t\in T$, respectively, be denoted $b_s$ and $b_t$.
+Let the bounds in question, referred to as the \emph{supply} at source $s\in S$ and the \emph{demand} at sink $t\in T$, respectively, be denoted $b_s$ and $b_t$,
+and let $\boldsymbol{b}=\left(b_u\right)_{u\in S\cup T}$.
 Traditionally in MCFP, the supply represents an upper bound, whereas demand is a \emph{lower} bound on the sink flow.
 This contrasts SPP, in which both bounds are upper, with the implication that zero flow is feasible in all instances.
 In the current work, we will consider both these options, and state explictly whether demand should be considered an upper or a lower bound.
@@ -343,8 +344,8 @@ Further, in bipartite digraphs, weak confluence (weak influence) implies conflue
 Finally, if $\len{D}=2$ (see the proof of Proposition~\ref{prop:confinf}), then a weakly confluent-influent flow in $D$ is also confluent-influent.
 For these reasons, Propositions~\ref{prop:conf}-\ref{prop:confinf} apply even if the fluency condition is to be understood in the weak sense.
 
-\subsection{MILP formulations and valid inequalities for weakly confluent-influent flow} \label{sec:ciMILP}
-Combining the flow variables $\boldsymbol{f}$ with binary variables gives a natural formulation of the weak MCCIFP.
+\subsection{Single-commodity flow formulations for weakly confluent-influent flow} \label{sec:sciMILP}
+Combining the single-commodity flow variables $\boldsymbol{f}$ with binary variables gives a natural formulation of the weak MCCIFP.
 For all $p\in P$, $s\in S_p$, and $t\in T_p$, let $x_p^s=1$ signify that all paths from $S$ to $p$ in $D(\boldsymbol{f})$ start at $s$.
 Analogously, $x_p^t=1$ means that all paths from $p$ to $T$ terminate at $t$.
 For notational convenience, define the constants $x_u^v=\left\{\begin{array}{lr}1, & u=v \\ 0, & u\neq v,\end{array}\right.$r
@@ -363,7 +364,7 @@ A basic MILP model thus reads:
      & f_{ij}\leq h_{ij}\left(1-x_j^s+x_i^s\right) & (i,j)\in A, s\in S_j \label{eq:sMCCIFP} \\
      & f_{ij}\leq h_{ij}\left(1-x_i^t+x_j^t\right) & (i,j)\in A, t\in T_i \label{eq:tMCCIFP} \\
      & \boldsymbol{f}\in F^{\geq}(D,\boldsymbol{h},\boldsymbol{b}) \label{eq:fMCCIFP} \\
-     & x_p^u\in\{0,1\} & p\in P, u\in S_p\cup T_p \label{eq:x}
+     & x_p^u\in\{0,1\} & p\in P, u\in S_p\cup T_p \label{eq:xMCCIFP}
 \end{eqnarray}
 
 For arcs $(i,j)\in A$, where $i\in S$, \eqref{eq:sMCCIFP} is simplified to $f_{ij}\leq h_{ij}(1-x_j^s)$ for all $s\neq i$, since $x_i^s=0$.
@@ -379,7 +380,35 @@ Therefore, the inequalities
  & f_{ij}\leq h_{ij}\left(1+\sum_{s\in S'}(x_i^s-x_j^s)\right) & (i,j)\in A, S'\subseteq S \label{eq:visMCCIFP} \\
  & f_{ij}\leq h_{ij}\left(1+\sum_{t\in T'}(x_j^t-x_i^t)\right) & (i,j)\in A, T'\subseteq T \label{eq:vitMCCIFP}
 \end{eqnarray}
-are valid
+are valid.
+Alternatively, \eqref{eq:visMCCIFP}--\eqref{eq:vitMCCIFP} are derived from the observation that along any path $(i_1,\ldots,i_m)$ in $D(\boldsymbol{f})$,
+$x_{i_k}^u$ is non-increasing with $k$ for all $u\in S$, and non-decreasing for all $u\in T$.
+This follows directly from \eqref{eq:sMCCIFP}--\eqref{eq:tMCCIFP}.
+The observation also implies validity of the combined inequality
+\begin{eqnarray}
+	& \displaystyle{f_{ij}\leq h_{ij}\left(1+\sum_{s\in S'}(x_i^s-x_j^s) + \sum_{t\in T'}(x_j^t-x_i^t)\right)} & (i,j)\in A, S'\subseteq S, T'\subseteq T \label{eq:vistMCCIFP}
+\end{eqnarray}
+
+\subsection{Multi-commodity flow formulations} \label{sec:mciMILP}
+For all $(i,j)\in A$ and $(s,t)\in S_i\times T_j$, denote by $f_{ij}^{st}$ the flow from source $s$ along arc $(i,j)$ to sink $t$,
+and let $f_{ij}^{st}=0$ for $(s,t)\in (S\times T)\setminus(S_i\times T_j)$.
+An upper bound, $h_{ij}^{st}$, on this flow, is given as the maximum flow from $j$ to $i$ in the digraph $D_{ij}=(N,A_{ij})$,
+where $A_{ij}=\left(A\cup\{(t,s)\}\right)\setminus\{(i,j)\}$, and the arc $(t,s)$ has capacity $h_{ts}=h_{ij}$.
+% Define $b_u^{st}=b_u$ for $u\in\{s,t\}$, and $b_u^{st}=0$ for all $u\in (S\cup T)\setminus\{s,t\}$.
+Let $\boldsymbol{f}=\left(f_{ij}^{st}\right)_{(i,j)\in A}$.
+% $\boldsymbol{h}^{st}=\left(h_{ij}^{st}\right)_{(i,j)\in A}$, and
+% $\boldsymbol{b}^{st}=\left(b_u^{st}\right)_{u\in S\cup T}$.
+
+Imposing $f_{ij}^{st}=0$ unless $x_i^s+x_i^t=x_j^s+x_j^t=1$ and $x_i^t+x_j^s\leq 1$, a multi-commodity flow formulation for the weak MCCIFP is given as:
+
+\begin{eqnarray}
+\min & \sum_{(i,j)\in A}c_{ij}f_{ij} \label{eq:objmMCCIFP} \\
+     & f_{ij} = \sum_{s\in S}\sum_{t\in T}f_{ij}^{st} & (i,j)\in A \label{eq:fmMCCIFP} \\
+     & f_{ij}^{st}\leq h_{ij}^{st}\left(x_i^s+x_i^t\right) & (i,j)\in A, s\in S_i, t\in T_j \label{eq:imMCCIFP} \\
+     & f_{ij}^{st}\leq h_{ij}^{st}\left(x_j^s+x_j^t\right) & (i,j)\in A, s\in S_i, t\in T_j \label{eq:jmMCCIFP} \\
+     & f_{ij}^{st}\leq h_{ij}^{st}\left(2-x_i^t-x_j^s\right) & (i,j)\in A, s\in S_i, t\in T_j \label{eq:ijmMCCIFP} \\
+     & \eqref{eq:convMCCIFP}, \eqref{eq:fMCCIFP}-\eqref{eq:xMCCIFP}\label{eq:mMCCIFP}
+\end{eqnarray}
 
 \subsection*{Acknowledgment}
 \small{The work of the second author has been funded by grants from the Spanish state (TIN2012-37483-C03-01 and TIN2015-66680), Junta de Andaluc\'{\i}a (P11-TIC-7176),
