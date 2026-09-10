@@ -352,8 +352,8 @@ For notational convenience, define the constants $x_u^v=\left\{\begin{array}{lr}
 for all $u,v\in S\cup T$, and $x_p^u=0$ for all $p\in P$ and $u\in (S\setminus S_p)\cup(T\setminus T_p)$.
 
 Weakly confluent-influent flow dictates $\sum_{s\in S_p}x_p^s+\sum_{t\in T_p}x_p^t=1$ at all $p\in P$.
-Consistency between $\boldsymbol{f}$ and $\boldsymbol{x}=\left(x_p^u\right)_{p\in P, u\in S_p\cup T_p}$ implies that for all arcs $(i,j)$
-in $D(\boldsymbol{f})$ and all $s\in S_i$, it holds that $x_i^s=1$ (node $i$ receives flow only from source $s$) if $x_j^s=1$
+Consistency between $\boldsymbol{f}$ and $\boldsymbol{x}=\left(x_p^u\right)_{p\in P, u\in S_p\cup T_p}$ implies that for all arcs $(i,j)\in A(\boldsymbol{f})$
+and all $s\in S_i$, it holds that $x_i^s=1$ (node $i$ receives flow only from source $s$) if $x_j^s=1$
 (node $j$ receives flow only from source $s$).
 Hence, $f_{ij}=0$ if $x_i^s=0$ and $x_j^s=1$, which is imposed by $f_{ij}\leq h_{ij}\left(1-x_j^s+x_i^s\right)$.
 A symmetric argument suggests the constraint $f_{ij}\leq h_{ij}\left(1-x_i^t+x_j^t\right)$ for each $t\in T_j$.
@@ -385,17 +385,49 @@ Alternatively, \eqref{eq:visMCCIFP}--\eqref{eq:vitMCCIFP} are derived from the o
 $x_{i_k}^u$ is non-increasing with $k$ for all $u\in S$, and non-decreasing for all $u\in T$.
 This follows directly from \eqref{eq:sMCCIFP}--\eqref{eq:tMCCIFP}.
 The observation also implies validity of the combined inequality
-\begin{eqnarray}
-	& \displaystyle{f_{ij}\leq h_{ij}\left(1+\sum_{s\in S'}(x_i^s-x_j^s) + \sum_{t\in T'}(x_j^t-x_i^t)\right)} & (i,j)\in A, S'\subseteq S, T'\subseteq T \label{eq:vistMCCIFP}
-\end{eqnarray}
+\begin{equation}
+	\displaystyle{f_{ij}\leq h_{ij}\left(1+\sum_{s\in S'}(x_i^s-x_j^s) + \sum_{t\in T'}(x_j^t-x_i^t)\right)}, ~(i,j)\in A, S'\subseteq S, T'\subseteq T, \label{eq:vistMCCIFP}
+\end{equation}
+
+\noindent
+which is a generalization of \eqref{eq:visMCCIFP}--\eqref{eq:vitMCCIFP}.
+The potential of inequality \eqref{eq:visMCCIFP} to strengthen \eqref{eq:sMCCIFP}, and \eqref{eq:vitMCCIFP} to strengthen \eqref{eq:tMCCIFP}, are addressed next:
+\begin{proposition} \label{prop:strong}
+Let $(\boldsymbol{f},\boldsymbol{x})$ be a feasible solution to the continuous relaxation of \eqref{eq:objMCCIFP}--\eqref{eq:xMCCIFP}.
+If, for every arc $(i,j)\in A(\boldsymbol{f})$, it holds that $x_i^s\geq x_j^s$ for all $s\in S_j$ and $x_i^t\leq x_j^t$ for all $t\in T_i$,
+then $\boldsymbol{f}$ is weakly confluent-influent.
+\end{proposition}
+\begin{proof}
+The proof is by contradiction.
+	Assume $\boldsymbol{f}$ is not weakly confluent-influent. Then, there exist a node $p\in P$,
+	distinct sources $s_0,s_1\in S_p$, distinct sinks $t_0,t_1\in T_p$, and paths $Q_{k\ell}$ ($k,\ell=0,1$) in $D(\boldsymbol{f})$,
+	where $Q_{k\ell}$ intersects $s_k$, $p$, and $t_{\ell}$.
+	By definition, $x_{s_k}^{s_{1-k}}=x_{t_k}^{t_{1-k}}=0$ ($k=0,1$).
+	As all arcs of $Q_{k\ell}$ are in $A(\boldsymbol{f})$, repeated application of $x_i^{s_1}\geq x_j^{s_1}$ to the arcs between $s_0$ and $p$ in $Q_{0\ell}$
+	proves $x_p^{s_1}=0$. Analogous operations along $Q_{1\ell}$ yield $x_p^{s_0}=0$.
+	Likewise, applying $x_i^{t_{1-\ell}}\leq x_j^{t_{1-\ell}}$ to the arcs between $t_{\ell}$ and $p$ in $Q_{k\ell}$ yields $x_p^{t_{\ell}}=0$ ($\ell=0,1$).
+	Hence, by \eqref{eq:convMCCIFP}, $x_p^u>0$ for some $u\in (S_p\cup T_p)\setminus\{s_0,s_1,t_0,t_1\}$.
+	If $u\in T_p$, applying $x_i^u\leq x_j^u$ to arcs $(i,j)$ along, e.g., $Q_{k0}$ from $p$ to $t_0$ yields $x_{t_0}^u>0$, which is a contradiction.
+	An analogous analysis applies if $u\in S_p$.
+\qed
+\end{proof}
+
+Consider an optimal solution $(\boldsymbol{f},\boldsymbol{x})$ to the continuous relaxation of \eqref{eq:objMCCIFP}--\eqref{eq:xMCCIFP},
+and for all $(i,j)\in A$, let $\alpha_{ij}^s=x_i^s-x_j^s$ ($s\in S_j$) and $\alpha_{ij}^t=x_j^t-x_i^t$ ($t\in T_i$).
+If $\boldsymbol{f}$ is weakly confluent-influent, then it is also an optimal flow in the MILP model.
+Even if $\boldsymbol{x}$ is fractional, it can easily be adjusted to integer values consistent with $\boldsymbol{f}$.
+Otherwise, Proposition \ref{prop:strong} shows that there exists some $(i,j)\in A(\boldsymbol{f})$ at which $\alpha_{ij}^u<0$ for some $u\in S_j\cup T_i$.
+If there exist two distinct $u,v\in S_j\cup T_i$ such that $\alpha_{ij}^u,\alpha_{ij}^v<0$,
+formulation \eqref{eq:objMCCIFP}--\eqref{eq:xMCCIFP} is strengthened by adding the inequality \eqref{eq:vistMCCIFP} corresponding to $S'\cup T'=\{u,v\}$.
+If $f_{ij}>h_{ij}\left(1+\alpha_{ij}^u+\alpha_{ij}^v\right)$, then the added inequality cuts off $(\boldsymbol{f},\boldsymbol{x})$.
 
 \subsection{Multi-commodity flow formulations} \label{sec:mciMILP}
 For all $(i,j)\in A$ and $(s,t)\in S_i\times T_j$, denote by $f_{ij}^{st}$ the flow from source $s$ along arc $(i,j)$ to sink $t$,
 and let $f_{ij}^{st}=0$ for $(s,t)\in (S\times T)\setminus(S_i\times T_j)$.
-An upper bound, $h_{ij}^{st}$, on this flow, is given as the maximum flow from $j$ to $i$ in the digraph $D_{ij}=(N,A_{ij})$,
-where $A_{ij}=\left(A\cup\{(t,s)\}\right)\setminus\{(i,j)\}$, and the arc $(t,s)$ has capacity $h_{ts}=h_{ij}$.
+An upper bound, $h_{ij}^{st}$, on this flow is given as the maximum flow from $j$ to $i$ in the digraph $D_{ij}^{st}=(N,A_{ij}^{st})$,
+where $A_{ij}^{st}=\left(A\cup\{(t,s)\}\right)\setminus\{(i,j)\}$, and the arc $(t,s)$ has capacity $h_{ts}=h_{ij}$.
 % Define $b_u^{st}=b_u$ for $u\in\{s,t\}$, and $b_u^{st}=0$ for all $u\in (S\cup T)\setminus\{s,t\}$.
-Let $\boldsymbol{f}=\left(f_{ij}^{st}\right)_{(i,j)\in A}$.
+Let $\boldsymbol{f}^{st}=\left(f_{ij}^{st}\right)_{(i,j)\in A}$.
 % $\boldsymbol{h}^{st}=\left(h_{ij}^{st}\right)_{(i,j)\in A}$, and
 % $\boldsymbol{b}^{st}=\left(b_u^{st}\right)_{u\in S\cup T}$.
 
@@ -403,10 +435,10 @@ Imposing $f_{ij}^{st}=0$ unless $x_i^s+x_i^t=x_j^s+x_j^t=1$ and $x_i^t+x_j^s\leq
 
 \begin{eqnarray}
 \min & \sum_{(i,j)\in A}c_{ij}f_{ij} \label{eq:objmMCCIFP} \\
-     & f_{ij} = \sum_{s\in S}\sum_{t\in T}f_{ij}^{st} & (i,j)\in A \label{eq:fmMCCIFP} \\
-     & f_{ij}^{st}\leq h_{ij}^{st}\left(x_i^s+x_i^t\right) & (i,j)\in A, s\in S_i, t\in T_j \label{eq:imMCCIFP} \\
-     & f_{ij}^{st}\leq h_{ij}^{st}\left(x_j^s+x_j^t\right) & (i,j)\in A, s\in S_i, t\in T_j \label{eq:jmMCCIFP} \\
-     & f_{ij}^{st}\leq h_{ij}^{st}\left(2-x_i^t-x_j^s\right) & (i,j)\in A, s\in S_i, t\in T_j \label{eq:ijmMCCIFP} \\
+     & f_{ij} = \sum_{s\in S_i}\sum_{t\in T_j}f_{ij}^{st} & (i,j)\in A \label{eq:fmMCCIFP} \\
+     & 0\leq f_{ij}^{st}\leq h_{ij}^{st}\left(x_i^s+x_i^t\right) & (i,j)\in A, s\in S_i, t\in T_j \label{eq:imMCCIFP} \\
+     & 0\leq f_{ij}^{st}\leq h_{ij}^{st}\left(x_j^s+x_j^t\right) & (i,j)\in A, s\in S_i, t\in T_j \label{eq:jmMCCIFP} \\
+     & 0\leq f_{ij}^{st}\leq h_{ij}^{st}\left(2-x_i^t-x_j^s\right) & (i,j)\in A, s\in S_i, t\in T_j \label{eq:ijmMCCIFP} \\
      & \eqref{eq:convMCCIFP}, \eqref{eq:fMCCIFP}-\eqref{eq:xMCCIFP}\label{eq:mMCCIFP}
 \end{eqnarray}
 
