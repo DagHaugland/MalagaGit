@@ -300,3 +300,140 @@
   year    = {2006},
   doi     = {10.1016/j.jcss.2005.10.003}
 }
+@article{chen07,
+author = {Chen, Jiangzhuo and Kleinberg, Robert D. and Lov{\'a}sz, L{\'a}szl{\'o} and Rajaraman, Rajmohan and Sundaram, Ravi and Vetta, Adrian},
+title = {(Almost) Tight bounds and existence theorems for single-commodity confluent flows},
+year = {2007},
+issue_date = {July 2007},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {54},
+number = {4},
+issn = {0004-5411},
+url = {https://doi.org/10.1145/1255443.1255444},
+doi = {10.1145/1255443.1255444},
+abstract = {A flow of a commodity is said to be confluent if at any node all the flow of the commodity leaves along a single edge. In this article, we study single-commodity confluent flow problems, where we need to route given node demands to a single destination using a confluent flow. Single- and multi-commodity confluent flows arise in a variety of application areas, most notably in networking; in fact, most flows in the Internet are (multi-commodity) confluent flows since Internet routing is destination based.We present near-tight approximation algorithms, hardness results, and existence theorems for minimizing congestion in single-commodity confluent flows. The maximum edge congestion of a single-commodity confluent flow occurs at one of the incoming edges of the destination. Therefore, finding a minimum-congestion confluent flow is equivalent to the following problem: given a directed graph G with k sinks and non-negative demands on all the nodes of G, determine a confluent flow that routes every node demand to some sink such that the maximum congestion at a sink is minimized.The main result of this article is a polynomial-time algorithm for determining a confluent flow with congestion at most 1 + ln(k) in G, if G admits a splittable flow with congestion at most 1. We complement this result in two directions. First, we present a graph G that admits a splittable flow with congestion at most 1, yet no confluent flow with congestion smaller than Hk, the kth harmonic number, thus establishing tight upper and lower bounds to within an additive constant less than 1. Second, we show that it is NP-hard to approximate the congestion of an optimal confluent flow to within a factor of (log2k)/2, thus resolving the polynomial-time approximability to within a multiplicative constant. We also consider a demand maximization version of the problem. We show that if G admits a splittable flow of congestion at most 1, then a variant of the congestion minimization algorithm yields a confluent flow in G with congestion at most 1 that satisfies 1/3 fraction of total demand.We show that the gap between confluent flows and splittable flows is much smaller, if the underlying graph is k-connected. In particular, we prove that k-connected graphs with k sinks admit confluent flows of congestion less than C + dmax, where C is the congestion of the best splittable flow, and dmax is the maximum demand of any node in G. The proof of this existence theorem is non-constructive and relies on topological techniques introduced by Lov{\'a}sz.},
+journal = {Journal of the ACM},
+month = jul,
+pages = {16–es},
+numpages = {32},
+keywords = {tight bounds, routing, network flow, confluent flow, Approximation algorithms}
+}
+@article{kolliopoulos02,
+  title={Approximation Algorithms for Single-Source Unsplittable Flow},
+  author={Stavros G. Kolliopoulos and Clifford Stein},
+  journal={SIAM Journal on Computing},
+  year={2002},
+  volume={31},
+  pages={919-946},
+  url={https://api.semanticscholar.org/CorpusID:275695061}
+}
+@incollection{kolliopoulos07,
+  author    = {Stavros G. Kolliopoulos},
+  title     = {Edge-Disjoint Paths and Unsplittable Flow},
+  booktitle = {Handbook of Approximation Algorithms and Metaheuristics},
+  editor    = {Teofilo F. Gonzalez},
+  chapter   = {57},
+  pages      = {57-1--57-16},
+  publisher = {Chapman \& Hall/CRC},
+  year      = {2007},
+  doi       = {10.1201/9781420010749.ch57}
+}
+@inproceedings{kleinberg96,
+  title={Single-source unsplittable flow},
+  author={Kleinberg, Jon M},
+  booktitle={Proceedings of 37th Conference on Foundations of Computer Science},
+  pages={68--77},
+  year={1996},
+  organization={IEEE}
+}
+@article{dinitz99,
+  author    = {Yefim Dinitz and Naveen Garg and Michel X. Goemans},
+  title     = {On the Single-Source Unsplittable Flow Problem},
+  journal   = {Combinatorica},
+  volume     = {19},
+  number     = {1},
+  pages      = {17--41},
+  year       = {1999},
+  doi        = {10.1007/S004930050043},
+  url = {https://doi.org/10.1007/S004930050043}
+}
+@article{chakrabarti07,
+  author  = {Amit Chakrabarti and Chandra Chekuri and
+             Anupam Gupta and Amit Kumar},
+  title   = {Approximation Algorithms for the Unsplittable Flow Problem},
+  journal = {Algorithmica},
+  volume  = {47},
+  number  = {1},
+  pages   = {53--78},
+  year    = {2007},
+  doi     = {10.1007/s00453-006-1210-5}
+}
+@article{baveja00,
+  author  = {Alok Baveja and Aravind Srinivasan},
+  title   = {Approximation Algorithms for Disjoint Paths and
+             Related Routing and Packing Problems},
+  journal = {Mathematics of Operations Research},
+  volume  = {25},
+  number  = {2},
+  pages   = {255--280},
+  year    = {2000},
+  doi     = {10.1287/moor.25.2.255.12228}
+}
+@InProceedings{dressler10,
+author="Dressler, Daniel and Strehler, Martin",
+editor="Calamoneri, Tiziana and Diaz, Josep",
+title="Capacitated Confluent Flows: Complexity and Algorithms",
+booktitle="Algorithms and Complexity",
+year="2010",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="347--358",
+abstract="A flow on a directed network is said to be confluent if the flow uses at most one outgoing arc at each node. Confluent flows arise naturally from destination-based routing. We study the Maximum Confluent Flow Problem (MaxConf) with a single commodity but multiple sources and sinks. Unlike previous results, we consider heterogeneous arc capacities. The supplies and demands of the sources and sinks can also be bounded. We give a pseudo-polynomial time algorithm and an FPTAS for graphs with constant treewidth. Somewhat surprisingly, MaxConf is NP-hard even on trees, so these algorithms are, in a sense, best possible. We also show that it is NP-complete to approximate MaxConf better than 3/2 on general graphs.",
+isbn="978-3-642-13073-1"
+}
+@article{dressler14,
+title = {Polynomial-time algorithms for special cases of the maximum confluent flow problem},
+journal = {Discrete Applied Mathematics},
+volume = {163},
+pages = {142-154},
+year = {2014},
+note = {Optimal Discrete Structures and Algorithms ODSA 2010},
+issn = {0166-218X},
+doi = {https://doi.org/10.1016/j.dam.2013.07.012},
+url = {https://www.sciencedirect.com/science/article/pii/S0166218X13003235},
+author = {Daniel Dressler and Martin Strehler},
+keywords = {Confluent flow, Outerplanar graph, Polynomial-time algorithm, Treewidth, FPTAS},
+abstract = {A flow on a directed network is said to be confluent if the flow uses at most one outgoing arc at each node. Confluent flows arise naturally in destination-based routing. We study the maximum confluent flow problem (MaxConf) with a single commodity but multiple sources and sinks and heterogeneous arc capacities. It was recently shown that MaxConf  is NP-hard even on trees. We improve the classification of easy and hard confluent flow problems by providing polynomial-time algorithms for outerplanar graphs with a single sink, as well as trees with a constant number of either sources or sinks. Furthermore, we present an FPTAS for graphs with bounded treewidth.}
+}
+@article{mamada05,
+  title={A tree partitioning problem arising from an evacuation problem in tree dynamic networks},
+  author={Satoko Mamada and Takeaki Uno and Kazuhisa Makino and Satoru Fujishige},
+  journal={Journal of the Operations Research Society of Japan},
+  volume={48},
+  number={3},
+  pages={196-206},
+  year={2005},
+  doi={10.15807/jorsj.48.196}
+}
+@inproceedings{shepherd15a,
+  author={Shepherd, F.B. and Vetta, Adrian and Wilfong, Gordon T.},
+  booktitle={2015 IEEE 56th Annual Symposium on Foundations of Computer Science}, 
+  title={Polylogarithmic Approximations for the Capacitated Single-Sink Confluent Flow Problem}, 
+  year={2015},
+  volume={},
+  number={},
+  pages={748-758},
+  keywords={Approximation methods;Approximation algorithms;Routing;Minimization;Polynomials;Nonhomogeneous media;Routing protocols;Combinatorial optimization;networks;confluent flow},
+  doi={10.1109/FOCS.2015.51}
+}
+@misc{shepherd15b
+      title={The Inapproximability of Maximum Single-Sink Unsplittable, Priority and Confluent Flow Problems}, 
+      author={F. Bruce Shepherd and Adrian Vetta},
+      year={2015},
+      eprint={1504.00627},
+      archivePrefix={arXiv},
+      primaryClass={cs.DS},
+      url={https://arxiv.org/abs/1504.00627}, 
+}
+

@@ -1,92 +1,220 @@
-%%%%%%%%%%%%%%%%%%%%%%% file template.tex %%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% This is a general template file for the LaTeX package SVJour3
-% for Springer journals.          Springer Heidelberg 2010/09/16
-%
-% Copy it to a new file with a new name and use it as the basis
-% for your article. Delete % signs as needed.
-%
-% This template includes a few options for different layouts and
-% content for various journals. Please consult a previous issue of
-% your journal as needed.
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% First comes an example EPS file -- just ignore it and
-% proceed on the \documentclass line
-% your LaTeX will extract the file if required
-% \begin{filecontents*}{example.eps}
-%!PS-Adobe-3.0 EPSF-3.0
-%%BoundingBox: 19 19 221 221
-%%CreationDate: Mon Sep 29 1997
-%%Creator: programmed by hand (JK)
-%%EndComments
-% gsave
-% newpath
-%   20 20 moveto
-%   20 220 lineto
-%   220 220 lineto
-%   220 20 lineto
-% closepath
-% 2 setlinewidth
-% gsave
-%   .4 setgray fill
-% grestore
-% stroke
-% grestore
-% \end{filecontents*}
-% \RequirePackage{fix-cm}
-% \documentclass[smallextended,referee,envcountsect]{svjour3}       % onecolumn (second format)
-\documentclass[smallextended,envcountsect]{svjour3}       % onecolumn (second format)
-\smartqed  % flush right qed marks, e.g. at end of proof
+%% 
+%% Copyright 2019-2024 Elsevier Ltd
+%% 
+%% This file is part of the 'CAS Bundle'.
+%% --------------------------------------
+%% 
+%% It may be distributed under the conditions of the LaTeX Project Public
+%% License, either version 1.3c of this license or (at your option) any
+%% later version.  The latest version of this license is in
+%%    http://www.latex-project.org/lppl.txt
+%% and version 1.3c or later is part of all distributions of LaTeX
+%% version 1999/12/01 or later.
+%% 
+%% The list of all files belonging to the 'CAS Bundle' is
+%% given in the file `manifest.txt'.
+%% 
+%% Template article for cas-sc documentclass for 
+%% double column output.
+
+\documentclass[a4paper,fleqn]{cas-sc}
+
+% If the frontmatter runs over more than one page
+% use the longmktitle option.
+
+%\documentclass[a4paper,fleqn,longmktitle]{cas-sc}
+
+%\usepackage[numbers]{natbib}
+\usepackage[authoryear]{natbib}
+%\usepackage[authoryear,longnamesfirst]{natbib}
+
+%%%Author macros
+\def\tsc#1{\csdef{#1}{\textsc{\lowercase{#1}}\xspace}}
+\tsc{WGM}
+\tsc{QE}
+%%%
+
+% Uncomment and use as if needed
+%\newtheorem{theorem}{Theorem}
+%\newtheorem{lemma}[theorem]{Lemma}
+%\newdefinition{rmk}{Remark}
+%\newproof{pf}{Proof}
+%\newproof{pot}{Proof of Theorem \ref{thm}}
+
+% \smartqed  % flush right qed marks, e.g. at end of proof
 \usepackage{graphicx}
-% \usepackage{textcomp}
-% \usepackage{subfigure}
 \usepackage[center]{caption}
 \usepackage{amsfonts}
-% \usepackage{pgfplots}
-\usepackage{algorithm}
 \usepackage[noend]{algorithmic}
 \usepackage{amsmath}
 
-\newtheorem{assumption}{Assumption}
+\newtheorem{theorem}{Theorem}
+\newtheorem{assumption}[theorem]{Assumption}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{definition}[theorem]{Definition}
+\newproof{proof}{Proof}
 \newcommand{\len}[1]{\text{len}{(#1)}}
 
-\journalname{To be decided}
-
 \begin{document}
+\let\WriteBookmarks\relax
+\def\floatpagepagefraction{1}
+\def\textpagefraction{.001}
 
-\title{Confluent flow and other approximations to the Pooling Problem}
-\titlerunning{Confluent flow and other approximations to the Pooling Problem}
+% Short title
+\shorttitle{Minimum cost confluent flow}
 
-\author{Dag Haugland \and Eligius M.T. Hendrix \and \'{I}sak P\'{a}ll Gestsson}
+% Short author
+\shortauthors{Haugland and Hendrix}
 
-\institute{Dag Haugland, Corresponding author \at 
-Department of Informatics, University of Bergen, Norway \email{dag.haugland@ii.uib.no}
-\and
-Eligius M.T. Hendrix \at
-              Department of Computer Architecture, Universidad de M\'alaga and Operations Research and Logistics Group, Wageningen University \email{eligius.hendrix@wur.nl}\and \'{I}sak P\'{a}ll Gestsson \at Gassco}
+% Main title of the paper
+\title [mode = title]{A computational study of the minimum cost confluent flow problem and its extensions}
+% \tnotemark[0]
+% \tnotetext[0]{Preprint submitted to \emph{Computers \& Operations Research}} 
+
+\author[1]{Dag Haugland}%[<options>]
+% Corresponding author indication
+\cormark[1]
+\cortext[1]{Corresponding author}
+% Email id of the first author
+\ead{dag.haugland@ii.uib.no}
+% Credit authorship
+% eg: \credit{Conceptualization of this study, Methodology, Software}
+% \credit{}
+\credit{The authors contributed equally to this article}
+% Address/affiliation
+\affiliation[1]{organization={University of Bergen},
+            addressline={Department of Informatics},
+            city={Bergen},
+%          citysep={}, % Uncomment if no comma needed between city and postcode
+            % postcode={},
+            % state={},
+            country={Norway}}
+
+\author[2]{Eligius M.T. Hendrix}
+\ead{eligius.hendrix@wur.nl}
+\credit{The authors contributed equally to this article}
+\affiliation[2]{organization={Universidad de M\'alaga},
+            addressline={Department of Computer Architecture},
+            city={M\'alaga},
+            country={Spain}}
+
 
 \date{Received: date / Accepted: date}
 
-\maketitle
-
 \begin{abstract}
-About the computational challenge of the pooling problem and finding approximate solutions by means of confluent or influent flow
+% \begin{itemize}
+About the minimum cost confluent flow problem as introduced by Chen et al.
+
+Conceptualizing extensions:
+
+% \begin{itemize}
+  Influent flow
+
+  Confluent-influent flow
+
+  Weak versions
+
+% \end{itemize}
+NP-hardness
+
+Single-commodity flow formulation
+
+% \begin{itemize}
+Valid inequalities, leading to a Branch-and-Cut procedure
+
+% \end{itemize}
+Multi-commodity flow formulation
+
+(?) Path formulation, leading to a Branch-and-Price procedure
+
+Computational experiments
+% \end{itemize}
 \end{abstract}
-\keywords{Pooling problem \and complexity \and global optimization}
-\subclass{90C26 \and 90C35 \and 90C39 \and 68Q25}
+
+% Research highlights
+\begin{highlights}
+\item
+\item
+\item
+\end{highlights}
+
+
+% Keywords
+% Each keyword is seperated by \sep
+\begin{keywords}
+network flow \sep complexity \sep integer programming \sep valid inequalities
+\end{keywords}
+% \subclass{90B10 \sep 90C11 \sep 90C27 \sep 90C57}
+
+\maketitle
 
 
 %-------------------------------------------------------------------------------
 \section{Introduction}
 \label{intro}
 
-Taken from an earlier paper, to be revised:
-Traditional network flow models, like the minimum cost network flow problem, rely on considerations of the flow as a homogeneous commodity.
-Variations in composition is however relevant in many industrial and logistics applications of the models,
-including petroleum refining and pipeline transportation of natural gas.
-Crude oils supplied to a refinery have contamination levels depending on their sources of origin.
+Classic network flow models, like the \textsc{Minimum Cost Network Flow Problem} and the \textsc{Maximum Flow Problem},
+enjoy favorable computational properties as well as a wide range of applications.
+Imposing simple conditions on the flow pattern may, however,
+transform a computationally tractable problem into a model of which only small instances can be solved in practical time.
+\citet{chen06} introduce the concept of a \emph{confluent flow}, which is a network flow where each node has at most one flow-carrying leaving arc.
+They prove that requiring the flow to be confluent, i.e., disallowing splitting of the flow at any node, may render otherwise well-solved flow models NP-hard.
+
+Settings in which confluent flow makes sense are numerous.
+According to \citet{chen06,chen07}, routing on the internet is a prominent example.
+An immediate consequence of a flow being confluent is that all flow leaving a given node arrives at a unique sink,
+which is consistent with destination-based internet routing.
+Other examples include evacuation systems \citep{mamada05}, where the flow of people must be directed along a unique passageway.
+Further, the confluent-flow condition applies to distribution networks where the distribution units must be organized in such a way that
+all outbound transportation follows a unique link.
+
+Extensions of confluent flow are straightforward to imagine.
+A condition dual to the no-splitting rule is prohibition of merging.
+By symmetry, it is plausible that optimizing network flow under the constraints that every node receives flow along a unique entering arc,
+is as computationally demanding as the case of confluent flow.
+In transportation and logistics, the said restriction has relevance whenever inbound flow cannot be distributed over multiple entering links.
+
+Several well-studied flow models relate to confluent flow and extensions thereof.
+The \textsc{Single-source Unsplittable Flow Problem} (UFP) \citep{kleinberg96,kolliopoulos02} asks for a unique path from a given source to each of a set of sinks.
+A demand is associated with each sink, and flow must be assigned to the paths such that the demand is satisfied and arc capacities are respected.
+As the flow paths constituting a UFP solution may intersect at one or more nodes, it does not hold in general that it is confluent.
+However, the reverse implication applies, even in a multi-source extension of UFP: If a flow is confluent, then it follows a unique path between any source-sink pair.
+
+Another related flow model is the \textsc{Disjoint Path Problem} (DPP) \citep{kolliopoulos07} in digraphs, in which pairs consisting of one source and one sink are given.
+The problem is to find the largest subset of the pairs that can be joined by arc- or node-disjoint paths.
+Feasible solutions are, in the node-disjoint version, necessarily confluent.
+In contrast, two arc-disjoint paths may intersect at some node, in which case the solution is not confluent.
+Conversly, a confluent flow does not necessarily induce a feasible solution to any of the two DPP variants.
+
+In the current work, we conceptualize natural extensions of the confluent flow model.
+Already indicated above, a flow involving no mixing of streams from different arcs entering any node is referred to as the \emph{influent} flow model.
+That is, a flow is influent if the reverse of it is confluent.
+We further introduce weaker flow conditions that relate strongly to confluent and influent flow, respectively.
+A flow is said to be \emph{weakly confluent} if all the flow leaving a node arrives at a unique sink.
+Obviously, if a flow is confluent in the strong sense, it is also confluent in the weak sense, whereas the reverse implication does not hold in general.
+An analogous weak counterpart of influent flow is also introduced.
+Weakly influent flow thus means that every node receives flow from at most one source, although the flow may be distributed across multiple entering arcs.
+
+The weak fluency conditions are motivated, e.g., by logistics problems where each distribution unit is able to handle multiple routes along which the material
+is leaving (entering) the unit, given that the entire flow is destined for (provenates from) a single recipient (supplier).
+Another interesting flow model emerges when the distribution network may be composed of a mix of nodes,
+some of which handle incoming flow from a single supplier and the rest handle flow to a single recipient.
+In more abstract terms, the flow in a digraph is said to be \emph{weakly confluent-influent} if the arcs carrying positive flow induce a subgraph
+where all source-sink paths intersecting any given node share either a common source or a common sink.
+The strong counterpart of this condition is that either the in-degree or the out-degree of any node in the subgraph is at most one.
+
+Since confluent flow models were introduced to the scientific community by \citet{chen06,chen07}, some attention to the topic has been given in the literature.
+In their seminal article, \citet{chen06} analyze the problem of minimizing the congestion, defined as the largest flow/capacity ratio across arcs,
+when the flow must be confluent and satisfy demand at all sinks.
+Approximating the minimum congestion to within a factor 4/3 is proved to be NP-hard.
+The follow-up work \citep{chen07} strengthens this result, and concludes that hardness persists if the approximation bound is relaxed to $1+\log_2{|T|}/2$,
+where $T$ is the set of sinks in the graph.
+\citet{dressler10} study the \textsc{Maximum Confluent Flow Problem}, for which they give complexity and approximability results.
+In particular, the problem is proved to be NP-hard even for directed trees, but solvable in pseudo-polynomial time for graph classes of bounded treewidth.
+The authors later prove that the single-sink version of the problem is solvable in polynomial time if the digraph is outerplanar \citep{dressler14}.
+
 Major components of natural gas are methane, ethane, butane and propane, but the proportions in which they occur are not equal for all gas wells.
 For environmental or technical reasons, requirements to the final composition are often imposed at the sink nodes of the flow network.
 Whenever constraints of this kind apply, it is therefore essential for network flow models to recognize not only the total product flow,
@@ -96,7 +224,7 @@ This provides a computationally challenging problem referred to as the \textsc{P
 
 The \textsc{Pooling Problem} exhibits strong resemblance with well-studied logistics models like the \textsc{Minimum Cost Flow Problem} and the
 \textsc{Transportation Problem}.
-Another classical related problem is Stigler's \textsc{Diet Problem} \cite{stigler45,dantzig90},
+Another classical related problem is Stigler's \textsc{Diet Problem} \citep{stigler45,dantzig90},
 asking for the minimum cost diet requiring a certain amount of specified nutrients.
 The problem is easy to extend to a multi-diet version where groups of people have each their own requirements.
 Nutritional contents differ between sources, that is, foods of which diets can be composed,
@@ -165,9 +293,10 @@ and $u_t^k$ is the upper bound on the concentration of the flow leaving $D$ at $
 For each pool $p\in P$, the set of sources from which there exists a path to $p$ in $D$ is denoted $S_p$.
 Analogously, $T_p$ is the set of sinks to which there is a path from $p$ in $D$.
 The sets of upstream and downstream neighbors of node $j\in N$ are denoted $N_j^-$ and $N_j^-$, respectively.
-Without loss of relevant generality, it is assumed that $N_s^-=N_t^+=\emptyset$ for every $s\in S$ and $t\in T$.
-The sets of pools adjacent to source $s$ and sink $t$ are denoted
-$P_s=P\cap N_s^+$ and $P_t=P\cap N_t^-$, respectively.
+Without relevant loss of generality, it is assumed that $S_p\neq\emptyset\neq T_p$ for every $p\in P$,
+and that $N_s^-=N_t^+=\emptyset$ for every $s\in S$ and $t\in T$.
+% The sets of pools adjacent to source $s$ and sink $t$ are denoted
+% $P_s=P\cap N_s^+$ and $P_t=P\cap N_t^-$, respectively.
 % The arc set $\mathcal{A}$ has a partition $\left(\mathcal{A}_S,\mathcal{A}_T\right)$,
 % where $\mathcal{A}_S=\mathcal{A}\cap\left(S\times P\right)$ and $\mathcal{A}_T=\mathcal{A}\cap\left(P\times T\right)$
 % denote the sets of source-incident and sink-incident arcs, respectively.
@@ -234,7 +363,8 @@ A flow $\boldsymbol{f}\in F(D,\boldsymbol{h})$ is said to be \emph{influent} if,
 \qed
 \end{definition}
 
-The two concepts are combined disjunctively:
+By Definitions~\ref{def:conf}--\ref{def:inf}, confluent and influent flow are dual concepts, where the duality corresponds to arc reversals.
+Combining the concepts disjunctively introduces another fluency condition.
 \begin{definition} \label{def:confinf}
 A flow $\boldsymbol{f}\in F(D,\boldsymbol{h})$ is said to be \emph{confluent-influent} if, at all nodes $p\in P$, either $f_{pj}>0$ for at most one $j\in N_p^+$
 or $f_{jp}>0$ for at most one $j\in N_p^-$.
@@ -305,12 +435,12 @@ Let $D$ be the complete bipartite digraph with node sets $S=\{s_1,\ldots,s_n,s_1
 All arcs of $D$ are incident to $P$, where $N_{p_i}^-=\{s_i,s_i'\}$ and  $N_{p_i}^+=\{t_0,t_1\}$.
 % Node $p_i\in P$ has entering arcs $(s_i,p_i)$ and $(s_i',p_i)$, and leaving arcs $(p_i,t_0)$
 Let the supply at $s_i$ and $s_i'$ be $b_i$ ($i=1,\ldots,n$), while the demand at $t_0$ and $t_1$ is, respectively, $2\sum_{i=1}^nb_i-2d$ and $2d$.
-Both arcs entring $p_i$ have capacity $b_i$, whereas the leaving arcs have capacity $2b_i$. Arc costs are arbitrary.
+Both arcs entering $p_i$ have capacity $b_i$, whereas the leaving arcs have capacity $2b_i$. Arc costs are arbitrary.
 
 Consider a feasible flow $\boldsymbol{f}$ in the MCCIFP instance $(D,\boldsymbol{h},\boldsymbol{b},\boldsymbol{c})$ hence defined.
-Then, since total supply equals both the total capacity of arcs leaving $S$ and total demand, $f_{sp_i}=h_{sp_i}>0$ for all $s=s_i,s_i'$ and $i=1,\ldots,n$.
+Then, since total supply equals both the total capacity of arcs leaving $S$ and total demand, $f_{sp_i}=h_{sp_i}b_i>0$ for all $s=s_i,s_i'$ and $i=1,\ldots,n$.
 It follows that $\boldsymbol{f}$ is confluent, as it is not influent at any $p_i$.
-Hence, all $2b_i$ units of flow leaving $p_i$ are sent to the same sink, $t_0$ or $t_1$.
+Thus, all $2b_i$ units of flow leaving $p_i$ are sent to the same sink, $t_0$ or $t_1$.
 Since $t_1$ receives $2d$ units of flow, there is a set $I_1\subseteq \{1,\ldots,n\}$ such that $\sum_{i\in I_1}f_{p_it_1}=2\sum_{i\in I_1}{b_i}=2d$.
 
 Conversely, if $\sum_{i\in I_1}b_i=d$ for some $I_1\subseteq\{1,\ldots,n\}$, then the flow $\boldsymbol{f}$, where $f_{s_ip_i}=f_{s_i'p_i}=b_i$ ($i=1,\ldots,n\}$),
@@ -399,16 +529,16 @@ then $\boldsymbol{f}$ is weakly confluent-influent.
 \end{proposition}
 \begin{proof}
 The proof is by contradiction.
-	Assume $\boldsymbol{f}$ is not weakly confluent-influent. Then, there exist a node $p\in P$,
-	distinct sources $s_0,s_1\in S_p$, distinct sinks $t_0,t_1\in T_p$, and paths $Q_{k\ell}$ ($k,\ell=0,1$) in $D(\boldsymbol{f})$,
-	where $Q_{k\ell}$ intersects $s_k$, $p$, and $t_{\ell}$.
-	By definition, $x_{s_k}^{s_{1-k}}=x_{t_k}^{t_{1-k}}=0$ ($k=0,1$).
-	As all arcs of $Q_{k\ell}$ are in $A(\boldsymbol{f})$, repeated application of $x_i^{s_1}\geq x_j^{s_1}$ to the arcs between $s_0$ and $p$ in $Q_{0\ell}$
-	proves $x_p^{s_1}=0$. Analogous operations along $Q_{1\ell}$ yield $x_p^{s_0}=0$.
-	Likewise, applying $x_i^{t_{1-\ell}}\leq x_j^{t_{1-\ell}}$ to the arcs between $t_{\ell}$ and $p$ in $Q_{k\ell}$ yields $x_p^{t_{\ell}}=0$ ($\ell=0,1$).
-	Hence, by \eqref{eq:convMCCIFP}, $x_p^u>0$ for some $u\in (S_p\cup T_p)\setminus\{s_0,s_1,t_0,t_1\}$.
-	If $u\in T_p$, applying $x_i^u\leq x_j^u$ to arcs $(i,j)$ along, e.g., $Q_{k0}$ from $p$ to $t_0$ yields $x_{t_0}^u>0$, which is a contradiction.
-	An analogous analysis applies if $u\in S_p$.
+Assume $\boldsymbol{f}$ is not weakly confluent-influent. Then, there exist a node $p\in P$,
+distinct sources $s_0,s_1\in S_p$, distinct sinks $t_0,t_1\in T_p$, and paths $Q_{k\ell}$ ($k,\ell=0,1$) in $D(\boldsymbol{f})$,
+where $Q_{k\ell}$ intersects $s_k$, $p$, and $t_{\ell}$.
+By definition, $x_{s_k}^{s_{1-k}}=x_{t_k}^{t_{1-k}}=0$ ($k=0,1$).
+As all arcs of $Q_{k\ell}$ are in $A(\boldsymbol{f})$, repeated application of $x_i^{s_1}\geq x_j^{s_1}$ to the arcs between $s_0$ and $p$ in $Q_{0\ell}$
+proves $x_p^{s_1}=0$. Analogous operations along $Q_{1\ell}$ yield $x_p^{s_0}=0$.
+Likewise, applying $x_i^{t_{1-\ell}}\leq x_j^{t_{1-\ell}}$ to the arcs between $t_{\ell}$ and $p$ in $Q_{k\ell}$ yields $x_p^{t_{\ell}}=0$ ($\ell=0,1$).
+Hence, by \eqref{eq:convMCCIFP}, $x_p^u>0$ for some $u\in (S_p\cup T_p)\setminus\{s_0,s_1,t_0,t_1\}$.
+If $u\in T_p$, applying $x_i^u\leq x_j^u$ to arcs $(i,j)$ along $Q_{k\ell}$ from $p$ to $t_{\ell}$ yields $x_{t_{\ell}}^u>0$, which is a contradiction.
+An analogous analysis applies if $u\in S_p$.
 \qed
 \end{proof}
 
@@ -446,7 +576,7 @@ Imposing $f_{ij}^{st}=0$ unless $x_i^s+x_i^t=x_j^s+x_j^t=1$ and $x_i^t+x_j^s\leq
 \small{The work of the second author has been funded by grants from the Spanish state (TIN2012-37483-C03-01 and TIN2015-66680), Junta de Andaluc\'{\i}a (P11-TIC-7176),
 in part financed by the European Regional Development Fund (ERDF).}
 
-\bibliographystyle{elsarticle-num}
+\bibliographystyle{cas-model2-names}
 \bibliography{ref.bib}
 
 \end{document}
