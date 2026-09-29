@@ -87,7 +87,7 @@
 
 \begin{document}
 
-\title[A computational study of the minimum cost confluent flow problem and its extensions]{A computational study of the minimum cost confluent flow problem and its extensions}
+\title[The minimum cost confluent flow problem and its extensions]{The minimum cost confluent flow problem and its extensions}
 
 %%=============================================================%%
 %% GivenName	-> \fnm{Joergen W.}
@@ -105,23 +105,20 @@
 \affil[2]{\orgdiv{Department of Computer Architecture}, \orgname{Universidad de M\'alaga}, \orgaddress{\city{M\'alaga}, \country{Spain}}}
 
 \abstract{
-\begin{itemize}
-\item About the minimum cost confluent flow problem as introduced by Chen et al.
-\item Conceptualizing extensions:
-\begin{itemize}
-  \item Influent flow
-  \item Confluent-influent flow
-  \item Weak versions
-\end{itemize}
-\item NP-hardness
-\item Single-commodity flow formulation
-\begin{itemize}
-\item Valid inequalities, leading to a Branch-and-Cut procedure
-\end{itemize}
-\item Multi-commodity flow formulation
-\item (?) Path formulation, leading to a Branch-and-Price procedure
-\item Computational experiments
-\end{itemize}
+Network flow problems tend to undergo a transistion from tractable to computationally demanding when special conditions are imposed on the flow.
+An example, introduced about two decades ago, is the requirement that all flow leaving a network node must be allocated to a unique arc.
+Such a split-free flow is called confluent.
+In the current work, several extensions of confluent flow are conceptualized and analyzed.
+The dual concept where merging is disallowed at all nodes suggests itself.
+This is extended further through a disjunctive combination at every node, where the flow has to either enter or leave along a unique arc.
+Each of these flow conditions has a weak counterpart:
+A flow is weakly confluent if all paths from any node in the flow graph terminate at a common sink.
+
+The current work proves that even the weak version of any of these flow conditions renders the minimum cost flow problem NP-hard.
+Hardness is shown to persist even in restricted instances, such as bipartite digraphs with only two sinks.
+For one of the flow conditions, single- and multi-commodity flow formulations are given,
+accompanied by proofs of their correctness.
+Valid inqualities intended for cutting-plane approaches are given for both formulations.
 }
 \keywords{
 network flow, complexity, integer programming, valid inequalities
@@ -156,7 +153,7 @@ is as computationally demanding as the case of confluent flow.
 In transportation and logistics, the said restriction has relevance whenever inbound flow cannot be distributed over multiple entering links.
 
 Several well-studied flow models relate to confluent flow and extensions thereof.
-The \textsc{Single-source Unsplittable Flow Problem} (UFP) \citep{kleinberg96,kolliopoulos02} asks for a unique path from a given source to each of a set of sinks.
+The \textsc{Single-source Unsplittable Flow Problem} (UFP) \citep{kleinberg96,dinitz99,kolliopoulos02} asks for a unique path from a given source to each of a set of sinks.
 A demand is associated with each sink, and flow must be assigned to the paths such that the demand is satisfied and arc capacities are respected.
 As the flow paths constituting a UFP solution may intersect at one or more nodes, it does not hold in general that it is confluent.
 However, the reverse implication applies, even in a multi-source extension of UFP: If a flow is confluent, then it follows a unique path between any source-sink pair.
@@ -165,7 +162,7 @@ Another related flow model is the \textsc{Disjoint Path Problem} (DPP) \citep{ko
 The problem is to find the largest subset of the pairs that can be joined by arc- or node-disjoint paths.
 Feasible solutions are, in the node-disjoint version, necessarily confluent.
 In contrast, two arc-disjoint paths may intersect at some node, in which case the solution is not confluent.
-Conversly, a confluent flow does not necessarily induce a feasible solution to any of the two DPP variants.
+Conversely, a confluent flow does not necessarily induce a feasible solution to any of the two DPP variants.
 
 In the current work, we conceptualize natural extensions of the confluent flow model.
 Already indicated above, a flow involving no mixing of streams from different arcs entering any node is referred to as the \emph{influent} flow model.
@@ -177,7 +174,7 @@ An analogous weak counterpart of influent flow is also introduced.
 Weakly influent flow thus means that every node receives flow from at most one source, although the flow may be distributed across multiple entering arcs.
 
 The weak fluency conditions are motivated, e.g., by logistics problems where each distribution unit is able to handle multiple routes along which the material
-is leaving (entering) the unit, given that the entire flow is destined for (provenates from) a single recipient (supplier).
+is leaving (entering) the unit, given that the entire flow is destined for (originates from) a single recipient (supplier).
 Another interesting flow model emerges when the distribution network may be composed of a mix of nodes,
 some of which handle incoming flow from a single supplier and the rest handle flow to a single recipient.
 In more abstract terms, the flow in a digraph is said to be \emph{weakly confluent-influent} if the arcs carrying positive flow induce a subgraph
@@ -201,13 +198,13 @@ The authors later prove that the single-sink version of the problem is solvable 
 
 In the current letter, the following contributions are made: The extensions of confluent flow discussed above are conceptualized.
 The complexity of the corresponding minimum cost flow problems is analyzed, and simple NP-hardness proofs are given.
-With special focus on the weakly confluent-influent minimum cost flow problem, integer programming (single and multi-commodity flow) formulations are given.
+With special focus on the \textsc{Weakly Confluent-Influent Minimum Cost Flow Problem}, integer programming (single and multi-commodity flow) formulations are given.
 In the context of these formulations, a host of redundant valid inequalities are given.
 
 The remainder of the letter is organized as follows:
 Mathematical notation and definitions of flow problems subject to fluency constraints are provided in Section \ref{sec:problem}.
 Complexity results are summarized in Section~\ref{sec:compl}.
-In Section~\ref{sec:sciMILP}, integer programming formulations are derived.
+In Section~\ref{sec:wciMILP}, integer programming formulations are derived, and their correctness is proved.
 Finally, valid inequalities for the models are analyzed in Section~\ref{sec:vi}
 
 %-----------------------------------------------------------------------
@@ -215,16 +212,16 @@ Finally, valid inequalities for the models are analyzed in Section~\ref{sec:vi}
 
 Let $D=(N,A)$ be a directed acyclic graph,
 where the node set $N=S\cup P\cup T$ consists of the disjoint subsets $S$ of \emph{sources}, $P$ of \emph{internal nodes}, and $T$ of \emph{sinks}.
-The sets of upstream and downstream neighbors of node $j\in N$ are denoted
-$N_j^-=\left\{i\in N:(i,j)\in A\right\}$ and $N_j^-=\left\{i\in N:(j,i)\in A\right\}$, respectively.
-The set of sources from which there exists a path to $j$ in $D$ is denoted $S_j$,
-and $T_j$ is the set of sinks to which there is a path from $j$ in $D$.
-Without relevant loss of generality, it is assumed that $S_j\neq\emptyset\neq T_j$ for every $j\in N$
-(with the conventions that $s\in S_s$ and $t\in T_t$ for every $\in S$, $t\in T$),
+The sets of upstream and downstream neighbors of node $i\in N$ are denoted
+$N_i^-=\left\{j\in N:(j,i)\in A\right\}$ and $N_i^+=\left\{j\in N:(i,j)\in A\right\}$, respectively.
+The set of sources from which there exists a path to $i$ in $D$ is denoted $S_i$,
+and $T_i$ is the set of sinks to which there is a path from $i$ in $D$.
+Without relevant loss of generality, it is assumed that $S_i\neq\emptyset\neq T_i$ for every $i\in N$
+(with the conventions that $s\in S_s$ and $t\in T_t$),
 and that $N_s^-=N_t^+=\emptyset$ for every $s\in S$ and $t\in T$.
 
 Define the vectors of arc \emph{costs} $\boldsymbol{c}\in\mathbb{Q}^{A}$ and arc \emph{capacities} $\boldsymbol{h}\in\mathbb{Q}_+^{A}$.
-In the \textsc{Minimum Cost Flow Problem} (MCFP), the flow leaving a source and the flow entering a sink are subject to upper and lower bounds, respectively.
+In the \textsc{Minimum Cost Flow Problem} (mcFP), the flow leaving a source and the flow entering a sink are subject to upper and lower bounds, respectively.
 Denote by $b_s$ the \emph{supply} at source $s\in S$, let $b_t$ be the \emph{demand} at sink $t\in T$,
 and let $\boldsymbol{b}=\left(b_u\right)_{u\in S\cup T}$.
 
@@ -235,22 +232,23 @@ For any $\boldsymbol{f}\in F(D,\boldsymbol{h},\boldsymbol{b})$, let $D(\boldsymb
 \emph{support} of $\boldsymbol{f}$, i.e., the subgraph of $D$
 where $A(\boldsymbol{f})\subseteq A$ consists of arcs $(i,j)\in A$ where $f_{ij}>0$, and
 $N(\boldsymbol{f})\subseteq N$ consists of nodes in $N$ with at least one incident arc in $A(\boldsymbol{f})$.
-Further, let $N_i^-(\boldsymbol{f})$ and $N_i^+(\boldsymbol{f})$ be the sets of in- and out-neighbors, respectively, of node $i\in N(\boldsymbol{f})$.
+For any node set $U\subseteq N$, let $U(\boldsymbol{f})=U\cap N(\boldsymbol{f})$.
 
 %-----------------------------------------------------------------
 \section{Confluent flow and extensions} \label{sec:conf}
 In the current letter, the notion of a \emph{confluent} flow \cite{chen06} is pursued and extended.
 First, confluency in the reverse flow direction is considered.
 Second, in Section~\ref{sec:weak}, a relaxed version of confluent flow is introduced.
-\subsection{Reversing the confluency condition} \label{sec:inf}
 \begin{definition} \label{def:conf}
 A flow $\boldsymbol{f}\in F(D,\boldsymbol{h},\boldsymbol{b})$ is said to be \emph{confluent} if $|N_i^+(\boldsymbol{f})|\leq 1$ at all nodes $i\in N(\boldsymbol{f})$.
 % $f_{ij}>0$ for at most one $j\in N_i^+$.
 \qed
 \end{definition}
 
-That is, confluence means that while flow streams are allowed to merge at any internal node, the flow has to leave along a unique arc.
+That is, confluency means that while flow streams are allowed to merge at any internal node, the flow has to leave along a unique arc.
 Also all flow leaving a source must be allocated to the same arc. At the sinks $t\in T$, the condition is satisfied by the assumption $N_t^+=\emptyset$.
+
+\subsection{Reversing the confluent-flow condition} \label{sec:inf}
 The inflow counterpart of confluent flow, where merging is disallowed at internal nodes and sinks, is defined analogously:
 \begin{definition} \label{def:inf}
 A flow $\boldsymbol{f}\in F(D,\boldsymbol{h},\boldsymbol{b})$ is said to be \emph{influent} if $|N_i^-(\boldsymbol{f})|\leq 1$ at all nodes $i\in N(\boldsymbol{f})$.
@@ -273,21 +271,21 @@ the condition in Definition~\ref{def:confinf} is satisfied at all sources and si
 Hence, in a bipartite digraph, where $P=\emptyset$, any feasible flow is confluent-influent.
 In an arbitrary digraph, a flow that is either confluent or influent is necessarily confluent-influent, but the converse is not true.
 
-The MCFP is extended by imposing any of the fluency conditions:
+The mcFP is extended by imposing any of the fluency conditions:
 \begin{problem} \label{prob:conf}
-The \textsc{Minimum Cost Confluent Flow Problem} (MCCFP):
+The \textsc{Minimum Cost Confluent Flow Problem} (mcCFP):
 Find a flow $\boldsymbol{f}\in F(D,\boldsymbol{h},\boldsymbol{b})$ satisfying Definition~\ref{def:conf} such that the cost $\boldsymbol{c}\cdot\boldsymbol{f}$ is minimized.
 \qed
 \end{problem}
 \noindent
 Analogously, in correspondence with Definitions~\ref{def:inf} and \ref{def:confinf}, respectively, the 
-\textsc{Minimum Cost Influent Flow Problem} (MCIFP) and the \textsc{Minimum Cost Confluent-Influent Flow Problem} (MCCIFP) are defined.
+\textsc{Minimum Cost Influent Flow Problem} (mcIFP) and the \textsc{Minimum Cost Confluent-Influent Flow Problem} (mcCIFP) are defined.
 
 \subsection{Weak fluency conditions} \label{sec:weak}
 
-Different digraphs may be equivalent in the perspective of the MCFP.
-Splitting any node into two new ones joined by an arc with sufficently large capacity and zero cost, renders the MCFP instance unchanged.
-In contrast, the operation largely alters the MCCIFP instance, since any flow in the modified network is confluent-influent.
+Different digraphs may be equivalent in the perspective of the mcFP.
+Splitting any node into two new ones joined by an arc with sufficiently large capacity and zero cost, leaves the mcFP instance unchanged.
+In contrast, the operation largely alters the mcCIFP instance, since any flow in the modified network is confluent-influent.
 A concept that is more resilient to likely graph alterations is introduced next.
 
 \begin{definition} \label{def:weakconfinf}
@@ -303,72 +301,74 @@ In bipartite graphs, weak confluency or influency implies the corresponding cond
 If all paths in $D$ have length at most 2, i.e., if $N_p^-\subseteq S$ and $N_p^+\subseteq T$ for all $p\in P$, then any weakly confluent-influent flow is also
 confluent-influent.
 
-\section{Complexity of fluency-constrained extensions of MCFP} \label{sec:compl}
-A modified version of MCCFP, in which the congestion $\max_{(i,j)\in A}f_{ij}/h_{ij}$ is to be minimized, is known to be NP-hard \cite{chen06}, and even NP-hard to approximate within a factor
+\section{Complexity of fluency-constrained extensions of mcFP} \label{sec:compl}
+A modified version of mcCFP, in which the congestion $\max_{(i,j)\in A}f_{ij}/h_{ij}$ is to be minimized, is known to be NP-hard \cite{chen06}, and even NP-hard to approximate within a factor
 $\tfrac{4}{3}$.
 \emph{Add more recent results!}
 By a simple reduction from the \textsc{Subset Sum Problem},
-it is next shown that MCCFP (Problem~\ref{prob:conf}) is NP-hard even in a restricted class of bipartite graphs.
+it is next shown that mcCFP (Problem~\ref{prob:conf}) is NP-hard even in a restricted class of bipartite graphs.
 \begin{proposition} \label{prop:conf}
-MCCFP is NP-hard in instances where $D$ is bipartite, $P=\emptyset$, and $|T|=2$.
+mcCFP is NP-hard in instances where $D$ is bipartite, $P=\emptyset$, and $|T|=2$.
 \end{proposition}
 \begin{proof}
-We prove that checking feaibility of MCCFP is NP-complete.
+We prove that checking whether $F(D,\boldsymbol{h},\boldsymbol{b})$ contains a confluent flow is NP-complete.
 
 Consider an instance $(b_1,\ldots,b_n,d)$ of the \textsc{Subset Sum Problem}, with positive integers $1\leq b_1\leq\cdots\leq b_n\leq d$.
 Let $D$ be the complete bipartite digraph with node sets $S=\{s_1,\ldots,s_n\}$ and $T=\{t_0,t_1\}$.
 Let the supply at $s_i$ be $b_i$ ($i=1,\ldots,n$), while the demand at $t_0$ and $t_1$ is, respectively, $\sum_{i=1}^nb_i-d$ and $d$.
-Both arcs leaving $s_i$ have capacity $b_i$ and arbitrary cost.
-Because total supply equals total demand, $\boldsymbol{f}\in F(D,\boldsymbol{h},\boldsymbol{b})$ only if $b_i$ flow units leave source $s_i$,
+Both arcs leaving $s_i$ have capacity $b_i$.
+Because total supply equals total demand, $\boldsymbol{f}\in F(D,\boldsymbol{h},\boldsymbol{b})$ if and only if $b_i$ flow units leave source $s_i$,
 $d$ units enter sink $t_1$, and $\sum_{i=1}^nb_i-d$ units enter sink $t_0$.
-Confluence implies that all the flow leaving $s_i$ enters exactly one of the sinks $t_0$ or $t_1$.
-Thus, the MCCFP instance $(D,\boldsymbol{h},\boldsymbol{b},\boldsymbol{c})$ is feasible if and only if there exists a set $S_1\subseteq\{1,\ldots,n\}$ such that $\sum_{i\in S_1}b_i=d$.
+Confluency of $\boldsymbol{f}$ is thus equivalent to the condition that for all $i=1,\ldots,n$, $f_{s_it_k}=b_i$ and $f_{s_it_{1-k}}=0$ for some $k\in\{0,1\}$.
+Thus, any confluent flow $\boldsymbol{f}\in F(D,\boldsymbol{h},\boldsymbol{b})$ satisfies $d=f_{t_1}^-=\sum_{s_i\in S_1}b_i$ for some $S_1\subseteq S$,
+which is precisely the condition for $(b_1,\ldots,b_n,d)$ to be a yes-instance.
 \end{proof}
 
-NP-hardness in restricted instance classes also applies to the influent and confluent-influent counterparts of MCCFP.
+NP-hardness in restricted instance classes also applies to the influent and confluent-influent counterparts of mcCFP.
 In the influent case, the proof repeats the arguments in the proof of Proposition~\ref{prop:conf} applied to a digraph with all arcs reversed.
 \begin{proposition} \label{prop:inf}
-MCIFP is NP-hard in instances where $D$ is bipartite, $P=\emptyset$, and $|S|=2$.
+mcIFP is NP-hard in instances where $D$ is bipartite, $P=\emptyset$, and $|S|=2$.
 \end{proposition}
 \begin{proof}
 Consider the instance of the \textsc{Subset Sum Problem} introduced in the proof of Proposition~\ref{prop:conf}.
 Let $D$ be the complete bipartite digraph with node sets $S=\{s_0,s_1\}$ and $T=\{t_1,\ldots,t_n\}$.
 Let the demand at $t_i$ be $b_i$ ($i=1,\ldots,n$), while the supply at $s_0$ and $s_1$ is, respectively, $\sum_{i=1}^nb_i-d$ and $d$.
-Finally, $c_{st_i}$ is arbitrary and $h_{st_i}=b_i$ for $s\in\{s_0,s_1\}$.
-Following the arguments in the proof of Proposition~\ref{prop:conf}, $(D,\boldsymbol{h},\boldsymbol{b},\boldsymbol{c})$ is a feasible MCIFP instance
-if and only if $\sum_{i\in S_1}b_i=d$ for some $S_1\subseteq\{1,\ldots,n\}$.
+Finally, $h_{st_i}=b_i$ for $s\in\{s_0,s_1\}$.
+Following the arguments in the proof of Proposition~\ref{prop:conf}, there exists an influent flow $\boldsymbol{f}\in F(D,\boldsymbol{h},\boldsymbol{b})$
+if and only if $\sum_{t_i\in T_1}b_i=d$ for some $T_1\subseteq T$.
 \end{proof}
 
-Proposition~\ref{prop:conf} also applies if MCCFP is defined with the demand as upper bounds
+Proposition~\ref{prop:conf} also applies if mcCFP is defined with the demand as upper bounds
 (if the constraints $f_t^-\geq b_t$ are replaced by $f_t^-\leq b_t$).
 Consider the digraph introduced in the proof of the proposition, and let the cost $c_{st}=-2$ for all $s=s_1,\ldots,s_n$ and $t=t_1$.
 For $t=t_0$, let $c_{st}=-1$.
 Hence, the minimum cost is $-t-\sum_{i=1}^nb_i$ if and only if $\sum_{i\in S_1}b_i=d$ for some $S_1\subseteq\{1,\ldots,n\}$.
-Analogously, Proposition~\ref{prop:inf} also holds if the definition of MCIFP undergoes the same modification.
+Analogously, Proposition~\ref{prop:inf} also holds if the definition of mcIFP undergoes the same modification.
 
 % Let $\len{D}$ denote the maximum length of paths from a source to a sink in $D$.
-While MCCIFP is solvcable in polynomial time in bipartite digraphs consisting only of sources and sinks,
-introducing an intermediate set $P$ of nodes renders MCCIFP NP-hard, even if there are no arcs between any two nodes in $P$.
+While mcCIFP is solvable in polynomial time in bipartite digraphs consisting only of sources and sinks,
+introducing an intermediate set $P$ of nodes renders mcCIFP NP-hard, even if there are no arcs between any two nodes in $P$.
 \begin{proposition} \label{prop:confinf}
-MCCIFP is NP-hard in instances where $N_p^-\subseteq S$ and $N_p^+\subseteq T$ for all $p\in P$.
+mcCIFP is NP-hard in instances where $|T|=2$, and $N_p^-\subseteq S$ and $N_p^+\subseteq T$ for all $p\in P$.
 \end{proposition}
 \begin{proof}
 Consider the instance $(b_1,\ldots,b_n,d)$ of the \textsc{Subset Sum Problem} introduced in the proof of Proposition~\ref{prop:conf}.
-Let $D$ be the complete bipartite digraph with node sets $S=\{s_1,\ldots,s_n,s_1',\ldots,s_n'\}$, $P=\{p_1,\ldots,p_n\}$, and $T=\{t_0,t_1\}$.
+Let $D$ be the digraph with node sets $S=\{s_1,\ldots,s_n,s_1',\ldots,s_n'\}$, $P=\{p_1,\ldots,p_n\}$, and $T=\{t_0,t_1\}$.
 Let all arcs of $D$ be incident to $P$, where $N_{p_i}^-=\{s_i,s_i'\}$ and  $N_{p_i}^+=\{t_0,t_1\}$.
 % Node $p_i\in P$ has entering arcs $(s_i,p_i)$ and $(s_i',p_i)$, and leaving arcs $(p_i,t_0)$
 Let the supply at $s_i$ and $s_i'$ be $b_i$ ($i=1,\ldots,n$), while the demand at $t_0$ and $t_1$ is, respectively, $2\sum_{i=1}^nb_i-2d$ and $2d$.
-Both arcs entering $p_i$ have capacity $b_i$, whereas both the leaving arcs have capacity $2b_i$. Arc costs are arbitrary.
+Both arcs entering $p_i$ have capacity $b_i$, whereas both the leaving arcs have capacity $2b_i$.
 
-Consider a feasible flow $\boldsymbol{f}$ in the MCCIFP instance $(D,\boldsymbol{h},\boldsymbol{b},\boldsymbol{c})$ hence defined.
-Then, since total supply equals both the total capacity of arcs leaving $S$ and total demand, $f_{sp_i}=h_{sp_i}=b_i>0$ for all $s=s_i,s_i'$ and $i=1,\ldots,n$.
-It follows that $\boldsymbol{f}$ is confluent, as it is not influent at any $p_i$.
-Thus, all $2b_i$ units of flow leaving $p_i$ are sent to the same sink, $t_0$ or $t_1$.
-Since $t_1$ receives $2d$ units of flow, there is a set $I_1\subseteq \{1,\ldots,n\}$ such that $\sum_{i\in I_1}f_{p_it_1}=2\sum_{i\in I_1}{b_i}=2d$.
+Consider a confluent-influent flow $\boldsymbol{f}\in F(D,\boldsymbol{h},\boldsymbol{b})$.
+Since total supply equals both the total capacity of arcs leaving $S$ and total demand, it holds that $f_{sp_i}=h_{sp_i}=b_i>0$ for all $i=1,\ldots,n$ and $s\in\{s_i,s_i'\}$.
+Because $\boldsymbol{f}$ is confluent-influent, and all $p_i\in P$ receive flow along two entering arcs,
+all $2b_i$ units of flow leaving $p_i$ enter the same sink, $t_0$ or $t_1$.
+Since $t_1$ receives $2d$ units of flow, there is a set $I_1\subseteq \{1,\ldots,n\}$ such that $f_{t_1}^-=\sum_{i\in I_1}f_{p_it_1}=2\sum_{i\in I_1}{b_i}=2d$,
+and $(b_1,\ldots,b_n,d)$ is a yes-instance.
 
-Conversely, if $\sum_{i\in I_1}b_i=d$ for some $I_1\subseteq\{1,\ldots,n\}$, then the flow $\boldsymbol{f}$, where $f_{s_ip_i}=f_{s_i'p_i}=b_i$ ($i=1,\ldots,n\}$),
+Conversely, if $\sum_{i\in I_1}b_i=d$ for some $I_1\subseteq\{1,\ldots,n\}$, then the flow $\boldsymbol{f}\in F(D,\boldsymbol{h},\boldsymbol{b})$, where $f_{s_ip_i}=f_{s_i'p_i}=b_i$ ($i=1,\ldots,n\}$),
 $f_{p_it_0}=\left\{\begin{array}{lr}2b_i, & i\notin I_1 \\ 0, & i\in I_1,\end{array}\right.$ and
-$f_{p_it_1}=\left\{\begin{array}{lr}2b_i, & i\in I_1 \\ 0, & i\notin I_1,\end{array}\right.$ is feasible in the MCCIFP instance.
+$f_{p_it_1}=\left\{\begin{array}{lr}2b_i, & i\in I_1 \\ 0, & i\notin I_1,\end{array}\right.$ is confluent-influent.
 \end{proof}
 
 \subsection{Extensions to weak fluency conditions} \label{sec:wcompl}
@@ -379,11 +379,13 @@ $f_{p_it_1}=\left\{\begin{array}{lr}2b_i, & i\in I_1 \\ 0, & i\notin I_1,\end{ar
 Because Propositions~\ref{prop:conf}-\ref{prop:confinf} apply to instance classes in which the fluency condition in question is equivalent to its
 weak counterpart, it follows immediately that the propositions apply even if the fluency condition is to be understood in the weak sense.
 
-\section{Single-commodity flow formulations for weakly confluent-influent flow} \label{sec:sciMILP}
-Combining the single-commodity flow variables $\boldsymbol{f}$ with binary variables gives a natural formulation of the weak MCCIFP.
+\section{MILP formulations for weakly confluent-influent flow} \label{sec:wciMILP}
+
+\subsection{Single-commodity flow formulations} \label{sec:sciMILP}
+Combining the single-commodity flow variables $\boldsymbol{f}$ with binary variables gives a natural formulation of the weak mcCIFP.
 For all $p\in P$, $s\in S_p$, and $t\in T_p$, let $x_p^s=1$ signify that all paths from $S$ to $p$ in $D(\boldsymbol{f})$ start at $s$.
 Analogously, $x_p^t=1$ means that all paths from $p$ to $T$ terminate at $t$.
-For notational convenience, define the constants $x_u^v=\left\{\begin{array}{lr}1, & u=v \\ 0, & u\neq v,\end{array}\right.$
+For notational convenience, define the constants $x_u^v=\left\{\begin{array}{lr}1, & u=v \\ 0, & u\neq v\end{array}\right.$
 for all $u,v\in S\cup T$, and $x_p^u=0$ for all $p\in P$ and $u\in (S\setminus S_p)\cup(T\setminus T_p)$.
 
 Weakly confluent-influent flow dictates $\sum_{s\in S_p}x_p^s+\sum_{t\in T_p}x_p^t=1$ at all $p\in P$.
@@ -413,12 +415,16 @@ For every path $(s,p_1,\ldots,p_r,t)$ in $D(\boldsymbol{f})$, where $s\in S$ and
 there exists some integer $q\in\{0,1,\ldots,r\}$ such that $x_{p_k}^s=1$ for all $0\leq k\leq q$ and $x_{p_k}^t=1$ for all $q<k\leq r+1$, where $p_0=s$ and $p_{r+1}=t$.
 \end{lemma}
 \begin{proof}
-Consider any $k\in\{1,\ldots,r\}$.
-By \eqref{eq:convMCCIFP} and \eqref{eq:xMCCIFP}, either $x_{p_k}^u=1$ for some $u\in S$ or $x_{p_k}^v=1$ for some $v\in T$.
-In the first case, \eqref{eq:sMCCIFP} applied to $(i,j)=(p_{k-1},p_k)\in A$ yields $x_{p_{k-1}}^u=1$, since $(p_{k-1},p_k)\in A(\boldsymbol{f})$ implies $f_{p_{k-1}p_k}>0$.
-By induction, it follows that $x_{p_0}^u=x_s^u=1$, which means that $s=u$.
-In the second case, by \eqref{eq:tMCCIFP} applied to $(p_k,p_{k+1}),\ldots,(p_r,t)$, it holds that $x_t^v=1$ and $t=v$.
-The claim then follows from $x_{p_0}^s=x_{p_{r+1}}^t=1$.
+Consider any $k\in\{0,1,\ldots,r+1\}$.
+By \eqref{eq:convMCCIFP} and \eqref{eq:xMCCIFP}, $x_{p_k}^{u_k}=1$ for a unique $u_k\in S\cap T$, where $u_0=s$ and $u_{r+1}=t$.
+Let $q=\max\{k=0,1,\ldots,r: u_k\in S\}$.
+If $q=0$, $u_q=s$ immediately follows.
+Otherwise, \eqref{eq:sMCCIFP} applied to $(i,j)=(p_{q-1},p_q)\in A$ yields $x_{p_{q-1}}^{u_q}=1$, since $(p_{k-1},p_k)\in A(\boldsymbol{f})$ implies $f_{p_{k-1}p_k}>0$.
+By induction, it follows that $x_{p_k}^{u_q}=1$ for $k=q,q-1,\ldots,0$, and $x_{p_0}^{u_q}=x_s^{u_q}=1$ yields $u_q=s$.
+Hence, $x_{p_0}^s=\cdots=x_{p_q}^s=1$.
+
+Analogously, since $u_{q+1}\in T$, \eqref{eq:tMCCIFP} applied to $(p_q,p_{q+1}),\ldots,(p_r,p_{r+1})$ yields $x_{p_k}^{u_{q+1}}=1$ for $k=q+1,\ldots,r+1$.
+The observation that $x_{p_{r+1}}^{u_{q+1}}=x_{t}^{u_{q+1}}=1$ implies $u_{q+1}=t$ completes the proof.
 \end{proof}
 
 \begin{proposition} \label{prop:MCCIFP}
@@ -432,17 +438,17 @@ If: Assume $(\boldsymbol{f},\boldsymbol{x})$ satisfies \eqref{eq:convMCCIFP}--\e
 % In the first case, \eqref{eq:sMCCIFP} applied to $(i,j)=(p_{k-1},p_k)\in A$ implies $x_{p_{k-1}}^s=1$, since $f_{p_{k-1}p_k}>0$.
 % By induction, it follows that $x_u^s=1$, which means that $s=u$.
 % In the second case, by \eqref{eq:tMCCIFP} applied to $(p_k,p_{k+1}),\ldots,(p_r,v)$, it holds that $x_v^t=1$ and $t=v$.
-Consider an arbitrary $p\in P\cap N(\boldsymbol{f})$.
+Consider an arbitrary $p\in P(\boldsymbol{f})$.
 If $x_p^s=1$ for some $s\in S$, Lemma~\ref{lem:MCCIFP} says that $x_u^s=1$ at all nodes $u$ on paths from $S$ to $p$ in $D(\boldsymbol{f})$.
 Since $x_u^s=0$ at sources $u\neq s$, it follows that all paths to $p$ start from source $s$.
 Otherwise, $x_p^t=1$ for some $t\in T$. By Lemma~\ref{lem:MCCIFP}, $x_u^t=1$ at all nodes $u$ on paths from $p$ to $T$, and $x_u^t=0$ at sinks $u\neq t$ proves that all paths terminate at sink $t$.
 Hence, $\boldsymbol{f}$ is a weakly confluent-influent flow in $F(D,\boldsymbol{h},\boldsymbol{b})$.
 
 Only if: Assume $\boldsymbol{f}$ is a weakly confluent-influent flow, which immediately implies \eqref{eq:fMCCIFP}.
-For all $p\in P\setminus N(\boldsymbol{f})$ and $u\in S_p\cup T_p$, choose $x_p^u\in\{0,1\}$ arbitrarily such that \eqref{eq:convMCCIFP} is satisfied.
+For all $p\in P\setminus P(\boldsymbol{f})$ and $u\in S_p\cup T_p$, choose $x_p^u\in\{0,1\}$ arbitrarily such that \eqref{eq:convMCCIFP} is satisfied.
 For arcs $(i,j)\in A\setminus A(\boldsymbol{f})$, $f_{ij}=0$ shows that \eqref{eq:sMCCIFP}--\eqref{eq:tMCCIFP} are satisfied.
-Consider a $p\in P\cap N(\boldsymbol{f})$. If $p$ receives all its flow from a uniques source $s$, let $x_p^s=1$ and $x_p^u=0$ for all $u\in T_p\cup S_p\setminus\{s\}$.
-Otherwise, $p$ sends all flow to a unique sink $t$ since $\boldsymbol{f}$ is weakly con fluent-influent.
+Consider a $p\in P(\boldsymbol{f})$. If $p$ receives all its flow from a unique source $s$, let $x_p^s=1$ and $x_p^u=0$ for all $u\in T_p\cup S_p\setminus\{s\}$.
+Otherwise, $p$ sends all flow to a unique sink $t$ since $\boldsymbol{f}$ is weakly confluent-influent.
 In that case, let $x_p^t=1$ and $x_p^u=0$ for all $u\in S_p\cup T_p\setminus\{t\}$. Thus, \eqref{eq:convMCCIFP} is satisfied.
 For any $(i,j)\in A(\boldsymbol{f})$, node $i$ receives all its flow from $s$ if node $j$ does.
 Hence, $x_i^s=1$ if $x_j^s=1$. Analogously, $x_j^t=1$ if $x_i^t=1$.
@@ -455,7 +461,7 @@ For any feasible solution $(\boldsymbol{f},\boldsymbol{x})$ to \eqref{eq:objMCCI
 the arc set $\bar{A}(\boldsymbol{f})=\left\{(i,j)\in A(\boldsymbol{f}):\sum_{s\in S_i}x_i^s=\sum_{t\in T_j}x_j^t=1\right\}$ is a cut set in $D(\boldsymbol{f})$ separating $S$ from $T$.
 \end{corollary}
 \begin{proof}
-Consider any $S-T$-path in $D(\boldsymbol{f})$.
+Consider any $S$-$T$-path in $D(\boldsymbol{f})$.
 The claim follows by observing that according to Lemma~\ref{lem:MCCIFP}, there exists an arc $(i,j)$ on the path such that $x_i^s=x_j^t=1$ for some $(s,t)\in(S_i\times T_j)$.
 \end{proof}
 
@@ -468,11 +474,11 @@ Let $\boldsymbol{f}^{st}=\left(f_{ij}^{st}\right)_{(i,j)\in A}$.
 
 Recall the binary variables and constants $x_i^u$ ($i\in N$, $u\in S\cup T$) introduced in Section~\ref{sec:sciMILP},
 along with the binary constants $x_u^v=1$ for $u=v$ and $x_u^v=0$ for $u\neq v$ ($u,v\in S\cup T$).
-When transforming single- to multi-commodity flow variables, the proportions of the flow at node $p$ supplied at source $s$ and delivered at sink $t$ become useful.
+When transforming from single- to multi-commodity flow variables, the proportions of the flow at node $p$ supplied at source $s$ and delivered at sink $t$ become useful.
 For any $\boldsymbol{f}\in F(D,\boldsymbol{h},\boldsymbol{b})$, let $w_u^v=x_u^v$ for all $u,v\in S\cup T$, and let
 \begin{eqnarray}
-w_p^s = \frac{\sum_{i\in N_p^-}w_i^sf_{ip}}{\sum_{i\in N_p^-}f_{ip}}, & ~p\in P\cap N(\boldsymbol{f}), s\in S_p \label{eq:ws} \\
-w_p^t = \frac{\sum_{j\in N_p^+}w_j^tf_{pj}}{\sum_{j\in N_p^+}f_{pj}}, & ~p\in P\cap N(\boldsymbol{f}), t\in T_p. \label{eq:wt}
+w_p^s = \frac{\sum_{i\in N_p^-}w_i^sf_{ip}}{\sum_{i\in N_p^-}f_{ip}}, & ~p\in P(\boldsymbol{f}), s\in S_p \label{eq:ws} \\
+w_p^t = \frac{\sum_{j\in N_p^+}w_j^tf_{pj}}{\sum_{j\in N_p^+}f_{pj}}, & ~p\in P(\boldsymbol{f}), t\in T_p. \label{eq:wt}
 \end{eqnarray}
 
 \begin{lemma} \label{lem:w}
@@ -480,7 +486,7 @@ For all $p\in N(\boldsymbol{f})$, $\sum_{s\in S_p}w_p^s=\sum_{t\in T_p}w_p^t=1$.
 \end{lemma}
 \begin{proof}
 For $i\in S$, $\sum_{s\in S}w_i^s=1$ is obvious. 
-Assume $\sum_{s\in S_i}w_i^s=1$ for all $i\in N_p^-(\boldsymbol{f})$, where $p\in P\cap N(\boldsymbol{f})$.
+Assume $\sum_{s\in S_i}w_i^s=1$ for all $i\in N_p^-(\boldsymbol{f})$, where $p\in P(\boldsymbol{f})$.
 Then, by \eqref{eq:ws}, $\sum_{s\in S_p}w_p^s=\sum_{s\in S_p}\frac{\sum_{i\in N_p^-}w_i^sf_{ip}}{\sum_{i\in N_p^-}f_{ip}}=1$.
 Because $D(\boldsymbol{f})$ is acyclic, induction proves $\sum_{s\in S_p}w_p^s=1$ for all $p\in N(\boldsymbol{f})$.
 The proof of $\sum_{t\in T_p}w_p^t=1$ is analogous.
@@ -497,11 +503,11 @@ $x_i^s+x_i^t=x_j^s+x_j^t=1\leq x_i^s+x_j^t$ for all $(i,j)\in A(\boldsymbol{f}^{
 If: Assume that flow vectors $\boldsymbol{f}^{st}$ satisfying the said conditions exist. % and consider an arbitrary arc $(i,j)\in A$. %$(\boldsymbol{f})$
 At arcs $(i,j)\notin A(\boldsymbol{f})$, it holds that $f_{ij}=0$ satisfies \eqref{eq:sMCCIFP}--\eqref{eq:tMCCIFP} since the right-hand side of both inequalities is non-negative for all $(s,t)\in S_i\times T_j$.
 For arcs $(i,j)\in A(\boldsymbol{f})$, observe first that \eqref{eq:fMCCIFP} implies $f_{ij}\leq h_{ij}$.
-Therefore, it suffices to prove $y_{ij}^s\geq 1$ and $y_{ij}^t\geq 1$ for all $(s,t)\in S_i\times T_j$, where $y_{ij}^s=1-x_j^s+x_i^s$ and $y_{ij}^t=1-x_i^t+x_j^t$.
+Therefore, it suffices to prove $y_{ij}^u\geq 1$ for all $u\in S_i\cup T_j$, where $y_{ij}^u=1-x_j^u+x_i^u$ if $u\in S_i$ and $y_{ij}^u=1-x_i^u+x_j^u$ if $u\in T_j$.
 From $\boldsymbol{f} = \sum_{(s,t)\in S\times T}\boldsymbol{f}^{st}$, it follows that $(i,j)\in A(\boldsymbol{f^{st}})$ for at least one $(s,t)\in S_i\times T_j$.
-Because of the assumption $x_i^s+x_i^t=x_j^s+x_j^t=1$, \eqref{eq:convMCCIFP} implies $x_i^u=x_j^u=0$ for all $u\in(S_i\cup T_j)\setminus\{s,t\}$, implying $y_{ij}^s=y_{ij}^t=1$.
+Because of the assumption $x_i^s+x_i^t=x_j^s+x_j^t=1$, \eqref{eq:convMCCIFP} implies $x_i^u=x_j^u=0$ for all $u\in(S_i\cup T_j)\setminus\{s,t\}$, implying $y_{ij}^u=1$.
 Further, combining \eqref{eq:convMCCIFP} and the assumption $x_i^s+x_j^t\geq 1$ yields $y_{ij}^s=1-x_j^s+x_i^s\geq x_j^t+x_i^s\geq 1$ and $y_{ij}^t=1-x_i^t+x_j^t\geq x_i^s+x_j^t\geq 1$. 
-It follows that \eqref{eq:sMCCIFP}--\eqref{eq:tMCCIFP} hold for all $(s,t)\in S_i\times T_j$.
+It follows that \eqref{eq:sMCCIFP}--\eqref{eq:tMCCIFP} hold for all $u\in S_i\cup T_j$.
 
 Only if: 
 Assume that $(\boldsymbol{f},\boldsymbol{x})$ satisfies \eqref{eq:sMCCIFP}--\eqref{eq:tMCCIFP}.
@@ -510,15 +516,15 @@ Let $f_{ij}^{st}=0$ for $(i,j)\in A\setminus A(\boldsymbol{f})$.
 Then, $\sum_{i\in N_p^-}f_{ip}^{st} = w_p^t\sum_{i\in N_p^-}w_i^sf_{ip} = w_p^tw_p^s\sum_{i\in N_p^-}f_{ip} = w_p^tw_p^s\sum_{j\in N_p^+}f_{pj} = w_p^s\sum_{j\in N_p^+}w_j^tf_{pj} = \sum_{j\in N_p^+}f_{pj}^{st}$.
 Further, $\sum_{s\in S_i}\sum_{t\in T_j}f_{ij}^{st}=\sum_{s\in S_i}\sum_{t\in T_j}f_{ij}w_i^sw_j^t=f_{ij}$ by Lemma~\ref{lem:w}.
 
-Consider any $i,j)\in A$ and $(s,t)\in S_i\times T_j$ such that $(i,j)\in A(\boldsymbol{f}^{st})\subseteq A(\boldsymbol{f})$.
+Consider any $(i,j)\in A$ and $(s,t)\in S_i\times T_j$ such that $(i,j)\in A(\boldsymbol{f}^{st})\subseteq A(\boldsymbol{f})$.
 Since $\boldsymbol{f}^{st}$ satisfies conservation of flow at $P$, there exists a path in $D(\boldsymbol{f}^{st})$ from $s$ to $t$ intersecting $(i,j)$.
-Because $\boldsymbol{f}^{st}\leq\boldsymbol{f}$, this is also a path in $D(\boldsymbol{f}^{st})$.
+Because $\boldsymbol{f}^{st}\leq\boldsymbol{f}$, this is also a path in $D(\boldsymbol{f})$.
 Lemma~\ref{lem:MCCIFP} then shows that for $k\in\{i,j\}$, either $x_k^s=1$ or $x_k^t=1$,
 and that $x_i^s+x_j^t\geq 1$.
 \end{proof}
 
-Proposition~\ref{prop:multi} suggests a multi-commodity flow formulation of the weak MCCIFP:
-% Imposing $f_{ij}^{st}=0$ unless $x_i^s+x_i^t=x_j^s+x_j^t=1$ and $x_i^t+x_j^s\leq 1$, a multi-commodity flow formulation for the weak MCCIFP is given as:
+Proposition~\ref{prop:multi} suggests a multi-commodity flow formulation of the weak mcCIFP:
+% Imposing $f_{ij}^{st}=0$ unless $x_i^s+x_i^t=x_j^s+x_j^t=1$ and $x_i^t+x_j^s\leq 1$, a multi-commodity flow formulation for the weak mcCIFP is given as:
 
 \begin{eqnarray}
 \min & \sum_{(i,j)\in A}c_{ij}f_{ij} \label{eq:objmMCCIFP} \\
@@ -534,19 +540,6 @@ Observe that by including, e.g., all $s\in S_j\setminus S_i$ in \eqref{eq:istmMC
 According to Proposition~\ref{prop:multi}, inequalities \eqref{eq:sMCCIFP}--\eqref{eq:tMCCIFP} are redundant in the multi-commodity formulation \eqref{eq:objmMCCIFP}--\eqref{eq:allMCCIFP}.
 In the interest of a strong continuous relaxation, however, the constraints are included.
 
-% \begin{proposition} \label{prop:multi}
-% Denote by $z_{\text{LP}}^1$ and $z_{\text{LP}}^2$ the optimal objective function values in the continuous relaxations of
-% problems \eqref{eq:objMCCIFP}--\eqref{eq:xMCCIFP} and \eqref{eq:objmMCCIFP}--\eqref{eq:mMCCIFP}, respectively.
-% Then, $z_{\text{LP}}^1\leq z_{\text{LP}}^2$.
-% \end{proposition}
-% \begin{proof}
-% Assume $(\boldsymbol{f},\boldsymbol{x})$ satisfies \eqref{eq:fmMCCIFP}--\eqref{eq:isjtmMCCIFP}, \eqref{eq:convMCCIFP}, \eqref{eq:fMCCIFP}, and $0\leq x_p^s,x_p^t\leq 1$ for all $p\in P$, $(s,t)\in S_p\times T_p$.
-% It suffices to prove that $(\boldsymbol{f},\boldsymbol{x})$ satisfies \eqref{eq:sMCCIFP}--\eqref{eq:tMCCIFP}.
-% Consider any $(i,j)\in A$ and $(s,t)\in S_i\times T_j$, and observe that \eqref{eq:convMCCIFP} implies $x_i^s\leq 1-x_i^t$ and $x_j^t\leq 1-x_j^s$.
-% Applying \eqref{eq:fmMCCIFP}, \eqref{eq:isjtmMCCIFP} and\eqref{eq:convMCCIFP} in order thus yields
-% $f_{ij} = \sum_{s\in S_i}\sum_{t\in T_j}f_{ij}^{st} \leq \sum_{s\in S_i}\sum_{t\in T_j}h_{ij}^{st}(x_i^s+x_j^t) \leq \sum_{s\in S_i}\sum_{t\in T_j}h_{ij}(x_i^s+1-x_j^s)$
-% \end{proof}
-
 \section{Valid inequalities} \label{sec:vi}
 \subsection{A strengthened single-commodity formulation} \label{sec:vis}
 Redundant valid inequalities in the single-commodity model are derived by applying the idea behind constraints \eqref{eq:sMCCIFP}--\eqref{eq:tMCCIFP}
@@ -559,8 +552,8 @@ Therefore, the inequalities
  & f_{ij}\leq h_{ij}\left(1+\sum_{t\in T'}(x_j^t-x_i^t)\right) & (i,j)\in A, T'\subseteq T \label{eq:vitMCCIFP}
 \end{eqnarray}
 are valid.
-Alternatively, \eqref{eq:visMCCIFP}--\eqref{eq:vitMCCIFP} are derived from the observation that along any path $(i_1,\ldots,i_m)$ in $D(\boldsymbol{f})$,
-$x_{i_k}^u$ is non-increasing with $k$ for all $u\in S$, and non-decreasing for all $u\in T$.
+Alternatively, \eqref{eq:visMCCIFP}--\eqref{eq:vitMCCIFP} are derived from the observation that along any path $(p_1,\ldots,p_r)$ in $D(\boldsymbol{f})$,
+$x_{p_k}^u$ is non-increasing with $k$ for all $u\in S$, and non-decreasing for all $u\in T$.
 This follows directly from \eqref{eq:sMCCIFP}--\eqref{eq:tMCCIFP}.
 The observation also implies validity of the combined inequality
 \begin{equation}
@@ -569,7 +562,7 @@ The observation also implies validity of the combined inequality
 
 \noindent
 which is a generalization of \eqref{eq:visMCCIFP}--\eqref{eq:vitMCCIFP}.
-The potential of inequality \eqref{eq:visMCCIFP} to strengthen \eqref{eq:sMCCIFP}, and \eqref{eq:vitMCCIFP} to strengthen \eqref{eq:tMCCIFP}, are addressed next:
+The potential of inequalities \eqref{eq:visMCCIFP}--\eqref{eq:vitMCCIFP} to strengthen \eqref{eq:sMCCIFP} and \eqref{eq:tMCCIFP}, respectively, is addressed next:
 \begin{proposition} \label{prop:strong}
 Let $(\boldsymbol{f},\boldsymbol{x})$ be a feasible solution to the continuous relaxation of \eqref{eq:objMCCIFP}--\eqref{eq:xMCCIFP}.
 If, for every arc $(i,j)\in A(\boldsymbol{f})$, it holds that $x_i^s\geq x_j^s$ for all $s\in S_j$ and $x_i^t\leq x_j^t$ for all $t\in T_i$,
