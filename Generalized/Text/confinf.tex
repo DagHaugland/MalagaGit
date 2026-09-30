@@ -105,7 +105,7 @@
 \affil[2]{\orgdiv{Department of Computer Architecture}, \orgname{Universidad de M\'alaga}, \orgaddress{\city{M\'alaga}, \country{Spain}}}
 
 \abstract{
-Network flow problems tend to undergo a transistion from tractable to computationally demanding when special conditions are imposed on the flow.
+Network flow problems tend to undergo a transition from tractable to computationally demanding when special conditions are imposed on the flow.
 An example, introduced about two decades ago, is the requirement that all flow leaving a network node must be allocated to a unique arc.
 Such a split-free flow is called confluent.
 In the current work, several extensions of confluent flow are conceptualized and analyzed.
@@ -118,7 +118,7 @@ The current work proves that even the weak version of any of these flow conditio
 Hardness is shown to persist even in restricted instances, such as bipartite digraphs with only two sinks.
 For one of the flow conditions, single- and multi-commodity flow formulations are given,
 accompanied by proofs of their correctness.
-Valid inqualities intended for cutting-plane approaches are given for both formulations.
+Valid inequalities intended for cutting-plane approaches are given for both formulations.
 }
 \keywords{
 network flow, complexity, integer programming, valid inequalities
@@ -192,9 +192,20 @@ when the flow must be confluent and satisfy demand at all sinks.
 Approximating the minimum congestion to within a factor 4/3 is proved to be NP-hard.
 The follow-up work \citep{chen07} strengthens this result, and concludes that hardness persists if the approximation bound is relaxed to $1+\log_2{|T|}/2$,
 where $T$ is the set of sinks in the graph.
+The problem of minimizing the congestion over the set of confluent flow vectors is generalized by \citet{donovan07}.
+They prove that the problem remains NP-hard if the flow condition is relaxed to \emph{bifurcated flow}, which means that at most two arcs leaving any node may carry flow.
+This concept is further generalized to other bounds on the number of such arcs.
+
 \citet{dressler10} study the \textsc{Maximum Confluent Flow Problem}, for which they give complexity and approximability results.
 In particular, the problem is proved to be NP-hard even for directed trees, but solvable in pseudo-polynomial time for graph classes of bounded treewidth.
 The authors later prove that the single-sink version of the problem is solvable in polynomial time if the digraph is outerplanar \citep{dressler14}.
+\citet{bhatia08} study the \textsc{Traffic Engineering Problem}, which takes as input a graph with node capacities, and asks for a set of arcs of minimum total cost to be added,
+such that a confluent flow exists.
+The requirement is that the supply at all nodes be routed confluently to the unique sink.
+Even when the input graph is a tree, approximation algorithms for this problem exist only if $P=NP$.
+\citet{shepherd15b} prove that the the same is required for the maximum confluent flow in a node-capacitated digraph with a single sink to be approximated within a factor below $\mathcal{O}(\sqrt{|A|})$.
+The minimum congestion in this type of graphs is equally hard to approximate \cite{shepherd15b}.
+Under mild assumptions about node supply and capacities, however, algorithms with approximation ratio given by high-degree polynomials in the logarithm of the node cardinality are known \cite{shepherd15a}.
 
 In the current letter, the following contributions are made: The extensions of confluent flow discussed above are conceptualized.
 The complexity of the corresponding minimum cost flow problems is analyzed, and simple NP-hardness proofs are given.
@@ -304,7 +315,6 @@ confluent-influent.
 \section{Complexity of fluency-constrained extensions of mcFP} \label{sec:compl}
 A modified version of mcCFP, in which the congestion $\max_{(i,j)\in A}f_{ij}/h_{ij}$ is to be minimized, is known to be NP-hard \cite{chen06}, and even NP-hard to approximate within a factor
 $\tfrac{4}{3}$.
-\emph{Add more recent results!}
 By a simple reduction from the \textsc{Subset Sum Problem},
 it is next shown that mcCFP (Problem~\ref{prob:conf}) is NP-hard even in a restricted class of bipartite graphs.
 \begin{proposition} \label{prop:conf}
@@ -372,12 +382,22 @@ $f_{p_it_1}=\left\{\begin{array}{lr}2b_i, & i\in I_1 \\ 0, & i\notin I_1,\end{ar
 \end{proof}
 
 \subsection{Extensions to weak fluency conditions} \label{sec:wcompl}
-% It is readily observed that if $\boldsymbol{f}$ is confluent, then it is also weakly confluent.
-% Analogous claims hold for the other two fluency conditions.
-% Further, in bipartite digraphs, weak confluence (weak influence) implies confluence (influence).
-% Finally, if $\len{D}=2$ (see the proof of Proposition~\ref{prop:confinf}), then a weakly confluent-influent flow in $D$ is also confluent-influent.
-Because Propositions~\ref{prop:conf}-\ref{prop:confinf} apply to instance classes in which the fluency condition in question is equivalent to its
+Because Propositions~\ref{prop:conf}--\ref{prop:confinf} apply to instance classes in which the fluency condition in question is equivalent to its
 weak counterpart, it follows immediately that the propositions apply even if the fluency condition is to be understood in the weak sense.
+Moreover, small extensions of the instances defined in the proofs of the propositions prove that approximation algorithms do not exist for any of the problems.
+This is true either the condition applies weakly or strongly.
+
+% \begin{corollary} \label{cor:appr}
+% Unless $P=NP$, there exists no approximation algorithm for any of the problems mcCFP, mcIFP, or mcCIFP, even if the flow condition applies in the weak sense.
+% \end{corollary}
+% Consider the digraph defined in the proof of Proposition~\ref{prop:conf} extended by a source node $s_0$ and arcs $(s_0,t_0)$ and $(s_0,t_1)$.
+% Let the cost of the new arcs be $c_{s_0t}=M+1$ ($t_\in\{t_0,t_1\}$), where $M>0$, and let all other arcs have unit cost. Let the supply at $s_0$ be $b_0=\sum_{i=1}^nb_i$,
+% and let $b_0$ also be the capacity of the arcs leaving $s_0$.
+% As $s_0$
+% It follows that if the \textsc{Subset Sum} instance $(b_1,\ldots,b_n,d)$ is a yes-instance, then the mcCFP instance has minimum cost $z=\sum_{i=1}^nb_i$.
+% Otherwise, $z\geq M+\sum_{i=1}^nb_i$.
+% Hence, any algorithm with approximation ratio $\alpha$ returns 
+% 
 
 \section{MILP formulations for weakly confluent-influent flow} \label{sec:wciMILP}
 
@@ -622,7 +642,22 @@ f_{ij}^{s_1t}+f_{ij}^{s_2t}\leq h_{ij}(x_i^{s_1}+x_i^{s_2}+x_i^t),
 \noindent
 which obviously is stronger.
 
+\section{Conclusion} \label{sec:conc}
+Network flow models with constraints on the flow pattern are highly applicable.
+This is true not only for the confluent flow restriction, but also for related conditions introduced and analyzed in the current work.
+Imposing that each node receives flow from at most one upstream neighbor, that is, disallowing flow merging, makes otherwise tractable optimization problems NP-hard.
+The same applies if each node can either merge or split the flow, but not both merge and split.
+Furthermore, NP-hardness persists if this flow condition must be present in its weak form, meaning that an intermediate node cannot receive from multiple sources if it also delivers to multiple sinks.
+
+The weak variant of the \textsc{Minimum Cost Confluent-Influent Flow Problem} hence defined is interesting not only in itself.
+In the \textsc{Pooling Problem} \cite{haverly78}, the goal is to find a minimum-cost flow that at every sink respects constraints on the \emph{composition}.
+At every source, the composition is given as input data, while at internal nodes, the composition is a convex combination of the compositions of the entering flow streams.
+Taking this into account makes the problem NP-hard \cite{alfaki13}, and mathematical programming formulations typically contain bilinear constraints corresponding to the blending of the flow.
+Confining the feasible region to weakly confluent-influent flow can however eliminate the need for bilinear constraints \cite{gestsson26}.
+The study of inner approximations to the \textsc{Pooling Problem} by means of weakly confluent-influent flow is an interesting line of future research.
+
 \subsection*{Acknowledgment}
+\small{The work of the first author has been funded by grants from L.\ Meltzers Universitetsstiftelse (105747107).}
 \small{The work of the second author has been funded by grants from the Spanish state (TIN2012-37483-C03-01 and TIN2015-66680), Junta de Andaluc\'{\i}a (P11-TIC-7176),
 in part financed by the European Regional Development Fund (ERDF).}
 
