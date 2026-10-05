@@ -5,6 +5,9 @@ class Node:
     self.b = b
     self.inarcs = {}
     self.outarcs = {}
+    self.sources = {}
+    self.sinks = {}
+    self.yOpt = {}
 
   def addIn(self, arc):
     self.inarcs[arc.fromnode] = arc
