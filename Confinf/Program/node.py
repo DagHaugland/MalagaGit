@@ -16,7 +16,10 @@ class Node:
     self.outarcs[arc.tonode] = arc
 
   def isSource(self):
-    return self.b > 0
+    return self in self.g.sources
+
+  def isPool(self):
+    return self in self.g.pools
 
   def isSink(self):
-    return self.b < 0
+    return self in self.g.sinks
