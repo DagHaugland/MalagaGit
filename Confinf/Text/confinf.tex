@@ -549,10 +549,10 @@ Proposition~\ref{prop:multi} suggests a multi-commodity flow formulation of the 
 \begin{eqnarray}
 \min & \sum_{(i,j)\in A}c_{ij}f_{ij} \label{eq:objmMCCIFP} \\
      & f_{ij} = \sum_{s\in S_i}\sum_{t\in T_j}f_{ij}^{st}, & (i,j)\in A \label{eq:fmMCCIFP} \\
-     & \sum_{j\in N_i^-}f_{ji}^{st} = \sum_{j\in N_i^+}f_{ij}^{st}, & i\in N(\boldsymbol{f})\setminus\{s,t\} \label{eq:stmMCCIFP} \\
-     & 0\leq f_{ij}^{st}\leq h_{ij}^{st}\left(x_i^s+x_i^t\right), & (i,j)\in A, s\in S_j, t\in T_i \label{eq:istmMCCIFP} \\
-     & 0\leq f_{ij}^{st}\leq h_{ij}^{st}\left(x_j^s+x_j^t\right), & (i,j)\in A, s\in S_j, t\in T_i \label{eq:jtsmMCCIFP} \\
-     & 0\leq f_{ij}^{st}\leq h_{ij}^{st}\left(x_i^s+x_j^t\right), & (i,j)\in A, s\in S_j, t\in T_i \label{eq:isjtmMCCIFP} \\
+     & \sum_{j\in N_i^-}f_{ji}^{st} = \sum_{j\in N_i^+}f_{ij}^{st}, & i\in N\setminus\{s,t\} \label{eq:stmMCCIFP} \\
+     & 0\leq f_{ij}^{st}\leq h_{ij}^{st}\left(x_i^s+x_i^t\right), & (i,j)\in A, s\in S_i, t\in T_j \label{eq:istmMCCIFP} \\
+     & 0\leq f_{ij}^{st}\leq h_{ij}^{st}\left(x_j^s+x_j^t\right), & (i,j)\in A, s\in S_i, t\in T_j \label{eq:jtsmMCCIFP} \\
+     & 0\leq f_{ij}^{st}\leq h_{ij}^{st}\left(x_i^s+x_j^t\right), & (i,j)\in A, s\in S_i, t\in T_j \label{eq:isjtmMCCIFP} \\
      & \eqref{eq:convMCCIFP}-\eqref{eq:xMCCIFP}\label{eq:mMCCIFP} \label{eq:allMCCIFP}
 \end{eqnarray}
 
