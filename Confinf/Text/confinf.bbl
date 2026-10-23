@@ -1,6 +1,6 @@
 %% BioMed_Central_Bib_Style_v1.01
 
-\begin{thebibliography}{16}
+\begin{thebibliography}{15}
 % BibTex style file: bmc-mathphys.bst (version 2.1), 2014-07-24
 \ifx \bisbn   \undefined \def \bisbn  #1{ISBN #1}\fi
 \ifx \binits  \undefined \def \binits#1{#1}\fi
@@ -44,7 +44,7 @@
 \csname PreBibitemsHook\endcsname
 
 %%% 1
-\bibitem[\protect\citeauthoryear{Chen et~al.}{2006}]{chen06}
+\bibitem[\protect\citeauthoryear{Chen et~al.}{2006}]{chen2006merge}
 \begin{barticle}
 \bauthor{\bsnm{Chen}, \binits{J.}},
 \bauthor{\bsnm{Rajaraman}, \binits{R.}},
@@ -54,31 +54,30 @@
 \bvolume{72}(\bissue{3}),
 \bfpage{468}--\blpage{489}
 (\byear{2006})
-\doiurl{10.1016/j.jcss.2005.10.003}
+\doiurl{10.1016/j.jcss.2005.09.009}
 \end{barticle}
 \endbibitem
 
 %%% 2
-\bibitem[\protect\citeauthoryear{Chen et~al.}{2007}]{chen07}
-\begin{barticle}
-\bauthor{\bsnm{Chen}, \binits{J.}},
-\bauthor{\bsnm{Kleinberg}, \binits{R.D.}},
-\bauthor{\bsnm{Lov{\'a}sz}, \binits{L.}},
-\bauthor{\bsnm{Rajaraman}, \binits{R.}},
-\bauthor{\bsnm{Sundaram}, \binits{R.}},
-\bauthor{\bsnm{Vetta}, \binits{A.}}:
-\batitle{(almost) tight bounds and existence theorems for single-commodity
-  confluent flows}.
-\bjtitle{Journal of the ACM}
-\bvolume{54}(\bissue{4}),
-\bfpage{16}
-(\byear{2007})
+\bibitem[\protect\citeauthoryear{Chen et~al.}{2007}]{chen2007confluent}
+\begin{botherref}
+\oauthor{\bsnm{Chen}, \binits{J.}},
+\oauthor{\bsnm{Kleinberg}, \binits{R.D.}},
+\oauthor{\bsnm{Lov{\'a}sz}, \binits{L.}},
+\oauthor{\bsnm{Rajaraman}, \binits{R.}},
+\oauthor{\bsnm{Sundaram}, \binits{R.}},
+\oauthor{\bsnm{Vetta}, \binits{A.}}:
+(almost) tight bounds and existence theorems for single-commodity confluent
+  flows.
+J. ACM
+\textbf{54}(4)
+(2007)
 \doiurl{10.1145/1255443.1255444}
-\end{barticle}
+\end{botherref}
 \endbibitem
 
 %%% 3
-\bibitem[\protect\citeauthoryear{Mamada et~al.}{2005}]{mamada05}
+\bibitem[\protect\citeauthoryear{Mamada et~al.}{2005}]{mamada2005evacuation}
 \begin{barticle}
 \bauthor{\bsnm{Mamada}, \binits{S.}},
 \bauthor{\bsnm{Uno}, \binits{T.}},
@@ -95,7 +94,7 @@
 \endbibitem
 
 %%% 4
-\bibitem[\protect\citeauthoryear{Kleinberg}{1996}]{kleinberg96}
+\bibitem[\protect\citeauthoryear{Kleinberg}{1996}]{kleinberg1996unsplittable}
 \begin{bchapter}
 \bauthor{\bsnm{Kleinberg}, \binits{J.M.}}:
 \bctitle{Single-source unsplittable flow}.
@@ -103,6 +102,7 @@ In: \bbtitle{Proceedings of 37th Conference on Foundations of Computer
   Science},
 pp. \bfpage{68}--\blpage{77}
 (\byear{1996}).
+\doiurl{10.1109/SFCS.1996.548465} .
 \bcomment{IEEE}
 \end{bchapter}
 \endbibitem
@@ -123,20 +123,7 @@ pp. \bfpage{68}--\blpage{77}
 \endbibitem
 
 %%% 6
-\bibitem[\protect\citeauthoryear{Kolliopoulos and Stein}{2002}]{kolliopoulos02}
-\begin{barticle}
-\bauthor{\bsnm{Kolliopoulos}, \binits{S.G.}},
-\bauthor{\bsnm{Stein}, \binits{C.}}:
-\batitle{Approximation algorithms for single-source unsplittable flow}.
-\bjtitle{SIAM Journal on Computing}
-\bvolume{31},
-\bfpage{919}--\blpage{946}
-(\byear{2002})
-\end{barticle}
-\endbibitem
-
-%%% 7
-\bibitem[\protect\citeauthoryear{Kolliopoulos}{2007}]{kolliopoulos07}
+\bibitem[\protect\citeauthoryear{Kolliopoulos}{2007}]{kolliopoulos2007unsplittable}
 \begin{bchapter}
 \bauthor{\bsnm{Kolliopoulos}, \binits{S.G.}}:
 \bctitle{Edge-disjoint paths and unsplittable flow}.
@@ -151,26 +138,28 @@ pp. \bfpage{1}--\blpage{16}.
 \end{bchapter}
 \endbibitem
 
-%%% 8
-\bibitem[\protect\citeauthoryear{Donovan et~al.}{2007}]{donovan07}
+%%% 7
+\bibitem[\protect\citeauthoryear{Donovan
+  et~al.}{2007}]{donovan2007degreeconstrained}
 \begin{bchapter}
 \bauthor{\bsnm{Donovan}, \binits{P.}},
 \bauthor{\bsnm{Shepherd}, \binits{F.B.}},
 \bauthor{\bsnm{Vetta}, \binits{A.}},
 \bauthor{\bsnm{Wilfong}, \binits{G.T.}}:
 \bctitle{Degree-constrained network flows}.
-In: \bbtitle{Proceedings of the 39th Annual ACM Symposium on Theory of
-  Computing (STOC)},
+In: \beditor{\bsnm{Johnson}, \binits{D.S.}},
+\beditor{\bsnm{Feige}, \binits{U.}} (eds.)
+\bbtitle{STOC},
 pp. \bfpage{681}--\blpage{688}.
-\bpublisher{ACM},
-\blocation{San Diego, California, USA}
+\bpublisher{ACM}, \blocation{???}
 (\byear{2007}).
 \doiurl{10.1145/1250790.1250889}
 \end{bchapter}
 \endbibitem
 
-%%% 9
-\bibitem[\protect\citeauthoryear{Dressler and Strehler}{2010}]{dressler10}
+%%% 8
+\bibitem[\protect\citeauthoryear{Dressler and
+  Strehler}{2010}]{dressler2010confluent}
 \begin{bchapter}
 \bauthor{\bsnm{Dressler}, \binits{D.}},
 \bauthor{\bsnm{Strehler}, \binits{M.}}:
@@ -181,12 +170,14 @@ In: \beditor{\bsnm{Calamoneri}, \binits{T.}},
 pp. \bfpage{347}--\blpage{358}.
 \bpublisher{Springer},
 \blocation{Berlin, Heidelberg}
-(\byear{2010})
+(\byear{2010}).
+\doiurl{10.1007/978-3-642-13073-1_31}
 \end{bchapter}
 \endbibitem
 
-%%% 10
-\bibitem[\protect\citeauthoryear{Dressler and Strehler}{2014}]{dressler14}
+%%% 9
+\bibitem[\protect\citeauthoryear{Dressler and
+  Strehler}{2014}]{dressler2014polynomial}
 \begin{barticle}
 \bauthor{\bsnm{Dressler}, \binits{D.}},
 \bauthor{\bsnm{Strehler}, \binits{M.}}:
@@ -196,44 +187,51 @@ pp. \bfpage{347}--\blpage{358}.
 \bvolume{163},
 \bfpage{142}--\blpage{154}
 (\byear{2014})
-\doiurl{10.1016/j.dam.2013.07.012} .
-\bcomment{Optimal Discrete Structures and Algorithms ODSA 2010}
+\doiurl{10.1016/j.dam.2013.07.012}
 \end{barticle}
 \endbibitem
 
-%%% 11
-\bibitem[\protect\citeauthoryear{Bhatia et~al.}{2008}]{bhatia08}
-\begin{barticle}
+%%% 10
+\bibitem[\protect\citeauthoryear{Bhatia et~al.}{2005}]{bhatia2008traffic}
+\begin{bchapter}
 \bauthor{\bsnm{Bhatia}, \binits{R.}},
 \bauthor{\bsnm{Immorlica}, \binits{N.}},
 \bauthor{\bsnm{Kimbrel}, \binits{T.}},
 \bauthor{\bsnm{Mirrokni}, \binits{V.S.}},
-\bauthor{\bsnm{Naor}, \binits{J.}},
+\bauthor{\bsnm{Naor}, \binits{S.}},
 \bauthor{\bsnm{Schieber}, \binits{B.}}:
-\batitle{Traffic engineering of management flows by link augmentations on
+\bctitle{Traffic engineering of management flows by link augmentations on
   confluent trees}.
-\bjtitle{Theory of Computing Systems}
-\bvolume{42}(\bissue{1}),
-\bfpage{2}--\blpage{26}
-(\byear{2008})
-\doiurl{10.1007/s00224-007-9010-0}
+In: \bbtitle{Proceedings of the Seventeenth Annual ACM Symposium on Parallelism
+  in Algorithms and Architectures}.
+\bsertitle{SPAA '05},
+pp. \bfpage{289}--\blpage{298}.
+\bpublisher{Association for Computing Machinery},
+\blocation{New York, NY, USA}
+(\byear{2005}).
+\doiurl{10.1145/1073970.1074018} .
+\burl{https://doi.org/10.1145/1073970.1074018}
+\end{bchapter}
+\endbibitem
+
+%%% 11
+\bibitem[\protect\citeauthoryear{Shepherd and
+  Vetta}{2017}]{shepherd2017inapprox}
+\begin{barticle}
+\bauthor{\bsnm{Shepherd}, \binits{F.B.}},
+\bauthor{\bsnm{Vetta}, \binits{A.R.}}:
+\batitle{The inapproximability of maximum single-sink unsplittable, priority
+  and confluent flow problems}.
+\bjtitle{Theory of Computing}
+\bvolume{13}(\bissue{20}),
+\bfpage{1}--\blpage{25}
+(\byear{2017})
+\doiurl{10.4086/toc.2017.v013a020}
 \end{barticle}
 \endbibitem
 
 %%% 12
-\bibitem[\protect\citeauthoryear{Shepherd and Vetta}{2015}]{shepherd15b}
-\begin{botherref}
-\oauthor{\bsnm{Shepherd}, \binits{F.B.}},
-\oauthor{\bsnm{Vetta}, \binits{A.}}:
-The Inapproximability of Maximum Single-Sink Unsplittable, Priority and
-  Confluent Flow Problems
-(2015).
-\url{https://arxiv.org/abs/1504.00627}
-\end{botherref}
-\endbibitem
-
-%%% 13
-\bibitem[\protect\citeauthoryear{Shepherd et~al.}{2015}]{shepherd15a}
+\bibitem[\protect\citeauthoryear{Shepherd et~al.}{2015}]{shepherd2015poly}
 \begin{bchapter}
 \bauthor{\bsnm{Shepherd}, \binits{F.B.}},
 \bauthor{\bsnm{Vetta}, \binits{A.}},
@@ -248,11 +246,11 @@ pp. \bfpage{748}--\blpage{758}
 \end{bchapter}
 \endbibitem
 
-%%% 14
-\bibitem[\protect\citeauthoryear{Haverly}{1978}]{haverly78}
+%%% 13
+\bibitem[\protect\citeauthoryear{Haverly}{1978}]{haverly1978pooling}
 \begin{barticle}
 \bauthor{\bsnm{Haverly}, \binits{C.A.}}:
-\batitle{Studies of the behavior of recursion for the pooling problem}.
+\batitle{Studies of the {B}ehavior of {R}ecursion for the {P}ooling {P}roblem}.
 \bjtitle{ACM SIGMAP Bulletin}
 \bvolume{25},
 \bfpage{19}--\blpage{28}
@@ -260,12 +258,13 @@ pp. \bfpage{748}--\blpage{758}
 \end{barticle}
 \endbibitem
 
-%%% 15
-\bibitem[\protect\citeauthoryear{Alfaki and Haugland}{2013}]{alfaki13}
+%%% 14
+\bibitem[\protect\citeauthoryear{Alfaki and
+  Haugland}{2013}]{alfaki2013formulations}
 \begin{barticle}
 \bauthor{\bsnm{Alfaki}, \binits{M.}},
 \bauthor{\bsnm{Haugland}, \binits{D.}}:
-\batitle{Strong formulations for the pooling problem}.
+\batitle{Strong formulations for the {P}ooling {P}roblem}.
 \bjtitle{Journal of Global Optimization}
 \bvolume{56}(\bissue{3}),
 \bfpage{897}--\blpage{916}
@@ -274,13 +273,13 @@ pp. \bfpage{748}--\blpage{758}
 \end{barticle}
 \endbibitem
 
-%%% 16
-\bibitem[\protect\citeauthoryear{Gestsson}{2026}]{gestsson26}
+%%% 15
+\bibitem[\protect\citeauthoryear{Gestsson}{2026}]{gestsson2026thesis}
 \begin{botherref}
 \oauthor{\bsnm{Gestsson}, \binits{I.P.}}:
-Sparse approximations to the pooling problem.
+Sparse approximations to the {P}ooling {P}roblem.
 Master's thesis,
-University of Bergen,
+University of {B}ergen,
 Bergen, Norway
 (June 2026).
 \url{https://nva.sikt.no/registration/019f50c5c695-357fd5e0-88a1-4941-aaab-691d63f0df5f}
