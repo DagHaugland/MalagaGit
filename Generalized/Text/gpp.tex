@@ -55,6 +55,8 @@
 \usepackage{algorithmicx}%
 \usepackage{algpseudocode}%
 \usepackage{listings}%
+\usepackage{tikz}
+\usepackage{subcaption}
 %%%%
 
 %%%%%=============================================================================%%%%
@@ -112,371 +114,478 @@ About the computational challenge of the pooling problem and finding approximate
 \section{Introduction}
 \label{intro}
 
-Taken from an earlier paper, to be revised:
-Traditional network flow models, like the minimum cost network flow problem, rely on considerations of the flow as a homogeneous commodity.
-Variations in composition is however relevant in many industrial and logistics applications of the models,
-including petroleum refining and pipeline transportation of natural gas.
-Crude oils supplied to a refinery have contamination levels depending on their sources of origin.
-Major components of natural gas are methane, ethane, butane and propane, but the proportions in which they occur are not equal for all gas wells.
-For environmental or technical reasons, requirements to the final composition are often imposed at the sink nodes of the flow network.
-Whenever constraints of this kind apply, it is therefore essential for network flow models to recognize not only the total product flow,
-but also how the flow composition evolves from network sources to sinks.
-In particular, the models must reflect updates of the composition at nodes where differently composed flows are pooled.
-This provides a computationally challenging problem referred to as the \textsc{Pooling Problem}.
+Ever since its discovery \cite{haverly78}, the \textsc{Pooling Problem} has been recognized as a computational challenge.
+Despite resemblence with well-solved network flow problems, like the \textsc{Minimum Cost Flow Problem} and the \textsc{Maximum Flow Problem},
+presence of constraints on the flow composition disables any linear programming (LP) representation of the problem.
+While the flow composition at the network sources is part of the input data, it depends on the flow values at other network nodes.
+At the sinks, bounds on the proportions of key components apply,
+reflecting that customers impose constraints not only on the quantity delivered, but also on the quality.
+Flow streams merging at any node are blended linearly,
+producing a mix where the concentration of each component is a weighted mean of entering concentrations.
+Unless the network structure satisfies rather strict conditions, such as absence of intermediate nodes (pools) between sources and sinks,
+the resulting problem is NP-hard and unlikely to be LP-representable.
 
-The \textsc{Pooling Problem} exhibits strong resemblance with well-studied logistics models like the \textsc{Minimum Cost Flow Problem} and the
-\textsc{Transportation Problem}.
-Another classical related problem is Stigler's \textsc{Diet Problem} \cite{stigler45,dantzig90},
-asking for the minimum cost diet requiring a certain amount of specified nutrients.
-The problem is easy to extend to a multi-diet version where groups of people have each their own requirements.
-Nutritional contents differ between sources, that is, foods of which diets can be composed,
-and the optimal mix must be found for each sink (group of people).
-Conceptually, the multi-diet version coincides with the \textsc{Pooling Problem} in bipartite networks.
-Thanks to this simple network structure, with exclusively direct links between sources and sinks, diet problems are nothing but linear programs.
-However, when extending the problem to more general network structures, this is no longer the case.
-Absence of linear formulations has immediate computational consequences.
-While minimum cost flow instances where the network size reaches a six digit number of arcs and nodes can be solved within hours, or even minutes,
-exact solution of \textsc{Pooling Problem} instances with hundreds of nodes appears to be unrealistic.
+\subsection{Problem variants and model formulations} \label{sec:form}
 
-The \textsc{Pooling Problem} has been recognized for decades as a challenge where linear programming approaches fail.
-Bounds on the flow composition frequently induce bilinear constraints in otherwise linear models,
-and require corresponding solution methods.
-An approach based on iterated solution of linearized model versions has gained popularity especially in the oil refining industry,
-and has been analyzed experimentally by Haverly \cite{haverly78}.
-A major conclusion is that methods of this kind may produce suboptimal solutions.
-Such observations helped establishing a consensus, already in early days of research in the \textsc{Pooling Problem}, that global optimality is achievable only in small instances.
+The \textsc{Pooling Problem} literature distinguishes the \textsc{Standard Pooling Problem} (SPP)
+from the \textsc{Generalized Pooling Problem} (GPP).
+In the standard variant, no paths from sources to sinks in the network consist of more than three nodes.
+This means that a three-layered structure is assumed, where the node set is partitioned into sources, pools, and sinks.
+Only sources can be upstream neighbors of pools, and only sinks can be downstream neighbors.
+In contrast, the generalized variant also allows pools to be adjacent to other pools, and flow paths may have arbitrary length. 
+Despite its considerably more restrictive definition, even the \textsc{Standard Pooling Problem} is NP-hard \cite{alfaki13a}.
+Hardness persists for instances with only one pool, and instances with only two sources and sinks \cite{haugland16a},
+whereas even the generalized variant is LP-representable in instances with only one source or one sink.
+For more detailed analyses of the boundary between tracktable and intractable instance classes,
+the reader is referred to \cite{haugland16b,boland17,baltean18}.
 
-Owing to the anticipated intractability of the problem, early research was mainly directed towards heuristic methods \cite{haverly78,baker85,dewitt89},
-where iterative linearization is the core idea.
-Floudas and Visweswaran \cite{floudas90} reported the first exact solution algorithm for the \textsc{Pooling Problem}.
-Later, algorithms based on branch-and-bound \cite{audet04,foulds92,misener11,sahinidis05,visweswaran96},
-Lagrangian relaxation \cite{adhya99,almutairi09,bental94}, and integer programming \cite{dey15} have been studied.
-The industrial relevance of the problem, notably in petroleum refining \cite{baker85,dewitt89},
-the food industry \cite{kallrath05}, and in waste water processing \cite{galan98,misener10},
-has been acknowledged by many authors.
-The \textsc{Pooling Problem} survey by Misener and Floudas \cite{misener09} has a comprehensive list of references to work in this area.
+Most mathematical models of the \textsc{Pooling Problem} are built upon two or more sets of variables.
+The (single-commodity) \emph{flow variables} are considered as independent variables,
+follow the pattern from traditional network flow models, like, e.g., the \textsc{Minimum Cost Flow Problem}.
+In order to track the flow composition on paths from sources to sinks, \emph{auxiliary variables} are required.
+In the earliest formulations emerging in the literature \cite{haverly78,baker85},
+each auxiliary variable represents the concentration of some flow component.
+For instance, in oil industry applications where the delivered products are subject to upper bounds on the relative CO2-content,
+a variable for the CO2 concentration is introduced for each network pool.
+Thus, the auxiliary variables are considered to be \emph{dependent},
+in the sense that their values are uniquely given by the flow variable values.
+Models with flow and concentration variables inevitably involve products across the two sets,
+particularly in material balance equations for every component at every pool.
+Consequently, the \textsc{Pooling Problem} is frequently referred to as a \emph{bilinear} problem.
 
-The \textsc{Standard Pooling Problem} (SPP) is defined in terms of a networks with three node layers, referred to as sources, pools and sinks (sinks), respectively.
-Each arc links either a source to a pool or a pool to a sink.
-Quality constraints in terms of bounds on the composition are imposed at the sinks.
-Each bound relates to the relative content of a flow component, referred to as the component.
-After NP-hardness of the SPP was formally proved \cite{alfaki13}, Dey and Gupte \cite{dey15} showed that the problem is as hard to approximate as the maximum clique problem.
-The problem remains NP-hard for networks with only two sources and two sinks,
-and only one flow component subject to constraints \cite{haugland16}.
+The auxiliary variables may alternatively represent \emph{source proportions}.
+Each such variable is associated with a source-node pair,
+and determines the proportion of the flow through the node that originates from the source.
+Such formulations are interesting from a computational viewpoint, although bilinear constraints are still necessary.
+The same applies if the source proportion variables are replaced or extended by sink proportions, 
+which, analogously, correspond to the relative amount of the flow at a node that in the end is delivered at a given sink.
+Regardless of how the auxilary variables are chosen,
+their necessary presence is the main reason for the hardness of the \textsc{Pooling Problem}.
 
-The remainder of the text is organized as follows:
-Mathematical notation and formulation of the \textsc{Pooling Problem} are provided in Section \ref{sec:problem}.
+A bilinear model combining flow and concentration variables is referred to as the P-formulation \cite{haverly78} of the
+standard \textsc{Pooling Problem}.
+Replacemant of concentration by source proportion variables leads to the Q-formulation \cite{bental94},
+which after addition of redundant valid inequalities gives the PQ-formulation \cite{sahinidis05}.
+These early contributions motivated more research into model formulations,
+aiming for strong dual bounds provided by the corresponding linear relaxations.
+Analogous to the PQ-formulation, sink proportions replace the source proportions to produce the TP-formulation \cite{alfaki13a}.
+Depending on the instance, the linear relaxation may give stronger bounds when the model contains variables for both source and sink proportions,
+which is referred to as the STP-formulation \cite{alfaki13a}.
 
-To be written.
+Extension to the generalized \textsc{Pooling Problem} is straightforward in the case of the P-formulation.
+The Q- and PQ-formulations are extended in \cite{alfaki13b}, while the extensions of the TP- and STP-formulations 
+are covered in \citep{boland16}.
+Proportion variables corresponding to pairs consisting of a source and a sink can give even stronger formulations.
+\citet{boland16} formulate the generalized \textsc{Pooling Problem} in terms of such variables,
+which for each pool expresses the relative amount of the flow that is supplied from the given source and delivered to the sink.
+Whereas such a formulation is proved to be at least as strong as the aforementioned models,
+the large number of variables incurs a high computational cost.
+For each pool, one proportion variable for each source-sink pair is associated,
+implying that the worst-case growth in the number of auxiliary variables is a cubic function of the node cardinality.
+
+\subsection{Relaxations and solution algorithms} \label{sec:relax}
+
+Linear relaxations of bilinear optimization models are achieved through replacement of each bilinear term by a new variable,
+which is constrained by the so-called McCormick inequalities \cite{mccormick76}.
+It is well known \cite{mccormick76} that with two variables constrained within a rectangular set,
+the convex (concave) envelope of a bilinear function is given as the maximum (minimum) of two affine functions.
+McCormick relaxations have been exploited in numerous algorithms for general bilinear programs since they started to
+emerge in the eighties \cite{alkhayyal83,alkhayyal90}.
+Incorporated in a tree-search (branch-and-bound, branch-and-cut) scheme, where branching involves refinement of one or more rectangular regions,
+the relaxation provides a dual bound that in the limit collapses with the primal bound corresponding to the best feasible solution found.
+Computational studies of \textsc{Pooling Problem} algorithms often cover approaches built upon this idea
+\cite{foulds92,bental94,quesada95,audet04,misener09,misener10,misener11,alfaki13a,alfaki13b,boland16},
+showing how their efficiency depends on, e.g., the strength of the formulation chosen. 
+Also available software for bilinear programs in general \cite{tawarmalani04,gurobi26}
+or the \textsc{Pooling Problem} in particular \cite{misener11,ceccon22} follow a tree-search algorithm
+solving linear or piecewise linear subproblems.
+
+Aiming for faster convergence of the algorithms, several attempts to strengthen the relaxations have been made.
+One approach is to subdivide the range of the flow variables into smaller sections,
+and add the McCormick inequalities corresponding to each section \cite{meyer06,wicaksono08,gounaris09,pham09,misener11,dey15,gupte17}.
+This results in a \emph{piecewise} linear relaxation,
+which requires binary variables in order to ensure consistency between
+variable values and the inequalities that apply in the corresponding section.
+By recognizing the complicating constraint functions as rank-one products,
+and observing that the convex hull of such functions under mild assumptions is second-order-cone representable,
+stronger relaxations are obtained \cite{dey20,jalilian26}.
+
+Alternatively, the convex and concave envelopes can be defined over non-rectangular regions.
+In the case of a bilinear function on a \emph{triangular} 
+domain, \citet{linderoth05} shows that the envelopes are given in terms of convex nonlinear inequalities,
+providing stronger relaxations than the traditional McCormick relaxations.
+Allowing convex nonlinear inequalities, \citet{luedtke20} not only strengthen the relaxation,
+but also achieve a convex hull formulation in a restricted set of instances.
+
+Decomposition approaches were among the first methods targeting exact solutions to the \textsc{Pooling Problem}.
+This includes, e.g., Benders decomposition \cite{floudas90a,visweswaran90}, and various methods based on Lagrangean duality
+\cite{adhya99,floudas90b}.
+Since then, tree-search methods seem to receive the majority of the attention from the research community.
+
+Local optimization methods, in particular successive linear programming \cite{haverly78,baker85}  dominated
+the \textsc{Pooling Problem} research before the advent of the first exact methods \cite{floudas90a,floudas90b}.
+In large instances, such methods still have considerable merit \cite{grothey23}.
+As exact solvers have become able to solve larger problem instances,
+the role of local methods is to provide fairly good solutions when optimality is not provable in practical time.
+To that end, several approaches are available.
+Noteworthy among metaheuristics is the variable-neighborhood-search method by \citet{audet04}.
+Augmenting-flow methods \cite{alfaki14,xiang26} optimize the flow to a single sink in each iteration.
+When the flow paths to the sink are not allowed to intersect pools that already are assigned positive flow,
+the subproblems become linear in each iteration, since the single-sink \textsc{Pooling Problem} is LP-representable \cite{haugland16a}.
+Allowing such intersections imply bilinear subproblems with modest computational cost due to few bilinear terms.
+
+\subsection{Discretization and anticipated sparse solutions} \label{sec:sparse}
+
+Despite recent progress in both exact solvers and local methods, experimental studies show that beyond instances of moderate size,
+there is a considerable gap between dual bounds provided by linear relaxations and the best solutions computed by heuristics.
+The purpose of the current paper is to narrow down this gap.
+Because bilinearity is the main source of computational challenge, the key idea is to restrict the search to feasible subregions
+that can be modeled without bilinear functions.
+\citet{baltean18} argue that optimal solutions to \textsc{Pooling Problem} instances tend to be \emph{sparse}.
+This motivates a search for solutions with a sparsity pattern that can be modeled by means of linear inequalities and binary variables.
+
+Generalizing \cite[Proposition 3]{haugland16a}, it is observed that the \textsc{Pooling Problem} is an LP in instances where
+every pool is connected to only one source or to only one sink.
+Consequently, restricting the \emph{support} of the flow, i.e., the subgraph induced by flow-carrying arcs, to have this structure,
+reduces the \textsc{Pooling Problem} to a mixed integer \emph{linear} program.
+The integer (binary) variables correspond to the selection of the source or sink to constitute the unique connection to a pool.
+Given the maturity of available MILP solvers, especially when compared with their bilinear programming counterparts,
+it is reasonable to believe that confining the search to MILP-representable parts of the feasible region will result in a considerable speed-up.
+
+Restricting the support as suggested implies a flow graph with a particular \emph{sparsity pattern}:
+Any two paths, starting at distinct sources and ending at distinct sinks, are also pool-disjoint.
+Equivalently, at any pool, all flow originates from a unique source, or all the flow is delivered to a unique sink.
+Recently, the \textsc{Minimum Cost Flow Problem} subject to these conditions, referred to as extended \emph{confluent flow} conditions,
+was studied \cite{haugland26}.
+Partly by pursuing ideas from \cite{haugland26}, this paper makes the following contributions:
+\begin{itemize}
+\item A hardness proof for a variant of the \textsc{Pooling Problem} with fixed demand \cite{ruiz13,grothey23} is provided.
+\item MILP models are derived for sparse solutions to the generalized \textsc{Pooling Problem}.
+\item Redundant valid inequalities for the MILP models are given.
+\item A comprehensive computational study is made, comparing the new models with a state-of-the-art bilinear solver.
+Most challenging instances available from the literature, in addition to new instances generated as part of this study,
+are included in the experiments.
+As an outcome of this, improvements over the best known solutions and the best known bounds are made in several instances.
+\end{itemize}
+
+The remainder of the paper is organized as follows:
+Following some basic definitions, Section~\ref{sec:notation} defines the problem and reviews mathematical formulations of the
+\textsc{Pooling Problem} from the literature.
+The section also gives new complexity results for a problem variant with fixed demand.
+Section~\ref{sec:conf} reviews the concept of confluent network flow, along with its extensions.
+These concepts are exploted to formulate MILP models for sparse inner-approximations of the generalized \textsc{Pooling Problem}.
+Finally, computational experiemnts are reported in Section~\ref{sec:exp}.
 
 %-----------------------------------------------------------------------
-\section{Mathematical Notation and Problem Formulation}\label{sec:problem}
+\section{Mathematical notation and problem formulation}\label{sec:notation}
 
-To be revised:
-
-Let $D=(N,A)$ be a directed acyclic graph,
+Let $D=(N,A)$ be a directed graph,
 where the node set $N=S\cup P\cup T$ consists of the disjoint subsets $S$ of \emph{sources}, $P$ of \emph{pools}, and $T$ of \emph{sinks}.
-Let $K$ be a finite set, and refer to its elements as \emph{flow components} or simply \emph{components}.
-In the sequel, elements of vectors and matrices defined over the sets $N$ and $K$
-are identified by a subscript if they correspond to $N$, and by a superscript if they correspond to $K$.
-Complexity analyses in later sections require that network parameters are defined as rational rather than real numbers.
-Define the vectors of unit arc costs $\boldsymbol{c}\in\mathbb{Q}^{A}$ and arc capacities $\boldsymbol{h}\in\mathbb{Q}_+^{A}$.
-For integers $j$ and $n$,
-let $\boldsymbol{j}^n$ denote the vector with all its $n$ entries equal to $j$,
-and let $\boldsymbol{I}^n$ denote the $(n\times n)$-identity matrix.
+It is assumed that $A\subseteq (S\times P)\cup (P\times P)\cup (P\times T)$,
+as all arcs link either a source with a pool, a pool with another pool, or a pool with a sink.
+Let $K$ be a finite set consisting of \emph{flow components} or simply \emph{components}.
+For node $i\in N$, define $S_i\subseteq S$ and $T_i\subseteq T$ such that $s\in S_i$ (such that $t\in T_i$)
+if and only if $D$ has a path from $s$ to $i$ (from $i$ to $t$), including the possibility that the path consists only of $i$ itself.
+Let $P_s={p\in P: s\in S_p}$ and $P_t={p\in P: t\in T_p}$ for all $s\in S$, $t\in T$.
+Denote by $N_i^-=\left\{j\in N: (j,i)\in A\right\}$ and $N_i^+=\left\{j\in N: (i,j)\in A\right\}$, respectively,
+the upstream and downstream neighbor sets of node $i\in N$.
+By the assumption on $A$, $N_s^-=N_t^+=\emptyset$ for every $s\in S$ and $t\in T$.
 
-At all sources $s\in S$, flow with a given concentration of each component $k\in K$ may enter $D$, and flow leaving the network at a sink $t\in T$ must satisfy upper concentration bounds.
-Define the matrices of \emph{concentration} $\boldsymbol{Q}\in\mathbb{Q}^{K\times S}$ and \emph{concentration bounds}
-$\boldsymbol{U}\in\mathbb{Q}^{K\times T}$.
-For $s\in S$ and $t\in T$, let $\boldsymbol{q}_s=\left(q_s^k\right)_{k\in K}$ and $\boldsymbol{u}_t=\left(u_t^k\right)_{k\in K}$ be the columns of $\boldsymbol{Q}$ and $\boldsymbol{U}$, respectively.
-That is, $q_s^k$ is the concentration of component $k$ of the flow entering $D$ at $s$,
-and $u_t^k$ is the upper bound on the concentration of the flow leaving $D$ at $t$.
+Vectors (matrices) are written in lowercase (uppercase) bold letters,
+and their entries are written in the corresponding lowercase plain letter.
+A superscript means that the entry corresponds to some $k\in K$, whereas subscripts are suppplied to identify a node or an arc.
+Let the vectors of \emph{unit arc costs} $\boldsymbol{c}\in\mathbb{Q}^{A}$ and \emph{node capacities} $\boldsymbol{b}\in\mathbb{Q}_+^{N}$
+be associated with $D$.
+% At most $b_s$ flow units may enter $D$ at source $s\in S$, and at most $b_t$ units may leave at sink $t\in T$.
+Define the matrices of \emph{concentration} $\boldsymbol{Q}\in\mathbb{Q}^{K\times S}$ at the sources, and \emph{concentration bounds}
+$\boldsymbol{U}\in\mathbb{Q}^{K\times T}$ at the sinks,
+where $q_s^k$ denotes the concentration of component $k$ in the flow entering $D$ at $s$,
+and $u_t^k$ is the upper bound on the concentration of component $k$ in the flow leaving $D$ at $t$.
+Let $\boldsymbol{q}_s$ ($s\in S$) and $\boldsymbol{u}_t$ ($t\in T$) be the columns of $\boldsymbol{Q}$ and $\boldsymbol{U}$, respectively.
 
-For each pool $p\in P$, the set of sources from which there exists a path to $p$ in $D$ is denoted $S_p$.
-Analogously, $T_p$ is the set of sinks to which there is a path from $p$ in $D$.
-The sets of upstream and downstream neighbors of node $j\in N$ are denoted $N_j^-$ and $N_j^-$, respectively.
-Without loss of relevant generality, it is assumed that $N_s^-=N_t^+=\emptyset$ for every $s\in S$ and $t\in T$.
-The sets of pools adjacent to source $s$ and sink $t$ are denoted
-$P_s=P\cap N_s^+$ and $P_t=P\cap N_t^-$, respectively.
-% The arc set $\mathcal{A}$ has a partition $\left(\mathcal{A}_S,\mathcal{A}_T\right)$,
-% where $\mathcal{A}_S=\mathcal{A}\cap\left(S\times P\right)$ and $\mathcal{A}_T=\mathcal{A}\cap\left(P\times T\right)$
-% denote the sets of source-incident and sink-incident arcs, respectively.
+\subsection{Problem definition} \label{sec:problem}
 
-A vector $\boldsymbol{f}\in\mathbb{R}_+^{A}$ is called a \emph{flow} in $D$ iff it satisfies the capacity and flow conservation constraints:
+A vector $\boldsymbol{f}\in\mathbb{R}_+^{A}$ is called a \emph{flow} in $D$ if it satisfies the capacity and flow conservation constraints:
 \begin{eqnarray}
-           & f_{ij}\leq h_{ij} & (i,j)\in A, \label{eq:cap} \\
+           & \sum_{j\in N_i^+}f_{ij}\leq b_i & i\in S\cup P\label{eq:capSP} \\
+           & \sum_{j\in N_t^-}f_{jt}\leq b_t & t\in T\label{eq:capT} \\
            & \sum_{j\in N_p^-}f_{jp}-\sum_{j\in N_p^+}f_{pj} = 0~~~~ & p\in P. \label{eq:flowcons}
 \end{eqnarray}
 
 \noindent
-We refer to the set $F(D,\boldsymbol{h}) = \left\{\boldsymbol{f}\in\mathbb{R}_+^{A}: \mbox{(\ref{eq:cap})--(\ref{eq:flowcons}) are satisfied}\right\}$
-as the \emph{flow polytope} of $D$.
-For each $\boldsymbol{f}\in F(D,\boldsymbol{h})$,
-define $\boldsymbol{W}=\left(\boldsymbol{w}_j\right)_{j\in N}\in\mathbb{R}^{K\times N}$ to be a
-\emph{concentration matrix} of $\boldsymbol{f}$ iff $\boldsymbol{w}_s=\boldsymbol{q}_s$ ($s\in S$) and
+We refer to the set
+$F(D,\boldsymbol{b}) = \left\{\boldsymbol{f}\in\mathbb{R}_+^{A}: \mbox{(\ref{eq:capSP})--(\ref{eq:flowcons}) are satisfied}\right\}$
+as the \emph{flow polytope} of $(D,b)$.
+For each $\boldsymbol{f}\in F(D,\boldsymbol{b})$,
+define $\boldsymbol{W}=\left(\boldsymbol{w}_i\right)_{i\in N}\in\mathbb{R}^{K\times N}$ to be a
+\emph{concentration matrix} of $\boldsymbol{f}$ if $\boldsymbol{w}_s=\boldsymbol{q}_s$ ($s\in S$) and
 \begin{equation} \label{eq:totqual}
-  \boldsymbol{w}_p\sum_{j\in N_p^-}f_{jp}=\sum_{j\in N_p^-}\boldsymbol{w}_jf_{jp},\ p\in P\cup T.
+  \boldsymbol{w}_i\sum_{j\in N_i^-}f_{ji}=\sum_{j\in N_i^-}\boldsymbol{w}_jf_{ji},\ i\in P\cup T.
 \end{equation}
-That is, the concentration $\boldsymbol{w}_p=\left(w_p^k\right)_{k\in K}$ of component $k$ in the flow blended at a pool/sink $i$,
+That is, the concentration $\boldsymbol{w}_i=\left(w_i^k\right)_{k\in K}$ of component $k$ in the flow blended at a pool/sink $i$,
 is a convex combination of the entering concentrations $\boldsymbol{w}_j$ ($j\in N_i^-$),
-with convexity weights $f_{ji}/\sum_{j'\in N_i^-}f_{j'p}$.
+with convexity weights $f_{ji}/\sum_{j'\in N_i^-}f_{j'i}$.
 Condition \eqref{eq:totqual} on $\boldsymbol{w}$ is referred to as the \emph{linear blending} property.
-At sinks $t\in T$ where $\sum_{i\in N_t^-}f_{it}>0$, the upper concentration bounds $u_t^k$ apply,
+At sinks $t\in T$ where $\sum_{j\in N_t^-}f_{jt}>0$, the upper concentration bounds $u_t^k$ apply,
 and linear blending yields $\boldsymbol{w}_t=\sum_{j\in N_t^-}\boldsymbol{w}_jf_{jt}/\sum_{j\in N_t^-}f_{jt}\leq \boldsymbol{u}_t$.
-Thus, $\boldsymbol{f}\in F\left(D,\boldsymbol{h}\right)$ is said to be a \emph{concentration-feasible} flow in
-$D$ iff $\sum_{j\in N_t^-}\boldsymbol{w}_jf_{jt}\leq \boldsymbol{u}_t\sum_{j\in N_t^-}f_{jt}$ ($t\in T$)
-for any concentration matrix $\boldsymbol{W}$ of $\boldsymbol{f}$.
+Any $\boldsymbol{f}\in F\left(D,\boldsymbol{h}\right)$ is said to be a \emph{concentration-feasible} flow in
+$D$ if $\sum_{j\in N_t^-}\boldsymbol{w}_jf_{jt}\leq \boldsymbol{u}_t\sum_{j\in N_t^-}f_{jt}$ ($t\in T$)
+for some concentration matrix $\boldsymbol{W}$ of $\boldsymbol{f}$.
 
 \begin{problem} \label{prob:pp}
-The \textsc{Pooling Problem}: Find a concentration-feasible flow $\boldsymbol{f}$ in $D$ minimizing the total costs $\boldsymbol{c}\cdot\boldsymbol{f}$.
+The \textsc{Pooling Problem}: Find a concentration-feasible flow $\boldsymbol{f}\in F(D,\boldsymbol{b})$
+minimizing the total costs $\boldsymbol{c}\cdot\boldsymbol{f}$.
 \qed
 \end{problem}
+
+The minimum cost in Problem~\ref{prob:pp} is denoted $z(D,\boldsymbol{c},\boldsymbol{b},\boldsymbol{q},\boldsymbol{u})$.
+Whenever $A\cap(P\times P)=\emptyset$, Problem~\ref{prob:pp} is referred to as the standard \textsc{Pooling Problem} (SPP),
+while the general version is called the \emph{generalized} \textsc{Pooling Problem} (GPP).
+
+\subsection{Formulations and extensions} \label{sec:formext}
+In this section, previously studied formulations of the \textsc{Pooling Problem} and its extensions are revised shortly.
+
+\subsubsection{Bilinear formulations of the \textsc{Pooling Problem}} \label{sec:form}
+Following the definitons in Section~\ref{sec:problem}, the variables of the P-formulation \cite{haverly78} consist of
+flow $f_{ij}$ along arcs $(i,j)\in A$ and the concentrations $w_p^k$ at pools $p\in P$, in addition to \emph{component flow} $z_{ij}^k$.
+The model reads (recall that $\boldsymbol{w}_s=\boldsymbol{q}_s$ for all $s\in S$):
+\begin{eqnarray}
+\min & \sum_{(i,j)\in A}c_{ij}f_{ij} \nonumber \\
+     & \boldsymbol{f}\in F(D,\boldsymbol{b}) \nonumber \\
+     & \sum_{j\in N_p^+}z_{pj}^k = \sum_{j\in N_p^-}z_{jp}^k  & p\in P, k\in K \label{eq:pcons} \\
+     & \sum_{p\in N_t^-}z_{pt}^k \leq u_t^k\sum_{p\in N_t^-}f_{pt} & t\in T, k\in K \label{eq:pqual} \\
+     & z_{ij}^k = w_i^kf_{ij} & (i,j)\in A, k\in K \label{eq:pbl}
+\end{eqnarray}
+
+In the Q-formulation \cite{bental94} for SPP, strengthened to the PQ-formulation by the addition of valid inequalities \cite{sahinidis05},
+and generalized to the MCF-formulation for GPP \cite{alfaki13b}, variables $w_p^k$ and $z_{ij}^k$ are replaced by
+$y_p^s\in[0,1]$ and $x_{ij}^s$, respectively ($s\in S_p$, $(i,j)\in A$).
+Defining $x_{ij}^s$ as the flow along arc $(i,j)$ supplied from source $s$ ($x_{ij}^s=0$ for $s\in S\setminus S_i$),
+and $y_i^s$ as the ratio between $x_{ij}^s$ and $f_{ij}$,
+a valid MCF-formulation is obtained by the replacement of \eqref{eq:pcons}--\eqref{eq:pbl} by
+(let $y_s^s=1$ and $y_s^{s'}=0$ for $s,s'\in S$, $s\neq s'$):
+\begin{eqnarray}
+     & \sum_{j\in N_p^+}x_{pj}^s = \sum_{j\in N_p^-}x_{jp}^s  & p\in P, s\in S_p \label{eq:scons} \\
+     & \sum_{p\in N_t^-}\sum_{s\in S_p}(q_s^k-u_t^k)x_{pt}^s \leq 0 & t\in T, k\in K \label{eq:squal} \\
+     & x_{ij}^s = y_i^sf_{ij} & (i,j)\in A, s\in S_i \label{eq:sbl} \\
+     & \sum_{s\in S_p}y_p^s = 1 & p\in P \label{eq:sconv} \\
+     & f_{ij} = \sum_{s\in S_i}x_{ij}^s & (i,j)\in A \label{eq:svi1} \\
+     & \sum_{j\in N_p^+}x_{pj}^s \leq b_py_p^s & p\in P, s\in S_p \label{eq:svi2} \\
+     & y_p^s\geq 0 & p\in P, s\in S_p \label{eq:sy}
+\end{eqnarray}
+
+Constraint \eqref{eq:svi1} follows from \eqref{eq:sbl}--\eqref{eq:sconv},
+but is added to strengthen the relaxation obtained when corresponding McCormick inequalities \cite{mccormick76} replace \eqref{eq:sbl}.
+For the same reason, \eqref{eq:svi2} is added, although it is implied by $\boldsymbol{f}\in F(D,\boldsymbol{b})$
+and \eqref{eq:sbl}.
+
+Alternatively, the proportion variables may relate to sinks rather than sources \cite{boland16}.
+For $t\in T_j$, let $x_{ij}^t$ denote the flow along arc $(i,j)$ that finally is delivered at sink $t$,
+let $x_{ij}^t=0$ for $t\in T\setminus T_j$, and let $y_j^t=x_{ij}^t/f_{ij}$ if $f_{ij}>0$.
+A valid formulation is obtained by replacing $S_p$ by $T_p$ in \eqref{eq:scons}, \eqref{eq:sconv}, and \eqref{eq:svi2}--\eqref{eq:sy},
+replacing $S_i$ by $T_j$ in \eqref{eq:svi1}, and replacing \eqref{eq:squal}--\eqref{eq:sbl} by
+\begin{eqnarray}
+     & \sum_{s\in S_t}(q_s^k-u_t^k)\sum_{p\in N_s^+}x_{sp}^t \leq 0 & t\in T, k\in K \label{eq:tqual} \\
+     & x_{ij}^t = y_j^tf_{ij} & (i,j)\in A, t\in T_j \label{eq:tbl}
+\end{eqnarray}
+
+The two models based on proportion variables can also be combined to create a stronger formulation \cite{boland16}.
+To that end, all variables $y_p^v$ ($p\in P$, $v\in S_p\cup T_p$) and $x_{ij}^v$ ($(i,j)\in A$, $v\in S_i\cup T_j$)
+and corresponding constraints from both models are pursued.
+
+\subsubsection{Extensions} \label{sec:ext}
+Some authors add features that are covered by the definition of Problem~\ref{prob:pp} by simple adjustments of the input data,
+and will therefore not be considered as extensions:
+\begin{itemize}
+\item arcs from sources to sinks (considered in most cited works)
+\item arc capacities \cite{boland16}
+\item lower bounds on the concentrations at $T$ (considered in \cite{adhya99} and several more recent works).
+\end{itemize}
+
+Other additions require more constraints in the model.
+Noteworthy among these are concentration bounds at the pools \cite{ruiz13} and lower bounds on the flow at the nodes.
+\citet{grothey23} consider a variant where the demands at $T$ are fixed, i.e.\ the inequalities \eqref{eq:capT} are replaced by equalities
+(also assumed in \cite{ruiz13}).
+While providing no complexity results, \cite{grothey23} states that the fixed-demand SPP tends to `have large numbers of local optima'.
+Next, we show that when the demand is fixed at all sinks, the instances with only one pool are solvable in polynomial time,
+contrasting \cite[Corollary 1]{alfaki13a}.
+\begin{proposition} \label{prop:grothey1}
+If all inequalities \eqref{eq:capT} are replaced by equalities, then Problem~\ref{prob:pp} is an LP in instances where $|P|=1$. 
+\end{proposition}
+\begin{proof}
+Recall that $D$ has no arcs from $S$ to $T$, which means that exactly $d=\sum_{t\in T}b_t$
+flow units pass through the pool (denoted $p$).
+Since also $N_t^-=\{p\}$ for all $t\in T$, equation \eqref{eq:totqual} reads
+$\boldsymbol{w}_pd = \sum_{s\in S}\boldsymbol{q}_sf_{sp}$ and $\boldsymbol{w}_t=\boldsymbol{w}_p$.
+It follows that $\boldsymbol{f}$ is a concentration-feasible flow satisfying the fixed demand constraints
+if and only if $\boldsymbol{f}\in F(D,\boldsymbol{b})$, $f_{pt}=b_t$ ($t\in T$), and
+$\sum_{s\in S}q_s^kf_{sp}\leq d\min_{t\in T}u_t^k$ for all $k\in K$.
+\end{proof}
+
+With two pools, also the fixed-demand variant becomes NP-hard:
+\begin{proposition} \label{prop:grothey2}
+If all inequalities \eqref{eq:capT} are replaced by equalities, then Problem~\ref{prob:pp} is NP-hard, even for instances where $|P|=2$. 
+\end{proposition}
+\begin{proof}
+The proof resembles the reduction from \textsc{Independent Vertex Set} considered in the proofs of \cite[Proposition 1]{alfaki13a},
+\cite[Proposition 2.1]{gupte17}, and \cite[Proposition 3]{dey15}.
+
+Let $G=(V,E)$ be a graph with vertex set $V$ and edge set $E$.
+Let $S=\{s_v: v\in V\}\cup\{\bar{s}\}$, $T=\{t_v: v\in V\}$, and $K=\{k_v: v\in V\}$, $P=\{p,\bar{p}\}$,
+and $A=\{(s_v,p), (p,t_v), (\bar{s},\bar{p}), (\bar{p},t_v): v\in V\}$.
+Hence there is a bijection between $V$ and each of the sets $S\setminus\{\bar{s}\}$, $T$, and $K$,
+and for any $k\in K$, we denote by $v(k)$ the corresponding vertex of $G$.
+An analogous notation is adopted for the other sets.
+For nodes indexed $i\in\{s_v, t_v: v\in V\}$, the capacity is $b_i=1$, whereas $b_i=|V|$ for $i\in\{\bar{s},p,\bar{p}\}$.
+Let the arc costs be $c_{ij}=0$ for $i\in S\cup\{p\}$, and $c_{ij}=1$ for $i=\bar{p}$.
+Finally, the concentration of component $k$ at source $s\neq \bar{s}$ is $q_s^k=1$ if $v(s)=v(k)$, and $q_s^k=0$ otherwise,
+while $\boldsymbol{q}_{\bar{s}}=\boldsymbol{0}$.
+Bounds on the concentrations are given as $u_t^k=0$ if $\{v(t),v(k)\}\in E$, and $u_t^k=1$ if $\{v(t),v(k)\}\notin E$.
+That is, flow from source $s\neq\bar{s}$ is compatible with the bounds at sink $t$ if and only if $\{v(s),v(t)\}\notin E$,
+whereas flow can be sent from $\bar{s}$ to any sink.
+See Fig.~\ref{fig:nphard} for an illustration.
+
+\begin{figure}
+\centering
+\begin{subfigure}{0.48\textwidth}
+\hspace{1em}
+\begin{tikzpicture}[
+  vertex/.style={circle, draw=black, fill=#1, inner sep=4pt},
+  >=stealth
+]
+  \node[vertex=red]    (r) at (0,0) {};
+  \node[vertex=blue]   (b) at (0,2) {};
+  \node[vertex=green]  (g) at (2,1) {};
+  \node[vertex=yellow] (y) at (4,1) {};
+
+  \draw (r) -- (b);
+  \draw (b) -- (g);
+  \draw (g) -- (r);
+  \draw (g) -- (y);
+\end{tikzpicture} \\
+\begin{tikzpicture}[
+  vertex/.style={circle, draw=white, fill=#1, inner sep=4pt},
+  >=stealth
+]
+  \node[vertex=white]    (r) at (0,0) {};
+  \node[vertex=white]  (g) at (0,1) {};
+\end{tikzpicture} \caption{\textsc{Independent vertex set} instance} \label{fig:ivs}
+\end{subfigure}
+\begin{subfigure}{0.48\textwidth}
+\begin{tikzpicture}[
+  vertex/.style={circle, draw=black, fill=#1, inner sep=4pt},
+  >=stealth
+]
+  % Left vertices
+  \node[vertex=blue]   (lb) at (0,2) {};
+  \node[vertex=red]    (lr) at (0,1) {};
+  \node[vertex=green]  (lg) at (0,0) {};
+  \node[vertex=yellow] (ly) at (0,-1) {};
+  \node[vertex=white]   (lgr) at (0,-2) {$\bar{s}$};
+
+  % Middle vertices
+  \node[vertex=white] (m1) at (2,1) {$p$};
+  \node[vertex=white] (m2) at (2,-1) {$\bar{p}$};
+
+  % Right vertices
+  \node[vertex=blue]   (rb) at (4,2) {};
+  \node[vertex=red]    (rr) at (4,1) {};
+  \node[vertex=green]  (rg) at (4,0) {};
+  \node[vertex=yellow] (ry) at (4,-1) {};
+
+  % Left labels
+  \node[left=5pt] at (lb) {$1000$};
+  \node[left=5pt] at (lr) {$0100$};
+  \node[left=5pt] at (lg) {$0010$};
+  \node[left=5pt] at (ly) {$0001$};
+
+  % Right labels
+  \node[right=5pt] at (rb) {$1001$};
+  \node[right=5pt] at (rr) {$0101$};
+  \node[right=5pt] at (rg) {$0010$};
+  \node[right=5pt] at (ry) {$1101$};
+
+  % Arcs from left to middle
+  \draw[->] (lb) -- node[midway] {$1$} (m1);
+  \draw[->] (lr) -- (m1);
+  \draw[->] (lg) -- (m1);
+  \draw[->] (ly) -- node[midway] {$1$} (m1);
+  \draw[->] (lgr) -- node[midway] {$2$} (m2);
+
+  % Arcs from middle to right
+  \draw[->] (m1) -- (rr);
+  \draw[->] (m1) -- (rg);
+  \draw[->] (m2) -- node[pos=0.85] {$1$} (rr);
+  \draw[->] (m2) -- node[pos=0.25] {$1$} (rg);
+  \draw[->] (m1) -- node[pos=0.75] {$1$} (rb);
+  \draw[->] (m1) -- node[pos=0.85] {$1$} (ry);
+  \draw[->] (m2) -- (rb);
+  \draw[->] (m2) -- (ry);
+\end{tikzpicture} \caption{Fixed-demand SPP instance. Node labels are concentration (bounds), arc labels are optimal flow.} \label{fig:spp}
+\end{subfigure} \caption{Reduction from maximum IVS to the fixed-demand \textsc{Pooling Problem}} \label{fig:nphard}
+\end{figure}
+
+
+Let $V'\subseteq V$ be an independent vertex set in $G$, and consider the flow $\boldsymbol{f}$ where
+$f_{sp}=1$ if $v(s)\in V'$ and $f_{sp}=0$ if $v(s)\notin V'$,
+$f_{pt}=1$ if $v(t)\in V'$ and $f_{pt}=0$ if $v(t)\notin V'$,
+$f_{\bar{s}\bar{p}}=|T|-|V'|$, and $f_{\bar{p}t}=1-f_{pt}$ ($t\in T$).
+It follows that $\boldsymbol{f}\in F(D,\boldsymbol{b})$ and $\sum_{p\in N_t^-}f_{pt}=b_t$ for all $t\in T$.
+Also, if $f_{sp}=f_{pt}=1$, then $\{v(s),v(t)\}\notin E$, and $q_s\leq u_t$ for all $k\in K$ shows that
+$\boldsymbol{f}$ satisfies the concentration bounds at all $t_v$ where $v\in V'$.
+For $v\in V\setminus V'$, the concentration of all components is zero at $t_v$.
+It follows that the \textsc{Pooling Problem} instance has a feasible solution with cost $|T|-|V'|$.
+Thus, $z(D,\boldsymbol{c},\boldsymbol{b},\boldsymbol{q},\boldsymbol{u})\leq |T|-\alpha(G)$,
+where $\alpha(G)$ denotes the independence number of $G$.
+
+To prove $z(D,\boldsymbol{c},\boldsymbol{b},\boldsymbol{q},\boldsymbol{u})\geq |T|-\alpha(G)$,
+assume $\boldsymbol{f}$ is optimal.
+Consider the vertices of $G$ corresponding to active sources $V_S = \left\{v\in V: f_{s_vp}>0\right\}$ and active sinks
+$V_T = \left\{v\in V: f_{pt_v}>0\right\}$, respectively.
+Because $\boldsymbol{f}$ is optimal, it can be assumed that $|V_S|=|V_T|$ and $f_{sp}=f_{pt}=1$ if $v(s)\in V_S$ and $v(t)\in V_T$
+(\textcolor{red}{Should we include this proof? To see this, assume on the contrary that $|V_T|>|V_S|$.
+Then, without loss of optimality, the flow along arc $(p,\tau)$, where $\tau\in\arg\min\{f_{pt}: v(t)\in V_T\}$,
+can be reallocated to other arcs $(p,t)$ where $v(t)\in V_T$.
+Hence, $|V_T|\leq|V_S|$ can be assumed, and the assumption $|V_S|\leq|V_T|$ is justified analogously.
+To prove $f_{sp}=f_{pt}=1$ for all $s,t$ where $v(s)\in V_S$ and $v(t)\in V_T$, assume $f_{pt}<1$ and $v(t)\in V_T$.
+Conservation of flow at $p$ and $|V_S|=|V_T|$ imply that $f_{sp}<1$ for some $s\in S$ where $v(s)\in V_S$.
+Since the fixed demand at $t$ is 1, $f_{\bar{p}t}>0$.
+By reducing the flow along the path $(\bar{s},\bar{p},t)$ by an amount $\delta\leq f_{\bar{p}t}$, 
+and increasing the flow by $\delta$ units along the path $(s,p,t)$,
+another feasible solution with lower cost than $\boldsymbol{f}$ is found, contradicting optimality.
+})
+It follows from the fixed demand at all $t\in T$ that $f_{\bar{p}t}=1-f_{pt}$,
+yielding $\boldsymbol{c}\cdot\boldsymbol{f}=\sum_{t\in T:v(t)\in V\setminus V_T}f_{\bar{p}t}=|T|-|V_T|$
+
+Let $W=V_S\cap V_T$.
+To prove $V_S=V_T=W$, assume there exists a $w\in V_S\setminus V_T$.
+Since $|V_S|=|V_T|$, there also exists some $w'\in V_T\setminus V_S$.
+Hence, $f_{s_{w'}p}=f_{pt_w}=0$, whereas $f_{\bar{p}t_w}=1$.
+Because $\{w',w\}\notin E$, and $\{w',v\}\notin E$ for all $v\in V_T$,
+flow can be augmented by one unit along the path $(s_{w'},p,t_w)$ while respecting the concentration bounds
+at all sinks $t_v$ ($v\in V_T\cup\{w\}$).
+To maintain the demand at $t_w$, the flow is reduced by one unit along $(\bar{s},\bar{p},t_w)$.
+As the resulting flow is feasible with a cost one unit less than the cost of $\boldsymbol{f}$,
+we have arrived at a contradiction that proves $V_S\setminus V_T=\emptyset$.
+That $V_T\setminus V_S=\emptyset$ is proved analogously, and thus, $V_S=V_T=W$.
+
+From the concentration bounds at $t_v$, it follows that $v\in V_T=W$ and $v'\in V_S=W$ only if $\{v',v\}\notin E$.
+Hence, $W$ is independent.
+The proof is complete by observing that $\boldsymbol{c}\cdot\boldsymbol{f} = |T|-|W|\geq|T|-\alpha(G)$.
+\end{proof}
 
 %-----------------------------------------------------------------
-\section{Cofluent flow and extensions} \label{sec:conf}
-In the \textsc{Minimum Cost Flow Problem} (MCFP), the flow leaving a source and the flow entering a sink are subject to bounds.
-Let the bounds in question, referred to as the \emph{supply} at source $s\in S$ and the \emph{demand} at sink $t\in T$, respectively, be denoted $b_s$ and $b_t$,
-and let $\boldsymbol{b}=\left(b_u\right)_{u\in S\cup T}$.
-Traditionally in MCFP, the supply represents an upper bound, whereas demand is a \emph{lower} bound on the sink flow.
-This contrasts SPP, in which both bounds are upper, with the implication that zero flow is feasible in all instances.
-In the current work, we will consider both these options, and state explictly whether demand should be considered an upper or a lower bound.
+\section{Confluent flow and extensions} \label{sec:conf}
+\section{Numerical experiments} \label{sec:exp}
 
-Let
-\[
-F^{\geq}(D,\boldsymbol{h},\boldsymbol{b}) = \left\{\boldsymbol{f}\in F(D,\boldsymbol{h}): \sum_{j\in N_s^+}f_{sj}\leq b_s (s\in S), \sum_{j\in N_t^-}f_{jt}\geq b_t (t\in T)\right\}
-\]
-and
-\[
-F^{\leq}(D,\boldsymbol{h},\boldsymbol{b}) = \left\{\boldsymbol{f}\in F(D,\boldsymbol{h}): \sum_{j\in N_s^+}f_{sj}\leq b_s (s\in S), \sum_{j\in N_t^-}f_{jt}\leq b_t (t\in T)\right\}
-\]
-be the flow polytopes corresponding to the two variants of the MCFP.
-In the current article, the notion of \emph{confluent} flow \cite{chen06} and related concepts are extensively exploited:
-\begin{definition} \label{def:conf}
-A flow $\boldsymbol{f}\in F(D,\boldsymbol{h})$ is said to be \emph{confluent} if, at all nodes $i\in S\cup P$, $f_{ij}>0$ for at most one $j\in N_i^+$.
-\qed
-\end{definition}
+\backmatter
+\bmhead{Acknowledgment}
+\small{The work of the first author is funded by grants from L.\ Meltzers Universitetsstiftelse (105747107).}
+\small{The work of the second author is funded by “ERDF A way of making Europe", Grant PID2025-170329OB-I00 of the Spanish ministry of Science, Innovation and Universities.}
+\bmhead{AI usage in the current research}
+\small{None.}
 
-That is, confluence means that while flow streams are allowed to merge at pools, it has to leave the pool along a unique arc.
-Also all flow leaving a source must be allocated to the same arc.
-The inflow counterpart of confluent flow, where merging is disallowed, is defined analogously:
-\begin{definition} \label{def:inf}
-A flow $\boldsymbol{f}\in F(D,\boldsymbol{h})$ is said to be \emph{influent} if, at all nodes $i\in P\cup T$, $f_{ji}>0$ for at most one $j\in N_i^-$.
-\qed
-\end{definition}
-
-The two concepts are combined disjunctively:
-\begin{definition} \label{def:confinf}
-A flow $\boldsymbol{f}\in F(D,\boldsymbol{h})$ is said to be \emph{confluent-influent} if, at all nodes $p\in P$, either $f_{pj}>0$ for at most one $j\in N_p^+$
-or $f_{jp}>0$ for at most one $j\in N_p^-$.
-\qed
-\end{definition}
-
-Observe that the condition in Definition~\ref{def:confinf} applies to pools only, since no flow enters sources or leaves sinks.
-
-\begin{problem} \label{prob:conf}
-The \textsc{Minimum Cost Confluent Flow Problem} (MCCFP):
-Find a flow $\boldsymbol{f}\in F^{\geq}(D,\boldsymbol{h},\boldsymbol{b})$ satisfying Definition~\ref{def:conf} such that the cost $\boldsymbol{c}\cdot\boldsymbol{f}$ is minimized.
-\qed
-\end{problem}
-\noindent
-Analogously, in correspondence with Definitions~\ref{def:inf} and \ref{def:confinf}, respectively, the 
-\textsc{Minimum Cost Influent Flow Problem} (MCIFP) and the \textsc{Minimum Cost Confluent-Influent Flow Problem} (MCCIFP) are defined.
-
-\subsection{Complexity of fluency-constrained extensions of MCFP} \label{sec:compl}
-A modified version of MCCFP, in which the largest arc flow is to be minimized, is known to be NP-hard \cite{chen06}, and even NP-hard to approximate within a factor
-$\tfrac{4}{3}$.
-By a simple reduction from the \textsc{Subset Sum Problem},
-it is next shown that MCCFP as introduced in Definition~\ref{prob:conf} is NP-hard, even in a much restricted instance class.
-\begin{proposition} \label{prop:conf}
-MCCFP is NP-hard in instances where $D$ is bipartite, $P=\emptyset$, and $|T|=2$.
-\end{proposition}
-\begin{proof}
-Consider an instance $(b_1,\ldots,b_n,d)$ of the \textsc{Subset Sum Problem}, with positive integers $1\leq b_1\leq\cdots\leq b_n\leq d$.
-Let $D$ be the complete bipartite digraph with node sets $S=\{s_1,\ldots,s_n\}$ and $T=\{t_0,t_1\}$.
-Let the supply at $s_i$ be $b_i$ ($i=1,\ldots,n$), while the demand at $t_0$ and $t_1$ is, respectively, $\sum_{i=1}^nb_i-d$ and $d$.
-Both arcs leaving $s_i$ have capacity $b_i$ and arbitrary cost.
-Because total supply equals total demand, $\boldsymbol{f}\in F^{\geq}(D,\boldsymbol{h},\boldsymbol{b})$ only if $b_i$ flow units leave source $s_i$,
-$d$ units enter sink $t_1$, and $\sum_{i=1}^nb_i-d$ units enter sink $t_0$.
-Confluence implies that all the flow leaving $s_i$ enters exactly one of the sinks $t_0$ or $t_1$.
-Thus, the MCCFP instance $(D,\boldsymbol{h},\boldsymbol{b},\boldsymbol{c})$ is feasible if and only if there exists a set $S_1\subseteq\{1,\ldots,n\}$ such that $\sum_{i\in S_1}b_i=d$.
-\qed
-\end{proof}
-
-NP-hardness in restricted instance classes also applies to the influent and confluent-influent counterparts of MCCFP:
-\begin{proposition} \label{prop:inf}
-MCIFP is NP-hard in instances where $D$ is bipartite, $P=\emptyset$, and $|S|=2$.
-\end{proposition}
-\begin{proof}
-Consider the instance of the \textsc{Subset Sum Problem} introduced in the proof of Proposition~\ref{prop:conf}.
-Let $D$ be the complete bipartite digraph with node sets $S=\{s_0,s_1\}$ and $T=\{t_1,\ldots,t_n\}$.
-Let the demand at $t_i$ be $b_i$ ($i=1,\ldots,n$), while the supply at $s_0$ and $s_1$ is, respectively, $\sum_{i=1}^nb_i-d$ and $d$.
-Finally, $c_{st_i}$ is arbitrary and $h_{st_i}=b_i$ for $s\in\{s_0,s_1\}$.
-Following the arguments in the proof of Proposition~\ref{prop:conf}, $(D,\boldsymbol{h},\boldsymbol{b},\boldsymbol{c})$ is a feasible MCIFP instance
-if and only if $\sum_{i\in S_1}b_i=d$ for some $S_1\subseteq\{1,\ldots,n\}$.
-\qed
-\end{proof}
-
-Proposition~\ref{prop:conf} also applies if MCCFP is defined with the demand as upper bounds.
-That is, if $F^{\geq}$ is replaced by $F^{\leq}$ in Problem~\ref{prob:conf}.
-Consider the digraph introduced in the proof of the proposition, and let the cost $c_{st}=-2$ for all $s=s_1,\ldots,s_n$ and $t=t_1$.
-For $t=t_0$, let $c_{st}=-1$.
-Hence, the minimum cost is $-t-\sum_{i=1}^nb_i$ if and only if $\sum_{i\in S_1}b_i=d$ for some $S_1\subseteq\{1,\ldots,n\}$.
-Analogously, Proposition~\ref{prop:inf} applies even if MCIFP is defined with respect to $F^{\leq}$ rather than $F^{\geq}$.
-
-Let $\len{D}$ denote the maximum length of paths from a source to a sink in $D$.
-In bipartite digraphs consisting only of sources and sinks (i.e, $\len{D}=1$), any flow is confluent-influent.
-Introducing an intermediate set $P$ of nodes renders MCCIFP NP-hard, even if there are no arcs between any two nodes in $P$.
-\begin{proposition} \label{prop:confinf}
-MCCIFP is NP-hard in instances where $\len{D}=|T|=2$.
-\end{proposition}
-\begin{proof}
-Consider the instance of the \textsc{Subset Sum Problem} introduced in the proof of Proposition~\ref{prop:conf}.
-Let $D$ be the complete bipartite digraph with node sets $S=\{s_1,\ldots,s_n,s_1',\ldots,s_n'\}$, $P=\{p_1,\ldots,p_n\}$, and $T=\{t_0,t_1\}$.
-All arcs of $D$ are incident to $P$, where $N_{p_i}^-=\{s_i,s_i'\}$ and  $N_{p_i}^+=\{t_0,t_1\}$.
-% Node $p_i\in P$ has entering arcs $(s_i,p_i)$ and $(s_i',p_i)$, and leaving arcs $(p_i,t_0)$
-Let the supply at $s_i$ and $s_i'$ be $b_i$ ($i=1,\ldots,n$), while the demand at $t_0$ and $t_1$ is, respectively, $2\sum_{i=1}^nb_i-2d$ and $2d$.
-Both arcs entring $p_i$ have capacity $b_i$, whereas the leaving arcs have capacity $2b_i$. Arc costs are arbitrary.
-
-Consider a feasible flow $\boldsymbol{f}$ in the MCCIFP instance $(D,\boldsymbol{h},\boldsymbol{b},\boldsymbol{c})$ hence defined.
-Then, since total supply equals both the total capacity of arcs leaving $S$ and total demand, $f_{sp_i}=h_{sp_i}>0$ for all $s=s_i,s_i'$ and $i=1,\ldots,n$.
-It follows that $\boldsymbol{f}$ is confluent, as it is not influent at any $p_i$.
-Hence, all $2b_i$ units of flow leaving $p_i$ are sent to the same sink, $t_0$ or $t_1$.
-Since $t_1$ receives $2d$ units of flow, there is a set $I_1\subseteq \{1,\ldots,n\}$ such that $\sum_{i\in I_1}f_{p_it_1}=2\sum_{i\in I_1}{b_i}=2d$.
-
-Conversely, if $\sum_{i\in I_1}b_i=d$ for some $I_1\subseteq\{1,\ldots,n\}$, then the flow $\boldsymbol{f}$, where $f_{s_ip_i}=f_{s_i'p_i}=b_i$ ($i=1,\ldots,n\}$),
-$f_{p_it_0}=\left\{\begin{array}{lr}2b_i, & i\notin I_1 \\ 0, & i\in I_1,\end{array}\right.$ and
-$f_{p_it_1}=\left\{\begin{array}{lr}2b_i, & i\in I_1 \\ 0, & i\notin I_1,\end{array}\right.$ is feasible in the MCCIFP instance.
-\qed
-\end{proof}
-
-\subsection{Weak fluency conditions} \label{sec:weak}
-
-Different digraphs may be eqivalent in the perspective of the MCFP.
-Splitting any node into two new ones joined by an arc with sufficently large capacity and zero cost, renders the MCFP instance unchanged.
-In contrast, the operation largely alters the MCCIFP instance, since any flow in the modified network is confluent-influent.
-A concept that is more resilient to likely graph alterations is introduced next.
-
-For any flow $\boldsymbol{f}$ in $D$, let $D(\boldsymbol{f})=\left(N(\boldsymbol{f}), A(\boldsymbol{f})\right)$ denote the subgraph of $D$,
-where $A(\boldsymbol{f})\subseteq A$ consists of arcs $(i,j)\in A$ where $f_{ij}>0$, and
-$N(\boldsymbol{f})\subseteq N$ consists of nodes in $N$ with at least one incident arc in $A(\boldsymbol{f})$.
-
-\begin{definition} \label{def:weakconfinf}
-A flow $\boldsymbol{f}$ in $D$ is said to be \emph{weakly confluent} if, for all $i\in N(\boldsymbol{f})$,
-$D(\boldsymbol{f})$ has paths from $i$ to at most one sink $t\in T\cap N(\boldsymbol{f})$.
-If $D(\boldsymbol{f})$ has paths to $i$ from at most one source $s\in S\cap N(\boldsymbol{f})$, then $\boldsymbol{f}$ is said to be \emph{weakly influent}.
-If either of the conditions holds at all $i\in N(\boldsymbol{f})$, then $\boldsymbol{f}$ is \emph{weakly confluent-influent}.
-\qed
-\end{definition}
-
-It is readily observed that if $\boldsymbol{f}$ is confluent, then it is also weakly confluent.
-Analogous claims hold for the other two fluency conditions.
-Further, in bipartite digraphs, weak confluence (weak influence) implies confluence (influence).
-Finally, if $\len{D}=2$ (see the proof of Proposition~\ref{prop:confinf}), then a weakly confluent-influent flow in $D$ is also confluent-influent.
-For these reasons, Propositions~\ref{prop:conf}-\ref{prop:confinf} apply even if the fluency condition is to be understood in the weak sense.
-
-\subsection{Single-commodity flow formulations for weakly confluent-influent flow} \label{sec:sciMILP}
-Combining the single-commodity flow variables $\boldsymbol{f}$ with binary variables gives a natural formulation of the weak MCCIFP.
-For all $p\in P$, $s\in S_p$, and $t\in T_p$, let $x_p^s=1$ signify that all paths from $S$ to $p$ in $D(\boldsymbol{f})$ start at $s$.
-Analogously, $x_p^t=1$ means that all paths from $p$ to $T$ terminate at $t$.
-For notational convenience, define the constants $x_u^v=\left\{\begin{array}{lr}1, & u=v \\ 0, & u\neq v,\end{array}\right.$r
-for all $u,v\in S\cup T$, and $x_p^u=0$ for all $p\in P$ and $u\in (S\setminus S_p)\cup(T\setminus T_p)$.
-
-Weakly confluent-influent flow dictates $\sum_{s\in S_p}x_p^s+\sum_{t\in T_p}x_p^t=1$ at all $p\in P$.
-Consistency between $\boldsymbol{f}$ and $\boldsymbol{x}=\left(x_p^u\right)_{p\in P, u\in S_p\cup T_p}$ implies that for all arcs $(i,j)\in A(\boldsymbol{f})$
-and all $s\in S_i$, it holds that $x_i^s=1$ (node $i$ receives flow only from source $s$) if $x_j^s=1$
-(node $j$ receives flow only from source $s$).
-Hence, $f_{ij}=0$ if $x_i^s=0$ and $x_j^s=1$, which is imposed by $f_{ij}\leq h_{ij}\left(1-x_j^s+x_i^s\right)$.
-A symmetric argument suggests the constraint $f_{ij}\leq h_{ij}\left(1-x_i^t+x_j^t\right)$ for each $t\in T_j$.
-A basic MILP model thus reads:
-\begin{eqnarray}
-\min & \sum_{(i,j)\in A}c_{ij}f_{ij} \label{eq:objMCCIFP} \\
-     & \sum_{s\in S_p}x_p^s+\sum_{t\in T_p}x_p^t = 1 & p\in P \label{eq:convMCCIFP} \\
-     & f_{ij}\leq h_{ij}\left(1-x_j^s+x_i^s\right) & (i,j)\in A, s\in S_j \label{eq:sMCCIFP} \\
-     & f_{ij}\leq h_{ij}\left(1-x_i^t+x_j^t\right) & (i,j)\in A, t\in T_i \label{eq:tMCCIFP} \\
-     & \boldsymbol{f}\in F^{\geq}(D,\boldsymbol{h},\boldsymbol{b}) \label{eq:fMCCIFP} \\
-     & x_p^u\in\{0,1\} & p\in P, u\in S_p\cup T_p \label{eq:xMCCIFP}
-\end{eqnarray}
-
-For arcs $(i,j)\in A$, where $i\in S$, \eqref{eq:sMCCIFP} is simplified to $f_{ij}\leq h_{ij}(1-x_j^s)$ for all $s\neq i$, since $x_i^s=0$.
-Hence, $(i,j)$ does not carry flow if $j$ receives all its flow from some source $s\neq i$.
-Likewise, \eqref{eq:tMCCIFP} implies no flow along arc $(i,j)$ if $j\in T$ and $x_i^t=1$ for some sink $t\in T_i\setminus\{j\}$.
-
-Redundant valid inequalities are derived by applying the idea behind constraints \eqref{eq:sMCCIFP}--\eqref{eq:tMCCIFP}
-to sets of sources or sinks.
-Consider an arc $(i,j) \in A$. If $j$ receives all its flow from some source $s\in S'\subseteq S$, i.e., if $\sum_{s\in S'}x_j^s=1$,
-then there is no flow along $(i,j)$ unless also $\sum_{s\in S'}x_i^s=1$.
-Therefore, the inequalities
-\begin{eqnarray}
- & f_{ij}\leq h_{ij}\left(1+\sum_{s\in S'}(x_i^s-x_j^s)\right) & (i,j)\in A, S'\subseteq S \label{eq:visMCCIFP} \\
- & f_{ij}\leq h_{ij}\left(1+\sum_{t\in T'}(x_j^t-x_i^t)\right) & (i,j)\in A, T'\subseteq T \label{eq:vitMCCIFP}
-\end{eqnarray}
-are valid.
-Alternatively, \eqref{eq:visMCCIFP}--\eqref{eq:vitMCCIFP} are derived from the observation that along any path $(i_1,\ldots,i_m)$ in $D(\boldsymbol{f})$,
-$x_{i_k}^u$ is non-increasing with $k$ for all $u\in S$, and non-decreasing for all $u\in T$.
-This follows directly from \eqref{eq:sMCCIFP}--\eqref{eq:tMCCIFP}.
-The observation also implies validity of the combined inequality
-\begin{equation}
-	\displaystyle{f_{ij}\leq h_{ij}\left(1+\sum_{s\in S'}(x_i^s-x_j^s) + \sum_{t\in T'}(x_j^t-x_i^t)\right)}, ~(i,j)\in A, S'\subseteq S, T'\subseteq T, \label{eq:vistMCCIFP}
-\end{equation}
-
-\noindent
-which is a generalization of \eqref{eq:visMCCIFP}--\eqref{eq:vitMCCIFP}.
-The potential of inequality \eqref{eq:visMCCIFP} to strengthen \eqref{eq:sMCCIFP}, and \eqref{eq:vitMCCIFP} to strengthen \eqref{eq:tMCCIFP}, are addressed next:
-\begin{proposition} \label{prop:strong}
-Let $(\boldsymbol{f},\boldsymbol{x})$ be a feasible solution to the continuous relaxation of \eqref{eq:objMCCIFP}--\eqref{eq:xMCCIFP}.
-If, for every arc $(i,j)\in A(\boldsymbol{f})$, it holds that $x_i^s\geq x_j^s$ for all $s\in S_j$ and $x_i^t\leq x_j^t$ for all $t\in T_i$,
-then $\boldsymbol{f}$ is weakly confluent-influent.
-\end{proposition}
-\begin{proof}
-The proof is by contradiction.
-	Assume $\boldsymbol{f}$ is not weakly confluent-influent. Then, there exist a node $p\in P$,
-	distinct sources $s_0,s_1\in S_p$, distinct sinks $t_0,t_1\in T_p$, and paths $Q_{k\ell}$ ($k,\ell=0,1$) in $D(\boldsymbol{f})$,
-	where $Q_{k\ell}$ intersects $s_k$, $p$, and $t_{\ell}$.
-	By definition, $x_{s_k}^{s_{1-k}}=x_{t_k}^{t_{1-k}}=0$ ($k=0,1$).
-	As all arcs of $Q_{k\ell}$ are in $A(\boldsymbol{f})$, repeated application of $x_i^{s_1}\geq x_j^{s_1}$ to the arcs between $s_0$ and $p$ in $Q_{0\ell}$
-	proves $x_p^{s_1}=0$. Analogous operations along $Q_{1\ell}$ yield $x_p^{s_0}=0$.
-	Likewise, applying $x_i^{t_{1-\ell}}\leq x_j^{t_{1-\ell}}$ to the arcs between $t_{\ell}$ and $p$ in $Q_{k\ell}$ yields $x_p^{t_{\ell}}=0$ ($\ell=0,1$).
-	Hence, by \eqref{eq:convMCCIFP}, $x_p^u>0$ for some $u\in (S_p\cup T_p)\setminus\{s_0,s_1,t_0,t_1\}$.
-	If $u\in T_p$, applying $x_i^u\leq x_j^u$ to arcs $(i,j)$ along, e.g., $Q_{k0}$ from $p$ to $t_0$ yields $x_{t_0}^u>0$, which is a contradiction.
-	An analogous analysis applies if $u\in S_p$.
-\qed
-\end{proof}
-
-Consider an optimal solution $(\boldsymbol{f},\boldsymbol{x})$ to the continuous relaxation of \eqref{eq:objMCCIFP}--\eqref{eq:xMCCIFP},
-and for all $(i,j)\in A$, let $\alpha_{ij}^s=x_i^s-x_j^s$ ($s\in S_j$) and $\alpha_{ij}^t=x_j^t-x_i^t$ ($t\in T_i$).
-If $\boldsymbol{f}$ is weakly confluent-influent, then it is also an optimal flow in the MILP model.
-Even if $\boldsymbol{x}$ is fractional, it can easily be adjusted to integer values consistent with $\boldsymbol{f}$.
-Otherwise, Proposition \ref{prop:strong} shows that there exists some $(i,j)\in A(\boldsymbol{f})$ at which $\alpha_{ij}^u<0$ for some $u\in S_j\cup T_i$.
-If there exist two distinct $u,v\in S_j\cup T_i$ such that $\alpha_{ij}^u,\alpha_{ij}^v<0$,
-formulation \eqref{eq:objMCCIFP}--\eqref{eq:xMCCIFP} is strengthened by adding the inequality \eqref{eq:vistMCCIFP} corresponding to $S'\cup T'=\{u,v\}$.
-If $f_{ij}>h_{ij}\left(1+\alpha_{ij}^u+\alpha_{ij}^v\right)$, then the added inequality cuts off $(\boldsymbol{f},\boldsymbol{x})$.
-
-\subsection{Multi-commodity flow formulations} \label{sec:mciMILP}
-For all $(i,j)\in A$ and $(s,t)\in S_i\times T_j$, denote by $f_{ij}^{st}$ the flow from source $s$ along arc $(i,j)$ to sink $t$,
-and let $f_{ij}^{st}=0$ for $(s,t)\in (S\times T)\setminus(S_i\times T_j)$.
-An upper bound, $h_{ij}^{st}$, on this flow is given as the maximum flow from $j$ to $i$ in the digraph $D_{ij}^{st}=(N,A_{ij}^{st})$,
-where $A_{ij}^{st}=\left(A\cup\{(t,s)\}\right)\setminus\{(i,j)\}$, and the arc $(t,s)$ has capacity $h_{ts}=h_{ij}$.
-% Define $b_u^{st}=b_u$ for $u\in\{s,t\}$, and $b_u^{st}=0$ for all $u\in (S\cup T)\setminus\{s,t\}$.
-Let $\boldsymbol{f}^{st}=\left(f_{ij}^{st}\right)_{(i,j)\in A}$.
-% $\boldsymbol{h}^{st}=\left(h_{ij}^{st}\right)_{(i,j)\in A}$, and
-% $\boldsymbol{b}^{st}=\left(b_u^{st}\right)_{u\in S\cup T}$.
-
-Imposing $f_{ij}^{st}=0$ unless $x_i^s+x_i^t=x_j^s+x_j^t=1$ and $x_i^t+x_j^s\leq 1$, a multi-commodity flow formulation for the weak MCCIFP is given as:
-
-\begin{eqnarray}
-\min & \sum_{(i,j)\in A}c_{ij}f_{ij} \label{eq:objmMCCIFP} \\
-     & f_{ij} = \sum_{s\in S_i}\sum_{t\in T_j}f_{ij}^{st} & (i,j)\in A \label{eq:fmMCCIFP} \\
-     & 0\leq f_{ij}^{st}\leq h_{ij}^{st}\left(x_i^s+x_i^t\right) & (i,j)\in A, s\in S_i, t\in T_j \label{eq:imMCCIFP} \\
-     & 0\leq f_{ij}^{st}\leq h_{ij}^{st}\left(x_j^s+x_j^t\right) & (i,j)\in A, s\in S_i, t\in T_j \label{eq:jmMCCIFP} \\
-     & 0\leq f_{ij}^{st}\leq h_{ij}^{st}\left(2-x_i^t-x_j^s\right) & (i,j)\in A, s\in S_i, t\in T_j \label{eq:ijmMCCIFP} \\
-     & \eqref{eq:convMCCIFP}, \eqref{eq:fMCCIFP}-\eqref{eq:xMCCIFP}\label{eq:mMCCIFP}
-\end{eqnarray}
-
-\subsection*{Acknowledgment}
-\small{The work of the second author has been funded by grants from the Spanish state (TIN2012-37483-C03-01 and TIN2015-66680), Junta de Andaluc\'{\i}a (P11-TIC-7176),
-in part financed by the European Regional Development Fund (ERDF).}
-
-\bibliographystyle{elsarticle-num}
+% \bibliographystyle{elsarticle-num}
 \bibliography{../../ref.bib}
 
 \end{document}
